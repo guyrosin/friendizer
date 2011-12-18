@@ -10,7 +10,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="15dip"
-        android:text="My Profile"
+        android:text="@string/my_profile"
         android:textSize="18dip" />
 
     <RelativeLayout
@@ -19,13 +19,12 @@
         android:layout_height="fill_parent" >
 
         <ImageView
-            android:id="@+id/imageView1"
+            android:id="@+id/user_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="20dp"
-            android:contentDescription="Profile Picture"
-            android:src="@android:drawable/ic_dialog_info" />
+            android:contentDescription="Profile Picture" />
 
         <TextView
             android:id="@+id/name"
@@ -34,8 +33,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginLeft="26dp"
             android:layout_marginRight="12dp"
-            android:layout_toRightOf="@+id/imageView1"
-            android:text="Guy Rosin"
+            android:layout_toRightOf="@+id/user_pic"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -43,8 +41,16 @@
             android:id="@+id/age"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/name"
+            android:layout_marginRight="8dp"
             android:layout_toRightOf="@+id/name"
-            android:text="20 yo"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/gender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/age"
             android:textSize="16sp" />
 
         <TextView

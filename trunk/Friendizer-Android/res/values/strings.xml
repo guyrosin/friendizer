@@ -66,5 +66,14 @@
 
     <!-- Notification message [CHAR LIMIT=NONE] -->
     <string name="unregistration_succeeded">Unegistered %1$s for C2DM messaging.</string>
+    <string name="my_profile">My Profile</string>
+    <string name="friends">Friends</string>
+    <string name="people_radar">People Radar</string>
+    <string name="refresh_title">Refresh</string>
+    <string name="logout_title">Logout</string>
+    <string name="invite_title">Invite</string>
+    <string name="settings_title">Settings</string>
+    <string name="more_title">More</string>
+    <string name="about_title">About</string>
 
 </resources>

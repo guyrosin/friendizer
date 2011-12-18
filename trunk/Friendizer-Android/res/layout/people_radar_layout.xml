@@ -10,7 +10,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="15dip"
-        android:text="People Radar"
+        android:text="@string/people_radar"
         android:textSize="18dip" />
 
     <ListView

@@ -39,7 +39,7 @@
         android:layout_toRightOf="@+id/age"
         android:text=" yo"
         android:textSize="16sp" />
-    
+
     <TextView
         android:id="@+id/value_title"
         android:layout_width="wrap_content"

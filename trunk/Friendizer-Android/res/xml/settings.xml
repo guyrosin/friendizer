@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="troll"
+        android:summary="Yes..."
+        android:title="Troll?" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="haha"
+        android:summary="Hihi"
+        android:title="Haha" />
+
+</PreferenceScreen>
