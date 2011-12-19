@@ -6,12 +6,17 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp" >
 
-    <TextView
+    <GridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="15dip"
-        android:text="@string/friends"
-        android:textSize="18dip" />
+        android:columnWidth="90dp"
+        android:gravity="center"
+        android:horizontalSpacing="10dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="10dp" />
 
     <ListView
         android:id="@android:id/list"

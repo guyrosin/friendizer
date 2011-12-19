@@ -50,6 +50,7 @@
             android:id="@+id/gender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/age"
             android:layout_toRightOf="@+id/age"
             android:textSize="16sp" />
 
@@ -90,7 +91,7 @@
 
     <ListView
         android:id="@+id/achievements_list"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:background="#000000"
@@ -105,7 +106,7 @@
 
     <ListView
         android:id="@+id/history_list"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="0dip"
         android:layout_weight="1"
         android:background="#000000"

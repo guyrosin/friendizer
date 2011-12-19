@@ -21,7 +21,8 @@ public class MyProfileActivity extends Activity {
 	age = (TextView) MyProfileActivity.this.findViewById(R.id.age);
 	gender = (TextView) MyProfileActivity.this.findViewById(R.id.gender);
 
-	mUserPic.setImageBitmap(Utility.userPic);
+	if (mUserPic != null)
+	    mUserPic.setImageBitmap(Utility.userPic);
 	userName.setText(Utility.userName);
 	age.setText(Utility.age);
 	gender.setText(Utility.gender);

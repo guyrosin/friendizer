@@ -18,7 +18,6 @@ import com.facebook.android.Facebook;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,10 +33,9 @@ public class Utility extends Application {
     public static JSONObject mFriendsList;
     public static String userUID = null;
     public static String objectID = null;
-    // public static FriendsGetProfilePics model;
+    public static FriendsGetProfilePics model;
     public static AndroidHttpClient httpclient = null;
     public static Hashtable<String, String> currentPermissions = new Hashtable<String, String>();
-    static SharedPreferences prefs;
     static Bitmap userPic;
     static String userName;
     static String firstName;

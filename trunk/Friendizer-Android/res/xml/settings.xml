@@ -8,8 +8,8 @@
         android:title="Troll?" />
     <CheckBoxPreference
         android:defaultValue="true"
-        android:key="haha"
-        android:summary="Hihi"
-        android:title="Haha" />
+        android:key="friends_list_type"
+        android:summary="Check for a regular list, uncheck for a grid view"
+        android:title="Friends List Type" />
 
 </PreferenceScreen>
