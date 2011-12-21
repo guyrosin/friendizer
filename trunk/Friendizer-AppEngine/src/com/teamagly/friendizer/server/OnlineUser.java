@@ -1,5 +1,6 @@
 package com.teamagly.friendizer.server;
 
+import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -9,16 +10,19 @@ import javax.jdo.annotations.PrimaryKey;
 public class OnlineUser {
 	
 	@PrimaryKey
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
 	
-	@Persistent
+	@Persistent(defaultFetchGroup = "true")
 	private User user;
 	
-	
+	@Persistent
 	private Long coordinateX;
 	
 	@Persistent
 	private Long coordinateY;
+	
+
 
 	public OnlineUser() {
 				

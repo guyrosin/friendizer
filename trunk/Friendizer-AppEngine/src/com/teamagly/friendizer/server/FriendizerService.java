@@ -23,7 +23,8 @@ public class FriendizerService {
 
 	@ServiceMethod
 	public OnlineUser updateOnlineUser(OnlineUser onlineuser) {
-		return ous.update(onlineuser);
+		OnlineUser result =  ous.update(onlineuser);
+		return result;
 	}
 
 	@ServiceMethod
@@ -54,7 +55,7 @@ public class FriendizerService {
 
 	@ServiceMethod
 	public User updateUser(User user) {
-
+		//setting money and value
 		return db.update(user);
 	}
 
@@ -66,8 +67,10 @@ public class FriendizerService {
 
 	@ServiceMethod
 	public List<User> queryUsers() {
-		// TODO Auto-generated method stub
-		return null;
+		 List<User> list =  db.getOnline();
+		 int size = list.size();
+		 return list;
+
 	}
 
 }

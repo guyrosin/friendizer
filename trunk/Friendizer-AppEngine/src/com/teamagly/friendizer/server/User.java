@@ -25,8 +25,22 @@ public class User {
 	@Persistent
 	private Integer money;
 	
+	@Persistent
+	private Long coordinateX;
+	
+	@Persistent
+	private Long coordinateY;
+	
+	@Persistent
+	private Boolean online;
+	
 	
 	public User() {
+		value = 1000;
+		money = 1000;
+	}
+	
+	public void init() {
 		value = 1000;
 		money = 1000;
 	}
@@ -54,6 +68,30 @@ public class User {
 	}
 	public void setMoney(Integer money) {
 		this.money = money;
+	}
+
+	public Long getCoordinateX() {
+		return coordinateX;
+	}
+
+	public void setCoordinateX(Long coordinateX) {
+		this.coordinateX = coordinateX;
+	}
+
+	public Long getCoordinateY() {
+		return coordinateY;
+	}
+
+	public void setCoordinateY(Long coordinateY) {
+		this.coordinateY = coordinateY;
+	}
+
+	public Boolean getOnline() {
+		return online;
+	}
+
+	public void setOnline(Boolean online) {
+		this.online = online;
 	}
 
 }

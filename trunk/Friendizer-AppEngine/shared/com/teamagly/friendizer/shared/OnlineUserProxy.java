@@ -7,8 +7,6 @@ import com.google.web.bindery.requestfactory.shared.ValueProxy;
 public interface OnlineUserProxy extends ValueProxy {
 
 	UserProxy getUser();
-	
-	void setId(Long id);
 
 	void setUser(UserProxy user);
 

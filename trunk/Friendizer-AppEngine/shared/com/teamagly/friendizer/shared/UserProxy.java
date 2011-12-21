@@ -7,9 +7,9 @@ import com.google.web.bindery.requestfactory.shared.ValueProxy;
 public interface UserProxy extends ValueProxy {
 
 	Long getId();
-	
-	void setId(Long id);
 
+	void setId(Long id);
+	
 	String getUsername();
 
 	void setUsername(String username);
@@ -21,5 +21,17 @@ public interface UserProxy extends ValueProxy {
 	Integer getMoney();
 
 	void setMoney(Integer money);
+
+	Long getCoordinateX();
+
+	void setCoordinateX(Long coordinateX);
+
+	Long getCoordinateY();
+
+	void setCoordinateY(Long coordinateY);
+
+	Boolean getOnline();
+
+	void setOnline(Boolean online);
 
 }
