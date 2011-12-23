@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="5dp"
-        android:contentDescription="Profile Picture"
+        android:contentDescription="@string/profile_pic"
         android:src="@android:drawable/ic_dialog_info" />
 
     <TextView
@@ -22,7 +22,6 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="6dp"
         android:layout_toRightOf="@+id/profile_pic"
-        android:text="Guy Rosin"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -39,7 +38,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/age_title"
-        android:text="00"
         android:textSize="16sp" />
 
     <TextView
@@ -48,7 +46,6 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_toRightOf="@+id/age"
-        android:text="male"
         android:textSize="16sp" />
 
     <TextView

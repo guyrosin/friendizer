@@ -44,6 +44,7 @@ public class Utility extends Application {
 
     private static int MAX_IMAGE_DIMENSION = 720;
     public static final String HACK_ICON_URL = "http://www.facebookmobileweb.com/hackbook/img/facebook_icon_large.png";
+    public static final String PREFS_NAME = "FriendizerPreferences";
 
     public static Bitmap getBitmap(String url) {
 	Bitmap bm = null;

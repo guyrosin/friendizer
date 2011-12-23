@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -65,6 +66,8 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
 	} catch (JSONException e) {
 	    e.printStackTrace();
 	}
+	if (Utility.model == null)
+	    Utility.model = new FriendsGetProfilePics(); // Load the profile pictures
 	list_type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", true);
 	if (list_type) { // -> show in a list
 	    gridview.setAdapter(null);
@@ -94,7 +97,7 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
 		listAdapter = new FriendListAdapter(this);
 		getListView().setOnItemClickListener(this);
 		getListView().setAdapter(listAdapter);
-	    } else { // == show in a gridView
+	    } else { // == show in a GridView
 		getListView().setAdapter(null);
 		listAdapter = new FriendImageAdapter(this);
 		gridview.setAdapter(listAdapter);
@@ -106,9 +109,21 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
     @Override
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 	try {
-	    // final long friendId = jsonArray.getJSONObject(position).getLong("id");
-	    String name = jsonArray.getJSONObject(position).getString("name");
-	    showToast("You have chosen " + name);
+	    JSONObject array = jsonArray.getJSONObject(position);
+	    showToast("You have chosen " + array.getString("name"));
+	    // Create an intent with the friend's data
+	    Intent intent = new Intent().setClass(FriendsListActivity.this, FriendProfileActivity.class);
+	    intent.putExtra("fbid", array.getLong("id"));
+	    intent.putExtra("name", array.getString("name"));
+	    intent.putExtra("gender", array.getString("gender"));
+	    intent.putExtra("picture", array.getString("picture"));
+	    try {
+		String age = Utility.calcAge(new Date(array.getString("birthday")));
+		intent.putExtra("age", age);
+	    } catch (Exception e) {
+		intent.putExtra("age", "");
+	    }
+	    startActivity(intent);
 	} catch (JSONException e) {
 	    showToast("Error: " + e.getMessage());
 	}
@@ -132,11 +147,8 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
 	FriendsListActivity friendsList;
 
 	public FriendListAdapter(FriendsListActivity friendsList) {
-	    this.friendsList = friendsList;
-	    if (Utility.model == null) {
-		Utility.model = new FriendsGetProfilePics();
-	    }
 	    Utility.model.setListener(this);
+	    this.friendsList = friendsList;
 	    mInflater = LayoutInflater.from(friendsList.getBaseContext());
 	}
 
@@ -209,11 +221,14 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
      * Definition of the list adapter
      */
     public class FriendImageAdapter extends BaseAdapter {
-	FriendsListActivity friendsList;
 	private Context mContext;
 
 	public FriendImageAdapter(Context c) {
 	    mContext = c;
+	    if (Utility.model == null) {
+		Utility.model = new FriendsGetProfilePics();
+	    }
+	    Utility.model.setListener(this);
 	}
 
 	@Override
@@ -244,7 +259,7 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
 		imageView = new ImageView(mContext);
 		imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
 		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-		imageView.setPadding(8, 8, 8, 8);
+		imageView.setPadding(5, 5, 5, 5);
 	    } else {
 		imageView = (ImageView) convertView;
 	    }
