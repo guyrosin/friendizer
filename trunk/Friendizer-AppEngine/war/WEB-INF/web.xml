@@ -21,6 +21,31 @@
   <welcome-file-list>
     <welcome-file>Friendizer.html</welcome-file>
   </welcome-file-list>
+  
+  <servlet>
+  	<servlet-name>LocationManager</servlet-name>
+  	<servlet-class>com.teamagly.friendizer.server.LocationManager</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>MarketManager</servlet-name>
+  	<url-pattern>/register</url-pattern>
+  	<url-pattern>/userDetails</url-pattern>
+  	<url-pattern>/ownList</url-pattern>
+  	<url-pattern>/buy</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+  	<servlet-name>LocationManager</servlet-name>
+  	<url-pattern>/changeLocation</url-pattern>
+  	<url-pattern>/exit</url-pattern>
+  	<url-pattern>/nearbyUsers</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>MarketManager</servlet-name>
+  	<servlet-class>com.teamagly.friendizer.server.MarketManager</servlet-class>
+  </servlet>
 
   <!-- RequestFactory Servlet -->
 
