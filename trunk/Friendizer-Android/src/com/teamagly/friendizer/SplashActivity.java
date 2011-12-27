@@ -135,7 +135,7 @@ public class SplashActivity extends Activity {
 		    }
 		});
 		Utility.firstName = jsonObject.getString("first_name");
-		Utility.userUID = jsonObject.getString("id");
+		Utility.userUID = jsonObject.getLong("id");
 		String birthday = jsonObject.getString("birthday");
 		Utility.gender = jsonObject.getString("gender");
 		Utility.age = Utility.calcAge(new Date(birthday));

@@ -33,6 +33,9 @@
 
     <!-- Necessary to check if the user has internet access -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Permission to check the user location -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:icon="@drawable/app_icon"

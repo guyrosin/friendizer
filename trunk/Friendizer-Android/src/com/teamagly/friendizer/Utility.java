@@ -31,7 +31,7 @@ public class Utility extends Application {
     public static Facebook facebook;
     public static AsyncFacebookRunner mAsyncRunner;
     public static JSONObject mFriendsList;
-    public static String userUID = null;
+    public static long userUID;
     public static String objectID = null;
     public static FriendsGetProfilePics model;
     public static AndroidHttpClient httpclient = null;
