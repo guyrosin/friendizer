@@ -29,6 +29,6 @@ http://www.ankara-gtug.org/2011/06/04/how-to-create-google-code-project-and-sync
 ==Import Projects==
 
 In Eclipse go to File->Import->SVN->Checkout Project from SVN->Create a new repository location. Then insert the url: https://friendizer.googlecode.com/svn/trunk
-Choose Friendizer-Android (a new project named Friendizer-Android should appear in the package explorer)
+Choose Friendizer-Android (a new project named Friendizer-Android should appear in the package explorer).
 Do the same for Friendizer-AppEngine
  
