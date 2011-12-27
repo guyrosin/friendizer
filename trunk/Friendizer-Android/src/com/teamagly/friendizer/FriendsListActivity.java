@@ -64,7 +64,8 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
 	try {
 	    jsonArray = new JSONObject(response).getJSONArray("data");
 	} catch (JSONException e) {
-	    e.printStackTrace();
+	    showToast(e.getMessage());
+	    return;
 	}
 	if (Utility.model == null)
 	    Utility.model = new FriendsGetProfilePics(); // Load the profile pictures
@@ -110,7 +111,7 @@ public class FriendsListActivity extends ListActivity implements OnItemClickList
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 	try {
 	    JSONObject array = jsonArray.getJSONObject(position);
-	    showToast("You have chosen " + array.getString("name"));
+	    // showToast("You have chosen " + array.getString("name"));
 	    // Create an intent with the friend's data
 	    Intent intent = new Intent().setClass(FriendsListActivity.this, FriendProfileActivity.class);
 	    intent.putExtra("fbid", array.getLong("id"));

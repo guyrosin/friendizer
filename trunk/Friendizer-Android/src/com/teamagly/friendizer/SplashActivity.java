@@ -1,14 +1,8 @@
 package com.teamagly.friendizer;
 
 import java.util.Date;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.FacebookError;
-import com.facebook.android.Facebook.DialogListener;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,6 +15,12 @@ import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
+
 public class SplashActivity extends Activity {
     public static final String APP_ID = "273844699335189";
     private Handler mHandler;
@@ -29,8 +29,8 @@ public class SplashActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.splash);
-	if (!isOnline()){
-	    ((TextView)findViewById(R.id.status)).setText("Not Internet Connection");
+	if (!isOnline()) {
+	    ((TextView) findViewById(R.id.status)).setText("Not Internet Connection");
 	}
 	mHandler = new Handler();
 	// Create the Facebook object using the app ID.
@@ -135,7 +135,7 @@ public class SplashActivity extends Activity {
 		    }
 		});
 		Utility.firstName = jsonObject.getString("first_name");
-		Utility.userUID = jsonObject.getLong("id");
+		long userID = jsonObject.getLong("id");
 		String birthday = jsonObject.getString("birthday");
 		Utility.gender = jsonObject.getString("gender");
 		Utility.age = Utility.calcAge(new Date(birthday));
@@ -147,7 +147,10 @@ public class SplashActivity extends Activity {
 		    }
 		});
 
-	    } catch (JSONException e) {
+		// Register/login
+		ServerFacade.register(userID);
+
+	    } catch (Exception e) {
 		// mHandler.post(new Runnable() {
 		// @Override
 		// public void run() {

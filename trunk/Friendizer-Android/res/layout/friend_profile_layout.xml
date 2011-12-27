@@ -36,21 +36,21 @@
             android:layout_marginRight="2dp"
             android:layout_toRightOf="@+id/user_pic"
             android:textSize="16sp" />
-        
-    <TextView
-        android:id="@+id/age_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/gender"
-        android:text=", age: "
-        android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/age"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/age_title"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/age_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/gender"
+            android:text=", age: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/age_title"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/value"
@@ -78,12 +78,31 @@
             android:layout_below="@+id/money"
             android:text="Owns: 10 people"
             android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/poke_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginRight="27dp"
+            android:text="Poke" />
+
+        <Button
+            android:id="@+id/buy_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/poke_btn"
+            android:layout_below="@+id/poke_btn"
+            android:text="Buy" />
+
     </RelativeLayout>
 
     <TextView
         android:id="@+id/achievements_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="Last achievements:"
         android:textSize="16sp" />
 

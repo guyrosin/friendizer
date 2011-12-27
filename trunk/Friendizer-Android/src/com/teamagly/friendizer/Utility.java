@@ -31,7 +31,6 @@ public class Utility extends Application {
     public static Facebook facebook;
     public static AsyncFacebookRunner mAsyncRunner;
     public static JSONObject mFriendsList;
-    public static long userUID;
     public static String objectID = null;
     public static FriendsGetProfilePics model;
     public static AndroidHttpClient httpclient = null;
@@ -41,6 +40,7 @@ public class Utility extends Application {
     static String firstName;
     static String age;
     static String gender;
+    static UserInfo userInfo;
 
     private static int MAX_IMAGE_DIMENSION = 720;
     public static final String HACK_ICON_URL = "http://www.facebookmobileweb.com/hackbook/img/facebook_icon_large.png";

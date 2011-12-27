@@ -16,7 +16,7 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="wrap_content" >
 
         <ImageView
             android:id="@+id/user_pic"
@@ -55,31 +55,93 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/value"
+            android:id="@+id/value_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/name"
             android:layout_below="@+id/name"
-            android:text="Value: 10,000"
+            android:text="Value: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/name"
+            android:layout_toRightOf="@+id/value_title"
+            android:text="10,000"
+            android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/money_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/name"
+            android:layout_below="@+id/value"
+            android:text="Money: "
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/money"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
             android:layout_below="@+id/value"
-            android:text="Money: 20,000"
+            android:layout_toRightOf="@+id/money_title"
+            android:text="20,000"
+            android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/owns_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/name"
+            android:layout_below="@+id/money_title"
+            android:text="Owns: "
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/owns"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
+            android:layout_toRightOf="@+id/owns_title"
             android:layout_below="@+id/money"
-            android:text="Owns: 10 people"
+            android:text="10"
             android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/owns_cont"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/owns"
+            android:layout_below="@+id/money"
+            android:text=" people"
+            android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/owner_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/name"
+            android:layout_below="@+id/owns"
+            android:text="Owner: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/owner_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/owner_title"
+            android:layout_below="@+id/owns"
+            android:text="none"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/owner_pic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/owner_title"
+            android:layout_toRightOf="@+id/owner_name" />
+        
     </RelativeLayout>
 
     <TextView
@@ -87,6 +149,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Last achievements:"
+        android:layout_marginTop="10dp"
         android:textSize="16sp" />
 
     <ListView
