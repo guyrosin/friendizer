@@ -53,23 +53,41 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/value"
+            android:id="@+id/value_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/gender"
             android:layout_below="@+id/gender"
-            android:text="Value: 10,000"
+            android:text="Value: "
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/value_title"
+            android:layout_below="@+id/gender"
+            android:text="10,000"
+            android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/money_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/gender"
+            android:layout_below="@+id/value"
+            android:text="Money: "
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/money"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/gender"
+            android:layout_toRightOf="@+id/money_title"
             android:layout_below="@+id/value"
-            android:text="Money: 20,000"
+            android:text="20,000"
             android:textSize="16sp" />
-
+        
         <TextView
             android:id="@+id/owns"
             android:layout_width="wrap_content"

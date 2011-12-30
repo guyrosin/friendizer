@@ -6,12 +6,17 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp" >
 
-    <TextView
+    <GridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:padding="15dip"
-        android:text="@string/people_radar"
-        android:textSize="18dip" />
+        android:columnWidth="90dp"
+        android:gravity="center"
+        android:horizontalSpacing="5dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="5dp" />
 
     <ListView
         android:id="@android:id/list"
@@ -25,7 +30,7 @@
         android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FF0000"
-        android:text="No online people nearby :(" />
+        android:text="No online people nearby :("
+        android:color="#FF0000" />
 
 </LinearLayout>

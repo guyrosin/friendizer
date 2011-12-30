@@ -19,6 +19,10 @@ public final class ServerFacade {
 	Utility.userInfo = userDetails(userID);
     }
 
+    public static void refreshMyDetails() throws Exception {
+	Utility.userInfo = userDetails(Utility.userInfo.getId());
+    }
+
     public static UserInfo userDetails(long userID) throws Exception {
 	URL url = new URL(serverAddress + "userDetails?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -26,10 +30,10 @@ public final class ServerFacade {
 	long money = Long.parseLong(in.readLine());
 	long owner = Long.parseLong(in.readLine());
 	in.close();
-	return new UserInfo(userID, value, money, owner, ownList(userID).length);
+	return new UserInfo(userID, value, money, owner, ownList(userID));
     }
 
-    public static long[] ownList(long userID) throws Exception {
+    public static ArrayList<Long> ownList(long userID) throws Exception {
 	URL url = new URL(serverAddress + "ownList?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	ArrayList<Long> list = new ArrayList<Long>();
@@ -39,12 +43,9 @@ public final class ServerFacade {
 	    inputLine = in.readLine();
 	}
 	in.close();
-	long[] retArray = new long[list.size()];
-	int i = 0;
-	for (Long user : list) {
-	    retArray[i] = user;
-	    i++;
-	}
+	ArrayList<Long> retArray = new ArrayList<Long>(list.size());
+	for (Long user : list)
+	    retArray.add(user);
 	return retArray;
     }
 

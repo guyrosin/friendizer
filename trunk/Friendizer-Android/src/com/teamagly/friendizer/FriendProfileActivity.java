@@ -23,6 +23,8 @@ public class FriendProfileActivity extends Activity {
     private TextView age;
     private TextView ageTitle;
     private TextView gender;
+    private TextView value;
+    private TextView money;
 
     /*
      * (non-Javadoc)
@@ -38,6 +40,8 @@ public class FriendProfileActivity extends Activity {
 	age = (TextView) findViewById(R.id.age);
 	ageTitle = (TextView) findViewById(R.id.age_title);
 	gender = (TextView) findViewById(R.id.gender);
+	value = (TextView) findViewById(R.id.value);
+	money = (TextView) findViewById(R.id.money);
 
 	if (userPic != null)
 	    userPic.setImageBitmap(Utility.getBitmap(intent.getStringExtra("picture")));
@@ -54,24 +58,43 @@ public class FriendProfileActivity extends Activity {
 	gender.setText(genderStr);
 	fbid = intent.getLongExtra("fbid", 0);
 
-	// Listener for the Buy button
-	final Button buyButton = (Button) findViewById(R.id.buy_btn);
-	buyButton.setOnClickListener(new View.OnClickListener() {
-	    public void onClick(View v) {
-		try {
-		    ServerFacade.buy(Utility.userInfo.getId(), fbid);
-		} catch (Exception e) {
-		    Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
-		}
-	    }
-	});
+	value.setText(String.valueOf(10000));
+	money.setText(String.valueOf(20000));
 
-	// Listener for the Poke button
-	final Button pokeButton = (Button) findViewById(R.id.poke_btn);
-	pokeButton.setOnClickListener(new View.OnClickListener() {
-	    public void onClick(View v) {
+	UserInfo userInfo;
+	try {
+	    userInfo = ServerFacade.userDetails(fbid);
+	    if (userInfo != null) {
+		value.setText(String.valueOf(userInfo.getValue()));
+		money.setText(String.valueOf(userInfo.getMoney()));
 	    }
-	});
+	} catch (Exception e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+
+	if ((Utility.userInfo != null) && (Utility.userInfo.getOwnsList().contains(fbid))) {
+
+	    // Listener for the Poke button
+	    final Button pokeButton = (Button) findViewById(R.id.poke_btn);
+	    pokeButton.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		}
+	    });
+	} else {
+	    // Listener for the Buy button
+	    final Button buyButton = (Button) findViewById(R.id.buy_btn);
+	    buyButton.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		    try {
+			ServerFacade.buy(Utility.userInfo.getId(), fbid);
+		    } catch (Exception e) {
+			Toast.makeText(getApplicationContext(), "Couldn't buy " + e.getMessage(), Toast.LENGTH_SHORT).show();
+		    }
+		}
+	    });
+	}
+
     }
 
 }

@@ -25,11 +25,11 @@ import android.widget.TabHost.TabSpec;
 public class FriendizerActivity extends TabActivity {
 
     // Provides access to the system location services
-    private LocationManager locationManager;
+    // private LocationManager locationManager;
     // Listener for network location updates
-    private LocationListener networkLocationListener;
+    // private LocationListener networkLocationListener;
     // Listener for GPS location updates
-    private LocationListener gpsLocationListener;
+    // private LocationListener gpsLocationListener;
 
     /** Called when the activity is first created. */
     @Override
@@ -37,18 +37,18 @@ public class FriendizerActivity extends TabActivity {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.main);
 
-	// Acquire a reference to the system Location Manager
-	locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-	// Create a location listener that get updated by the network provider
-	networkLocationListener = new ProviderLocationListener("Network");
-	// Create a location listener that get updated by the GPS provider
-	gpsLocationListener = new ProviderLocationListener("GPS");
-
-	// Register the listener with the Location Manager to receive location updates from the network provider
-	locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, networkLocationListener);
-	// Register the listener with the Location Manager to receive location updates from the GPS provider
-	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, gpsLocationListener);
+	// // Acquire a reference to the system Location Manager
+	// locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	//
+	// // Create a location listener that get updated by the network provider
+	// networkLocationListener = new ProviderLocationListener("Network");
+	// // Create a location listener that get updated by the GPS provider
+	// gpsLocationListener = new ProviderLocationListener("GPS");
+	//
+	// // Register the listener with the Location Manager to receive location updates from the network provider
+	// locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, networkLocationListener);
+	// // Register the listener with the Location Manager to receive location updates from the GPS provider
+	// locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, gpsLocationListener);
 
 	TabHost tabHost = getTabHost();
 
@@ -106,6 +106,12 @@ public class FriendizerActivity extends TabActivity {
 	    }
 	    // No matter what happened, just quit the app
 	    finish();
+	    return true;
+	case R.id.refresh_title:
+	    try {
+		ServerFacade.refreshMyDetails();
+	    } catch (Exception e) {
+	    }
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);

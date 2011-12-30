@@ -1,18 +1,20 @@
 package com.teamagly.friendizer;
 
+import java.util.ArrayList;
+
 public class UserInfo {
     private long id;
     private long value;
     private long money;
     private long owner;
-    private int ownsNum;
+    private ArrayList<Long> ownsList;
 
-    public UserInfo(long id, long value, long money, long owner, int ownsNum) {
+    public UserInfo(long id, long value, long money, long owner, ArrayList<Long> ownsList) {
 	this.id = id;
 	this.value = value;
 	this.money = money;
 	this.owner = owner;
-	this.ownsNum = ownsNum;
+	this.ownsList = ownsList;
     }
 
     public long getId() {
@@ -31,7 +33,7 @@ public class UserInfo {
 	return owner;
     }
 
-    public long getOwnsNum() {
-	return ownsNum;
+    public ArrayList<Long> getOwnsList() {
+	return ownsList;
     }
 }
