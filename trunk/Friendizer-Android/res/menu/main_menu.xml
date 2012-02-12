@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/refresh_title"
+        android:icon="@drawable/ic_menu_refresh"
+        android:title="@string/refresh_title"/>
+    <item
+        android:id="@+id/more_title"
+        android:icon="@android:drawable/ic_menu_more"
+        android:title="@string/more_title">
+
+        <!-- Submenu -->
+        <menu>
+            <item
+                android:id="@+id/invite_title"
+                android:title="@string/invite_title"/>
+            <item
+                android:id="@+id/about_title"
+                android:title="@string/about_title"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/settings_title"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/settings_title"/>
+    <item
+        android:id="@+id/logout_title"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:title="@string/logout_title"/>
+
+</menu>
