@@ -6,13 +6,14 @@
     android:paddingLeft="8dp"
     android:paddingRight="8dp" >
 
-    <TextView
+    <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingTop="70dp"
-        android:text="@string/app_name"
-        android:textSize="36sp" />
+        android:paddingTop="40dp"
+        android:textSize="36sp"
+        android:src="@drawable/logo"
+        android:contentDescription="@string/friendizer_logo" />
 
     <ImageView
         android:id="@+id/imageView1"
@@ -21,7 +22,8 @@
         android:layout_gravity="center"
         android:paddingTop="20dp"
         android:scaleType="center"
-        android:src="@drawable/radar_icon" />
+        android:src="@drawable/radar_icon"
+        android:contentDescription="@string/people_radar" />
 
     <!--
          <ProgressBar

@@ -79,5 +79,11 @@
     <string name="please_wait">Please wait&#8230;</string>
     <string name="profile_pic">Profile Picture</string>
     <string name="loading">Loading...</string>
+    <string name="friendizer_logo">Friendizer Logo</string>
+    <string name="invitation_msg">Meet new friends, based on your interests.</string>
+    <string name="made_by">Made By</string>
+    <string name="team_agly">Team AGLY</string>
+    <string name="facebook_friends">Facebook Friends</string>
+    <string name="sort_by">Sort By</string>
 
 </resources>

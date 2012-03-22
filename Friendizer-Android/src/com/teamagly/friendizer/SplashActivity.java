@@ -30,7 +30,7 @@ public class SplashActivity extends Activity {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.splash);
 	if (!isOnline()) {
-	    ((TextView) findViewById(R.id.status)).setText("Not Internet Connection");
+	    ((TextView) findViewById(R.id.status)).setText("No Internet Connection");
 	}
 	mHandler = new Handler();
 	// Create the Facebook object using the app ID.
@@ -84,7 +84,7 @@ public class SplashActivity extends Activity {
     }
 
     /**
-     * @return true iff the user is connected to the internet
+     * @return true iff the user is connected to the Internet
      */
     public boolean isOnline() {
 	ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -107,12 +107,22 @@ public class SplashActivity extends Activity {
      */
     public void requestUserData() {
 	Bundle params = new Bundle();
-	params.putString("fields", "name, first_name, picture, birthday, gender");
+	params.putString("fields", "name, first_name, picture, birthday, gender, inspirational_people, likes");
 	Utility.mAsyncRunner.request("me", params, new UserRequestListener());
 	// Continue to the main activity
 	Intent intent = new Intent().setClass(SplashActivity.this, FriendizerActivity.class);
 	startActivity(intent);
 	finish();
+    }
+    
+    /* (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // TODO: Not sure if need to extend the token from here or from the main Activity
+        Utility.facebook.extendAccessTokenIfNeeded(this, null);
     }
 
     /*

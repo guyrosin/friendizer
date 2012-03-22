@@ -1,12 +1,10 @@
 package com.teamagly.friendizer;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import com.teamagly.friendizer.R;
+
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -54,26 +52,25 @@ public class FriendizerActivity extends TabActivity {
 
 	// Tab for People Radar
 	TabSpec peopleRadarSpec = tabHost.newTabSpec("People Radar");
-	peopleRadarSpec.setIndicator("People Radar", getResources().getDrawable(R.drawable.ic_tab_people_radar_selected));
+	peopleRadarSpec.setIndicator("People Radar", getResources().getDrawable(R.drawable.icon_peopleradar_tab));
 	Intent peopleRadarIntent = new Intent(this, PeopleRadarActivity.class);
 	peopleRadarSpec.setContent(peopleRadarIntent);
 
-	// Tab for Friends
-	TabSpec friendsSpec = tabHost.newTabSpec("Friends");
-	// setting Title and Icon for the Tab
-	friendsSpec.setIndicator("Friends", getResources().getDrawable(R.drawable.ic_tab_friends_unselected));
-	Intent friendsIntent = new Intent(this, FriendsListActivity.class);
-	friendsSpec.setContent(friendsIntent);
+	// Tab for Connections
+	TabSpec connectionsSpec = tabHost.newTabSpec("Connections");
+	connectionsSpec.setIndicator("Connections", getResources().getDrawable(R.drawable.icon_friends_tab));
+	Intent connectionsIntent = new Intent(this, ConnectionsActivity.class);
+	connectionsSpec.setContent(connectionsIntent);
 
 	// Tab for My Profile
 	TabSpec myProfileSpec = tabHost.newTabSpec("My Profile");
-	myProfileSpec.setIndicator("My Profile", getResources().getDrawable(R.drawable.ic_tab_my_profile_unselected));
+	myProfileSpec.setIndicator("My Profile", getResources().getDrawable(R.drawable.icon_myprofile_tab));
 	Intent myProfileIntent = new Intent(this, MyProfileActivity.class);
 	myProfileSpec.setContent(myProfileIntent);
 
 	// Adding all TabSpec to TabHost
 	tabHost.addTab(peopleRadarSpec); // Adding People Radar tab
-	tabHost.addTab(friendsSpec); // Adding Friends tab
+	tabHost.addTab(connectionsSpec); // Adding Friends tab
 	tabHost.addTab(myProfileSpec); // Adding My Profile tab
     }
 
@@ -89,23 +86,10 @@ public class FriendizerActivity extends TabActivity {
 	case R.id.settings_title:
 	    startActivity(new Intent(this, FriendsPrefs.class));
 	    return true;
-	case R.id.about_title:
-	    Toast.makeText(getApplicationContext(), "Made by Team AGLY (F**k Yeah!)", Toast.LENGTH_LONG).show();
-	    return true;
-	case R.id.logout_title:
-	    try {
-		// Clear the preferences (access token) and logout
-		Editor editor = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).edit();
-		editor.clear();
-		editor.commit();
-		Utility.facebook.logout(this);
-	    } catch (MalformedURLException e1) {
-		e1.printStackTrace();
-	    } catch (IOException e1) {
-		e1.printStackTrace();
-	    }
-	    // No matter what happened, just quit the app
-	    finish();
+	case R.id.invite:
+	    Bundle params = new Bundle();
+	    params.putString("message", getString(R.string.invitation_msg));
+	    Utility.facebook.dialog(this, "apprequests", params, new BaseDialogListener());
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
@@ -173,6 +157,6 @@ public class FriendizerActivity extends TabActivity {
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 	    // TODO Auto-generated method stub
 	}
-
     }
+
 }
