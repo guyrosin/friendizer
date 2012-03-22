@@ -42,16 +42,19 @@ public class FriendProfileActivity extends Activity {
 	if (userPic != null)
 	    userPic.setImageBitmap(Utility.getBitmap(intent.getStringExtra("picture")));
 	name.setText(intent.getStringExtra("name"));
-	age.setText(intent.getStringExtra("age"));
-	if (age.getText() == "")
-	    ageTitle.setText("");
 	String genderStr = intent.getStringExtra("gender");
 	// Capitalize the first letter
 	if (genderStr.equals("male"))
 	    genderStr = "Male";
 	else if (genderStr.equals("female"))
 	    genderStr = "Female";
+	else { // No gender
+	    ageTitle.setText("age: "); // Remove the separator from the age title
+	}
 	gender.setText(genderStr);
+	age.setText(intent.getStringExtra("age"));
+	if (age.getText().length() == 0)
+	    ageTitle.setText("");
 	fbid = intent.getLongExtra("fbid", 0);
 
 	// Listener for the Buy button

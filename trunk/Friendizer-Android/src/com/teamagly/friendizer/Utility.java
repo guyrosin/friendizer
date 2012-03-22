@@ -31,8 +31,7 @@ public class Utility extends Application {
     public static Facebook facebook;
     public static AsyncFacebookRunner mAsyncRunner;
     public static JSONObject mFriendsList;
-    public static String objectID = null;
-    public static FriendsGetProfilePics model;
+    public static FriendsGetProfilePics model = new FriendsGetProfilePics();;
     public static AndroidHttpClient httpclient = null;
     public static Hashtable<String, String> currentPermissions = new Hashtable<String, String>();
     static Bitmap userPic;
@@ -43,7 +42,6 @@ public class Utility extends Application {
     static UserInfo userInfo;
 
     private static int MAX_IMAGE_DIMENSION = 720;
-    public static final String HACK_ICON_URL = "http://www.facebookmobileweb.com/hackbook/img/facebook_icon_large.png";
     public static final String PREFS_NAME = "FriendizerPreferences";
 
     public static Bitmap getBitmap(String url) {

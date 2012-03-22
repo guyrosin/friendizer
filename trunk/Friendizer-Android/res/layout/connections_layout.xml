@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp" >
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp" >
 
     <GridView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:columnWidth="90dp"
         android:gravity="center"
         android:horizontalSpacing="5dp"
-        android:columnWidth="90dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
         android:verticalSpacing="5dp" />
@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FF0000"
-        android:text="Forever Alone! (Sadly you have no friends... now go invite some!)" />
+        android:text="Forever Alone! (Sadly you have no friends... now go invite some!)"
+        android:visibility="invisible" />
 
 </LinearLayout>
