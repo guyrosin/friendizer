@@ -85,5 +85,6 @@
     <string name="team_agly">Team AGLY</string>
     <string name="facebook_friends">Facebook Friends</string>
     <string name="sort_by">Sort By</string>
+    <string name="facebook_login">Login with Facebook</string>
 
 </resources>

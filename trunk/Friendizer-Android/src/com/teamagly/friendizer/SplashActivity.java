@@ -5,13 +5,18 @@ import java.util.Date;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,19 +29,43 @@ import com.facebook.android.FacebookError;
 public class SplashActivity extends Activity {
     public static final String APP_ID = "273844699335189";
     private Handler mHandler;
+    ProgressDialog dialog;
+    UserRequestListener userRequestListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.splash);
 	if (!isOnline()) {
-	    ((TextView) findViewById(R.id.status)).setText("No Internet Connection");
+	    ((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
+	    return;
 	}
+	Intent intent = getIntent();
+	if (intent.getBooleanExtra("logout", false))
+	    logout();
+
 	mHandler = new Handler();
 	// Create the Facebook object using the app ID.
 	Utility.facebook = new Facebook(APP_ID);
 	// Instantiate the asyncrunner object for asynchronous api calls.
 	Utility.mAsyncRunner = new AsyncFacebookRunner(Utility.facebook);
+
+	// Listener for the login button
+	final ImageView loginButton = (ImageView) findViewById(R.id.loginButton);
+	loginButton.setOnClickListener(new View.OnClickListener() {
+	    public void onClick(View v) {
+		onResume();
+	    }
+	});
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+	super.onResume();
 
 	/*
 	 * Get existing access_token if any
@@ -84,6 +113,21 @@ public class SplashActivity extends Activity {
     }
 
     /**
+     * Logs out the user from Facebook
+     */
+    private void logout() {
+	try {
+	    // Clear the preferences (access token) and logout
+	    Editor e = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).edit();
+	    e.clear();
+	    e.commit();
+	    Utility.facebook.logout(getBaseContext());
+	} catch (Exception e) {
+	    Log.v("Splash", "ERROR: " + e.getMessage());
+	}
+    }
+
+    /**
      * @return true iff the user is connected to the Internet
      */
     public boolean isOnline() {
@@ -98,37 +142,37 @@ public class SplashActivity extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	super.onActivityResult(requestCode, resultCode, data);
-
 	Utility.facebook.authorizeCallback(requestCode, resultCode, data);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onBackPressed()
+     */
+    @Override
+    public void onBackPressed() {
+	// Quit the app
+	moveTaskToBack(true);
     }
 
     /*
      * Request user name, and picture to show on the main screen.
      */
     public void requestUserData() {
+	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true); // Show a loading dialog
 	Bundle params = new Bundle();
 	params.putString("fields", "name, first_name, picture, birthday, gender, inspirational_people, likes");
-	Utility.mAsyncRunner.request("me", params, new UserRequestListener());
-	// Continue to the main activity
-	Intent intent = new Intent().setClass(SplashActivity.this, FriendizerActivity.class);
-	startActivity(intent);
-	finish();
-    }
-    
-    /* (non-Javadoc)
-     * @see android.app.Activity#onResume()
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // TODO: Not sure if need to extend the token from here or from the main Activity
-        Utility.facebook.extendAccessTokenIfNeeded(this, null);
+	// Send a new request only if there are none currently
+	if ((userRequestListener == null) || (!userRequestListener.completed))
+	    userRequestListener = new UserRequestListener();
+	Utility.mAsyncRunner.request("me", params, userRequestListener);
     }
 
     /*
      * Callback for fetching current user's name, picture, uid.
      */
     public class UserRequestListener extends BaseRequestListener {
+	public boolean completed = false;
 
 	@Override
 	public void onComplete(final String response, final Object state) {
@@ -159,6 +203,13 @@ public class SplashActivity extends Activity {
 
 		// Register/login
 		ServerFacade.register(userID);
+
+		dialog.dismiss(); // Dismiss the loading dialog
+		// Continue to the main activity
+		Intent intent = new Intent().setClass(SplashActivity.this, FriendizerActivity.class);
+		startActivity(intent);
+		completed = true;
+		finish();
 
 	    } catch (Exception e) {
 		// mHandler.post(new Runnable() {

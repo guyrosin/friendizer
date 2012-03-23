@@ -42,7 +42,9 @@ public class FriendProfileActivity extends Activity {
 	if (userPic != null)
 	    userPic.setImageBitmap(Utility.getBitmap(intent.getStringExtra("picture")));
 	name.setText(intent.getStringExtra("name"));
-	String genderStr = intent.getStringExtra("gender");
+	String genderStr = "";
+	if (intent.hasExtra("gender"))
+	    genderStr = intent.getStringExtra("gender");
 	// Capitalize the first letter
 	if (genderStr.equals("male"))
 	    genderStr = "Male";

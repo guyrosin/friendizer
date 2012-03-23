@@ -35,7 +35,7 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	setContentView(R.layout.friends_layout);
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
 	Bundle params = new Bundle();
-	params.putString("fields", "name, picture");
+	params.putString("fields", "name, picture, birthday, gender");
 	Utility.mAsyncRunner.request("me/friends", params, new UserRequestListener());
     }
 
@@ -64,6 +64,8 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	    intent.putExtra("fbid", userInfo.id);
 	    intent.putExtra("name", userInfo.name);
 	    intent.putExtra("picture", userInfo.picURL);
+	    intent.putExtra("gender", userInfo.gender);
+	    intent.putExtra("age", userInfo.age);
 	    startActivity(intent);
 	} catch (JSONException e) {
 	    showToast("Error: " + e.getMessage());
@@ -169,7 +171,6 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 		}
 	    });
 	    dialog.dismiss(); // Dismiss the loading dialog
-
 	}
     }
 }
