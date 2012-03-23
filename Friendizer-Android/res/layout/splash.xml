@@ -10,7 +10,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingTop="40dp"
+        android:paddingTop="20dp"
         android:textSize="36sp"
         android:src="@drawable/logo"
         android:contentDescription="@string/friendizer_logo" />
@@ -20,20 +20,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingTop="20dp"
+        android:paddingTop="10dp"
         android:scaleType="center"
         android:src="@drawable/radar_icon"
         android:contentDescription="@string/people_radar" />
-
-    <!--
-         <ProgressBar
-        android:id="@+id/loading"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="40dp" />
-    -->
 
     <TextView
         android:id="@+id/status"
@@ -42,5 +32,14 @@
         android:layout_gravity="center"
         android:text="@string/loading"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <ImageView
+        android:id="@+id/loginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingTop="40dp"
+        android:src="@drawable/facebook_login"
+        android:contentDescription="@string/facebook_login" />
 
 </LinearLayout>

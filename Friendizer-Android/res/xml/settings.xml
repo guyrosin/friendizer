@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="troll"
-        android:summary="Yes..."
-        android:title="Troll?" />
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="friends_list_type"
         android:summary="Check for a regular list, uncheck for a grid view"
         android:title="Friends List Type" />
     <PreferenceScreen android:key="about" android:title="About" android:summary="Made by Team AGLY (F*ck YEAH!)"></PreferenceScreen>
-    <PreferenceScreen android:title="Logout" android:key="logout"></PreferenceScreen>
+    <Preference android:title="Logout" android:key="logout"/>
 
 </PreferenceScreen>

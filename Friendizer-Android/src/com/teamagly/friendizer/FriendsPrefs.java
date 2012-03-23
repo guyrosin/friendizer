@@ -3,14 +3,14 @@
  */
 package com.teamagly.friendizer;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
@@ -21,6 +21,7 @@ import android.preference.PreferenceManager;
 public class FriendsPrefs extends PreferenceActivity {
     SharedPreferences prefs;
     OnSharedPreferenceChangeListener listener;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,24 +36,22 @@ public class FriendsPrefs extends PreferenceActivity {
 		    CheckBoxPreference friendsListType = (CheckBoxPreference) getPreferenceScreen().findPreference(key);
 		    editor.putBoolean(key, friendsListType.isChecked());
 		    editor.commit();
-		} else if (key.equals("troll")) {
-		    ;
-		} else if (key.equals("logout")) {
-		    try {
-			// Clear the preferences (access token) and logout
-			Editor e = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).edit();
-			e.clear();
-			e.commit();
-			Utility.facebook.logout(getBaseContext());
-		    } catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		    } catch (IOException e1) {
-			e1.printStackTrace();
-		    }
-		    // No matter what happened, just quit the app
-		    finish();
 		}
 	    }
 	};
+	Preference logoutBtn = (Preference) findPreference("logout");
+	logoutBtn.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+	    public boolean onPreferenceClick(Preference preference) {
+		Intent intent = new Intent(FriendsPrefs.this, SplashActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
+		Bundle bundle = new Bundle();
+		bundle.putBoolean("logout", true);
+		intent.putExtras(bundle);
+		startActivity(intent);
+		finish();
+		return true;
+	    }
+	});
     }
+
 }

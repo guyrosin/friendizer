@@ -6,18 +6,6 @@
     android:paddingLeft="4dp"
     android:paddingRight="4dp" >
 
-    <GridView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/gridview"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:columnWidth="90dp"
-        android:gravity="center"
-        android:horizontalSpacing="5dp"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="5dp" />
-
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
