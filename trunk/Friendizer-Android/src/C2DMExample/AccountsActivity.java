@@ -14,9 +14,13 @@
  * the License.
  */
 
-package com.teamagly.friendizer;
+package C2DMExample;
 
 import com.google.android.c2dm.C2DMessaging;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.R.id;
+import com.teamagly.friendizer.R.layout;
+import com.teamagly.friendizer.R.string;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;

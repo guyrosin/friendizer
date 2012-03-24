@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.teamagly.friendizer;
+package C2DMExample;
 
 import com.google.android.c2dm.C2DMBaseReceiver;
 

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.teamagly.friendizer;
+package C2DMExample;
 
 /**
  * Class to be customized with app-specific data. The Eclipse plugin will set

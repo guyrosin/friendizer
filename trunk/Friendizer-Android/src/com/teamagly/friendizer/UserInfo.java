@@ -5,14 +5,14 @@ public class UserInfo {
     private long value;
     private long money;
     private long owner;
-    private int ownsNum;
+    private long[] ownsList;
 
-    public UserInfo(long id, long value, long money, long owner, int ownsNum) {
+    public UserInfo(long id, long value, long money, long owner, long[] ownsList) {
 	this.id = id;
 	this.value = value;
 	this.money = money;
 	this.owner = owner;
-	this.ownsNum = ownsNum;
+	this.ownsList = ownsList;
     }
 
     public long getId() {
@@ -31,7 +31,7 @@ public class UserInfo {
 	return owner;
     }
 
-    public long getOwnsNum() {
-	return ownsNum;
+    public long[] getOwnsList() {
+	return ownsList;
     }
 }

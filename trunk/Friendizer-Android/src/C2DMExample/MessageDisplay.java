@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.teamagly.friendizer;
+package C2DMExample;
+
 
 import android.content.Context;
 import android.content.Intent;

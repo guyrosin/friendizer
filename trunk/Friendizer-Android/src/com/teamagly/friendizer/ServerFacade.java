@@ -26,7 +26,7 @@ public final class ServerFacade {
 	long money = Long.parseLong(in.readLine());
 	long owner = Long.parseLong(in.readLine());
 	in.close();
-	return new UserInfo(userID, value, money, owner, ownList(userID).length);
+	return new UserInfo(userID, value, money, owner, ownList(userID));
     }
 
     public static long[] ownList(long userID) throws Exception {

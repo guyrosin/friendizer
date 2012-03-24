@@ -1,9 +1,11 @@
 package com.teamagly.friendizer;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.teamagly.friendizer.R;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -30,9 +32,9 @@ import android.widget.Toast;
 public class ConnectionsActivity extends ListActivity implements OnItemClickListener {
     ProgressDialog dialog;
     private boolean list_type;
-    protected static JSONArray jsonArray;
     private GridView gridview;
     private ListAdapter listAdapter;
+    ArrayList<FBUserInfo> usersList;
 
     /*
      * (non-Javadoc)
@@ -76,6 +78,16 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	}
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onPause()
+     */
+    @Override
+    protected void onPause() {
+	super.onPause();
+	dialog.dismiss(); // Dismiss the dialog
+    }
+
     public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);
 	menu.clear(); // Clear the main activity's menu
@@ -116,21 +128,15 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
      */
     @Override
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-	try {
-	    JSONObject jsonObject = jsonArray.getJSONObject(position);
-	    // Create an intent with the friend's data
-	    Intent intent = new Intent().setClass(ConnectionsActivity.this, FriendProfileActivity.class);
-	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
-	    intent.putExtra("fbid", userInfo.id);
-	    intent.putExtra("name", userInfo.name);
-	    intent.putExtra("gender", userInfo.gender);
-	    intent.putExtra("picture", userInfo.picURL);
-	    intent.putExtra("age", userInfo.age);
-	    startActivity(intent);
-	} catch (JSONException e) {
-	    showToast("Error: " + e.getMessage());
-	    return;
-	}
+	FBUserInfo userInfo = usersList.get(position);
+	// Create an intent with the friend's data
+	Intent intent = new Intent().setClass(ConnectionsActivity.this, FriendProfileActivity.class);
+	intent.putExtra("fbid", userInfo.id);
+	intent.putExtra("name", userInfo.name);
+	intent.putExtra("gender", userInfo.gender);
+	intent.putExtra("picture", userInfo.picURL);
+	intent.putExtra("age", userInfo.age);
+	startActivity(intent);
     }
 
     /**
@@ -164,7 +170,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 
 	@Override
 	public int getCount() {
-	    return jsonArray.length();
+	    return usersList.size();
 	}
 
 	@Override
@@ -179,12 +185,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    JSONObject jsonObject = null;
-	    try {
-		jsonObject = jsonArray.getJSONObject(position);
-	    } catch (JSONException e1) {
-		e1.printStackTrace();
-	    }
+	    FBUserInfo userInfo = usersList.get(position);
 	    View hView = convertView;
 	    if (convertView == null) {
 		hView = mInflater.inflate(R.layout.connection_list_item, null);
@@ -194,12 +195,10 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 		holder.gender = (TextView) hView.findViewById(R.id.gender);
 		holder.age = (TextView) hView.findViewById(R.id.age);
 		holder.ageTitle = (TextView) hView.findViewById(R.id.age_title);
-		// holder.online_presence = (TextView) hView.findViewById(R.id.online_presence);
 		hView.setTag(holder);
 	    }
 
 	    ViewHolder holder = (ViewHolder) hView.getTag();
-	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
 	    holder.profile_pic.setImageBitmap(userInfo.pic);
 	    holder.name.setText(userInfo.name);
 	    holder.gender.setText(userInfo.gender);
@@ -224,7 +223,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 
 	@Override
 	public int getCount() {
-	    return jsonArray.length();
+	    return usersList.size();
 	}
 
 	@Override
@@ -239,12 +238,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    JSONObject jsonObject = null;
-	    try {
-		jsonObject = jsonArray.getJSONObject(position);
-	    } catch (JSONException e1) {
-		e1.printStackTrace();
-	    }
+	    FBUserInfo userInfo = usersList.get(position);
 	    ImageView imageView;
 	    if (convertView == null) { // if it's not recycled, initialize some attributes
 		imageView = new ImageView(mContext);
@@ -255,7 +249,9 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 		imageView = (ImageView) convertView;
 	    }
 
-	    imageView.setImageBitmap(Utility.model.getImage(jsonObject.optString("id"), jsonObject.optString("picture")));
+	    if (userInfo.pic == null)
+		userInfo.pic = Utility.model.getImage(userInfo.id, userInfo.picURL);
+	    imageView.setImageBitmap(userInfo.pic);
 	    return imageView;
 	}
 
@@ -267,7 +263,6 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	TextView gender;
 	TextView age;
 	TextView ageTitle;
-	// TextView online_presence;
     }
 
     /*
@@ -283,7 +278,15 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	@Override
 	public void onComplete(final String response, final Object state) {
 	    try {
-		jsonArray = new JSONObject(response).getJSONArray("data");
+		JSONArray jsonArray = new JSONObject(response).getJSONArray("data");
+		// Convert the JSON array to a regular Java list
+		usersList = new ArrayList<FBUserInfo>();
+		int len = jsonArray.length();
+		for (int i = 0; i < len; i++)
+		    usersList.add(new FBUserInfo(jsonArray.getJSONObject(i)));
+		// Sort the list alphabetically
+		Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+
 		if (Utility.model == null)
 		    Utility.model = new FriendsGetProfilePics(); // Load the profile pictures
 		// Load the list type - list / grid (default is grid)
