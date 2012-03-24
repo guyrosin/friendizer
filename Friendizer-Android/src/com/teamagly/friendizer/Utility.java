@@ -43,6 +43,7 @@ public class Utility extends Application {
 
     private static int MAX_IMAGE_DIMENSION = 720;
     public static final String PREFS_NAME = "FriendizerPreferences";
+    public static int DEFAULT_DISTANCE = 1000;
 
     public static Bitmap getBitmap(String url) {
 	Bitmap bm = null;

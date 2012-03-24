@@ -25,6 +25,7 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
+import com.teamagly.friendizer.R;
 
 public class SplashActivity extends Activity {
     public static final String APP_ID = "273844699335189";

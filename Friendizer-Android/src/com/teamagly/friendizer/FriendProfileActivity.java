@@ -3,6 +3,9 @@
  */
 package com.teamagly.friendizer;
 
+import java.util.Arrays;
+
+import com.teamagly.friendizer.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -58,22 +61,36 @@ public class FriendProfileActivity extends Activity {
 	if (age.getText().length() == 0)
 	    ageTitle.setText("");
 	fbid = intent.getLongExtra("fbid", 0);
+	long[] ownsList = intent.getLongArrayExtra("ownsList");
 
-	// Listener for the Buy button
-	final Button buyButton = (Button) findViewById(R.id.buy_btn);
-	buyButton.setOnClickListener(new View.OnClickListener() {
-	    public void onClick(View v) {
-		try {
-		    ServerFacade.buy(Utility.userInfo.getId(), fbid);
-		} catch (Exception e) {
-		    Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
+	final Button btn1 = (Button) findViewById(R.id.btn1);
+	final Button btn2 = (Button) findViewById(R.id.btn2);
+
+	if (Arrays.asList(ownsList).contains(fbid)) { // If I own this user
+	    // Define the first button
+	    btn1.setText("Chat");
+	    btn1.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		    // TODO: move to the chat activity
 		}
-	    }
-	});
+	    });
+	} else {
+	    // Define the first button
+	    btn1.setText("Buy");
+	    btn1.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		    try {
+			ServerFacade.buy(Utility.userInfo.getId(), fbid);
+		    } catch (Exception e) {
+			Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
+		    }
+		}
+	    });
+	}
 
-	// Listener for the Poke button
-	final Button pokeButton = (Button) findViewById(R.id.poke_btn);
-	pokeButton.setOnClickListener(new View.OnClickListener() {
+	// Define the second button
+	btn2.setText("Poke");
+	btn2.setOnClickListener(new View.OnClickListener() {
 	    public void onClick(View v) {
 	    }
 	});

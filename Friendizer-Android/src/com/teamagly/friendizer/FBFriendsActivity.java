@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.teamagly.friendizer.R;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -136,11 +137,12 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 
 	    ViewHolder holder = (ViewHolder) hView.getTag();
 	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
+	    if (userInfo.pic == null)
+		userInfo.pic = Utility.model.getImage(userInfo.id, userInfo.picURL);
 	    holder.profile_pic.setImageBitmap(userInfo.pic);
 	    holder.name.setText(userInfo.name);
 	    return hView;
 	}
-
     }
 
     class ViewHolder {

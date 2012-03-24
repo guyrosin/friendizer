@@ -21,11 +21,16 @@ public class FBUserInfo {
     Bitmap pic;
     String picURL;
 
-    public FBUserInfo(JSONObject jsonObject) {
-	// TODO Auto-generated constructor stub
+    public FBUserInfo(final JSONObject jsonObject) {
+	// Note we don't load the pic here! (It has to be done in the main UI thread)
 	id = jsonObject.optString("id");
 	picURL = jsonObject.optString("picture");
-	pic = Utility.model.getImage(jsonObject.optString("id"), picURL);
+	// new Handler(Looper.getMainLooper()).post(new Runnable() { // -- It's not working
+	// @Override
+	// public void run() {
+	// pic = Utility.model.getImage(jsonObject.optString("id"), picURL);
+	// }
+	// });
 	name = jsonObject.optString("name");
 	gender = jsonObject.optString("gender");
 

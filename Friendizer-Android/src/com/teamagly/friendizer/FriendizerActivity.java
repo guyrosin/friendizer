@@ -1,7 +1,6 @@
 package com.teamagly.friendizer;
 
 import com.teamagly.friendizer.R;
-
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;

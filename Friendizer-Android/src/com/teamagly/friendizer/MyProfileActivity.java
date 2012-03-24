@@ -45,7 +45,7 @@ public class MyProfileActivity extends Activity {
 	if (Utility.userInfo != null) {
 	    value.setText(String.valueOf(Utility.userInfo.getValue()));
 	    money.setText(String.valueOf(Utility.userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.userInfo.getOwnsNum()));
+	    owns.setText(String.valueOf(Utility.userInfo.getOwnsList().length));
 
 	    // Get the owner's name and picture from Facebook
 	    Bundle params = new Bundle();
@@ -71,7 +71,7 @@ public class MyProfileActivity extends Activity {
 	if (Utility.userInfo != null) {
 	    value.setText(String.valueOf(Utility.userInfo.getValue()));
 	    money.setText(String.valueOf(Utility.userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.userInfo.getOwnsNum()));
+	    owns.setText(String.valueOf(Utility.userInfo.getOwnsList().length));
 
 	    // Get the owner's name and picture from Facebook
 	    Bundle params = new Bundle();

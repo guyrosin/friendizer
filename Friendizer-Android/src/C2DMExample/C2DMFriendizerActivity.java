@@ -13,7 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.teamagly.friendizer;
+package C2DMExample;
+
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.R.id;
+import com.teamagly.friendizer.R.layout;
+import com.teamagly.friendizer.R.menu;
+import com.teamagly.friendizer.R.string;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
