@@ -88,7 +88,7 @@ public class FriendizerActivity extends TabActivity {
 	case R.id.invite:
 	    Bundle params = new Bundle();
 	    params.putString("message", getString(R.string.invitation_msg));
-	    Utility.facebook.dialog(this, "apprequests", params, new BaseDialogListener());
+	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
@@ -129,7 +129,7 @@ public class FriendizerActivity extends TabActivity {
 	    if (location != null) {
 		try {
 		    // Update the server with the new location
-		    ServerFacade.changeLocation(Utility.userInfo.getId(), location.getLatitude(), location.getLongitude());
+		    ServerFacade.changeLocation(Utility.getInstance().userInfo.getId(), location.getLatitude(), location.getLongitude());
 		} catch (Exception e) {
 		    System.out.println("Can't update the server with the new location");
 		}

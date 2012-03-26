@@ -37,7 +37,7 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
 	Bundle params = new Bundle();
 	params.putString("fields", "name, picture, birthday, gender");
-	Utility.mAsyncRunner.request("me/friends", params, new UserRequestListener());
+	Utility.getInstance().mAsyncRunner.request("me/friends", params, new UserRequestListener());
     }
 
     /*
@@ -98,7 +98,6 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	FBFriendsActivity friendsList;
 
 	public FriendListAdapter(FBFriendsActivity friendsList) {
-	    Utility.model.setListener(this);
 	    this.friendsList = friendsList;
 	    mInflater = LayoutInflater.from(friendsList.getBaseContext());
 	}
@@ -137,9 +136,7 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 
 	    ViewHolder holder = (ViewHolder) hView.getTag();
 	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
-	    if (userInfo.pic == null)
-		userInfo.pic = Utility.model.getImage(userInfo.id, userInfo.picURL);
-	    holder.profile_pic.setImageBitmap(userInfo.pic);
+	    Utility.getInstance().imageLoader.displayImage(userInfo.picURL, holder.profile_pic);
 	    holder.name.setText(userInfo.name);
 	    return hView;
 	}
@@ -164,8 +161,6 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 		showToast(e.getMessage());
 		return;
 	    }
-	    if (Utility.model == null)
-		Utility.model = new FriendsGetProfilePics(); // Load the profile pictures
 	    // Update the view (must do it from the main thread)
 	    runOnUiThread(new Runnable() {
 		public void run() {

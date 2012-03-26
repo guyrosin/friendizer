@@ -3,38 +3,33 @@ package com.teamagly.friendizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ConnectionsActivity extends ListActivity implements OnItemClickListener {
     ProgressDialog dialog;
     private boolean list_type;
-    private GridView gridview;
-    private ListAdapter listAdapter;
-    ArrayList<FBUserInfo> usersList;
+    private GridView gridView;
+    private FriendsAdapter friendsAdapter;
+    private ArrayList<FBUserInfo> usersList = new ArrayList<FBUserInfo>();
 
     /*
      * (non-Javadoc)
@@ -44,13 +39,15 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.connections_layout);
+	gridView = (GridView) findViewById(R.id.gridview);
 
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
+	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
+	list_type = type;
+	updateListType(type);
 	Bundle params = new Bundle();
 	params.putString("fields", "name, picture, birthday, gender");
-	Utility.mAsyncRunner.request("me/friends", params, new UserRequestListener(this));
-	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
-	list_type = type; // Initialize with the user's chosen type
+	Utility.getInstance().mAsyncRunner.request("me/friends", params, new UserRequestListener());
     }
 
     /*
@@ -60,21 +57,24 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
     @Override
     protected void onResume() {
 	super.onResume();
-	gridview = (GridView) findViewById(R.id.gridview);
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	if (type != list_type) { // A change occurred -> redraw the view
 	    list_type = type;
-	    if (list_type) { // => show in a list
-		gridview.setAdapter(null);
-		listAdapter = new FriendListAdapter(this);
-		getListView().setOnItemClickListener(this);
-		getListView().setAdapter(listAdapter);
-	    } else { // == show in a GridView
-		getListView().setAdapter(null);
-		listAdapter = new FriendImageAdapter(this);
-		gridview.setAdapter(listAdapter);
-		gridview.setOnItemClickListener(this);
-	    }
+	    updateListType(type);
+	}
+    }
+
+    protected void updateListType(boolean type) {
+	if (list_type) { // => show in a list
+	    gridView.setAdapter(null);
+	    friendsAdapter = new FriendsListAdapter(this, R.layout.connection_list_item, usersList);
+	    getListView().setOnItemClickListener(this);
+	    getListView().setAdapter(friendsAdapter);
+	} else { // == show in a GridView
+	    getListView().setAdapter(null);
+	    friendsAdapter = new FriendsImageAdapter(this, 0, usersList);
+	    gridView.setAdapter(friendsAdapter);
+	    gridView.setOnItemClickListener(this);
 	}
     }
 
@@ -104,7 +104,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	case R.id.invite: // Show the Facebook invitation dialog
 	    Bundle params = new Bundle();
 	    params.putString("message", getString(R.string.invitation_msg));
-	    Utility.facebook.dialog(this, "apprequests", params, new BaseDialogListener());
+	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
 	    return true;
 	case R.id.facebook_friends: // Move to my Facebook friends activity
 	    Intent intent = new Intent().setClass(ConnectionsActivity.this, FBFriendsActivity.class);
@@ -139,182 +139,31 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	startActivity(intent);
     }
 
-    /**
-     * Shows a toast
-     * 
-     * @param msg
-     *            a message to show
-     */
-    public void showToast(final String msg) {
-	new Handler().post(new Runnable() {
-	    @Override
-	    public void run() {
-		Toast toast = Toast.makeText(ConnectionsActivity.this, msg, Toast.LENGTH_LONG);
-		toast.show();
-	    }
-	});
-    }
-
-    /**
-     * Definition of the list adapter
-     */
-    public class FriendListAdapter extends BaseAdapter {
-	private LayoutInflater mInflater;
-	ConnectionsActivity friendsList;
-
-	public FriendListAdapter(ConnectionsActivity friendsList) {
-	    Utility.model.setListener(this);
-	    this.friendsList = friendsList;
-	    mInflater = LayoutInflater.from(friendsList.getBaseContext());
-	}
-
-	@Override
-	public int getCount() {
-	    return usersList.size();
-	}
-
-	@Override
-	public Object getItem(int position) {
-	    return null;
-	}
-
-	@Override
-	public long getItemId(int position) {
-	    return 0;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-	    FBUserInfo userInfo = usersList.get(position);
-	    View hView = convertView;
-	    if (convertView == null) {
-		hView = mInflater.inflate(R.layout.connection_list_item, null);
-		ViewHolder holder = new ViewHolder();
-		holder.profile_pic = (ImageView) hView.findViewById(R.id.profile_pic);
-		holder.name = (TextView) hView.findViewById(R.id.name);
-		holder.gender = (TextView) hView.findViewById(R.id.gender);
-		holder.age = (TextView) hView.findViewById(R.id.age);
-		holder.ageTitle = (TextView) hView.findViewById(R.id.age_title);
-		hView.setTag(holder);
-	    }
-
-	    ViewHolder holder = (ViewHolder) hView.getTag();
-	    holder.profile_pic.setImageBitmap(userInfo.pic);
-	    holder.name.setText(userInfo.name);
-	    holder.gender.setText(userInfo.gender);
-	    holder.age.setText(userInfo.age);
-	    if (userInfo.age.length() == 0)
-		holder.ageTitle.setText("");
-	    return hView;
-	}
-
-    }
-
-    /**
-     * Definition of the list adapter
-     */
-    public class FriendImageAdapter extends BaseAdapter {
-	private Context mContext;
-
-	public FriendImageAdapter(Context c) {
-	    mContext = c;
-	    Utility.model.setListener(this);
-	}
-
-	@Override
-	public int getCount() {
-	    return usersList.size();
-	}
-
-	@Override
-	public Object getItem(int position) {
-	    return null;
-	}
-
-	@Override
-	public long getItemId(int position) {
-	    return 0;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-	    FBUserInfo userInfo = usersList.get(position);
-	    ImageView imageView;
-	    if (convertView == null) { // if it's not recycled, initialize some attributes
-		imageView = new ImageView(mContext);
-		imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-		imageView.setPadding(5, 5, 5, 5);
-	    } else {
-		imageView = (ImageView) convertView;
-	    }
-
-	    if (userInfo.pic == null)
-		userInfo.pic = Utility.model.getImage(userInfo.id, userInfo.picURL);
-	    imageView.setImageBitmap(userInfo.pic);
-	    return imageView;
-	}
-
-    }
-
-    class ViewHolder {
-	ImageView profile_pic;
-	TextView name;
-	TextView gender;
-	TextView age;
-	TextView ageTitle;
-    }
-
     /*
      * Callback for fetching current user's name, picture, uid.
      */
     public class UserRequestListener extends BaseRequestListener {
-	ConnectionsActivity curActivity;
-
-	public UserRequestListener(ConnectionsActivity curActivity) {
-	    this.curActivity = curActivity;
-	}
 
 	@Override
 	public void onComplete(final String response, final Object state) {
 	    try {
 		JSONArray jsonArray = new JSONObject(response).getJSONArray("data");
 		// Convert the JSON array to a regular Java list
-		usersList = new ArrayList<FBUserInfo>();
+		usersList.clear();
 		int len = jsonArray.length();
 		for (int i = 0; i < len; i++)
 		    usersList.add(new FBUserInfo(jsonArray.getJSONObject(i)));
 		// Sort the list alphabetically
 		Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
-
-		if (Utility.model == null)
-		    Utility.model = new FriendsGetProfilePics(); // Load the profile pictures
-		// Load the list type - list / grid (default is grid)
-		list_type = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
-			.getBoolean("friends_list_type", false);
-		if (list_type) { // -> show in a list
-		    listAdapter = new FriendListAdapter(curActivity);
-		    // Update the view (must do it from the main thread)
-		    runOnUiThread(new Runnable() {
-			public void run() {
-			    getListView().setOnItemClickListener(curActivity);
-			    getListView().setAdapter(listAdapter);
-			}
-		    });
-		} else { // -> show in a gridView
-		    listAdapter = new FriendImageAdapter(curActivity);
-		    // Update the view (must do it from the main thread)
-		    runOnUiThread(new Runnable() {
-			public void run() {
-			    gridview.setAdapter(listAdapter);
-			    gridview.setOnItemClickListener(curActivity);
-			}
-		    });
-		}
+		runOnUiThread(new Runnable() {
+		    public void run() {
+			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
+		    }
+		});
 		dialog.dismiss(); // Dismiss the loading dialog
 
-	    } catch (Exception e) {
-		new Handler().post(new Runnable() {
+	    } catch (JSONException e) {
+		new Handler(Looper.getMainLooper()).post(new Runnable() {
 		    @Override
 		    public void run() {
 			Toast.makeText(getApplicationContext(), "Failed to request user data", Toast.LENGTH_SHORT).show();

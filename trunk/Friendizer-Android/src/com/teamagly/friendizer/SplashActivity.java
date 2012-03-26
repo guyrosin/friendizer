@@ -1,7 +1,5 @@
 package com.teamagly.friendizer;
 
-import java.util.Date;
-
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -46,10 +44,11 @@ public class SplashActivity extends Activity {
 	    logout();
 
 	mHandler = new Handler();
+	Utility.getInstance().imageLoader = new ImageLoader(getApplicationContext());
 	// Create the Facebook object using the app ID.
-	Utility.facebook = new Facebook(APP_ID);
+	Utility.getInstance().facebook = new Facebook(APP_ID);
 	// Instantiate the asyncrunner object for asynchronous api calls.
-	Utility.mAsyncRunner = new AsyncFacebookRunner(Utility.facebook);
+	Utility.getInstance().mAsyncRunner = new AsyncFacebookRunner(Utility.getInstance().facebook);
 
 	// Listener for the login button
 	final ImageView loginButton = (ImageView) findViewById(R.id.loginButton);
@@ -74,25 +73,25 @@ public class SplashActivity extends Activity {
 	String access_token = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).getString("access_token", null);
 	long expires = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).getLong("access_expires", 0);
 	if (access_token != null) {
-	    Utility.facebook.setAccessToken(access_token);
+	    Utility.getInstance().facebook.setAccessToken(access_token);
 	}
 	if (expires != 0) {
-	    Utility.facebook.setAccessExpires(expires);
+	    Utility.getInstance().facebook.setAccessExpires(expires);
 	}
 
 	// Toast.makeText(getApplicationContext(), "Session is " + Utility.facebook.isSessionValid(), Toast.LENGTH_SHORT).show();
 	/*
 	 * Only call authorize if the access_token has expired.
 	 */
-	if (!Utility.facebook.isSessionValid()) {
+	if (!Utility.getInstance().facebook.isSessionValid()) {
 
-	    Utility.facebook.authorize(this, new String[] { "user_activities", "user_checkins", "user_interests", "user_likes",
-		    "user_birthday", "friends_online_presence", "friends_birthday" }, new DialogListener() {
+	    Utility.getInstance().facebook.authorize(this, new String[] { "user_activities", "user_checkins", "user_interests",
+		    "user_likes", "user_birthday", "friends_online_presence", "friends_birthday" }, new DialogListener() {
 		@Override
 		public void onComplete(Bundle values) {
 		    SharedPreferences.Editor editor = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).edit();
-		    editor.putString("access_token", Utility.facebook.getAccessToken());
-		    editor.putLong("access_expires", Utility.facebook.getAccessExpires());
+		    editor.putString("access_token", Utility.getInstance().facebook.getAccessToken());
+		    editor.putLong("access_expires", Utility.getInstance().facebook.getAccessExpires());
 		    editor.commit();
 		    requestUserData();
 		}
@@ -122,7 +121,7 @@ public class SplashActivity extends Activity {
 	    Editor e = getSharedPreferences(Utility.PREFS_NAME, MODE_PRIVATE).edit();
 	    e.clear();
 	    e.commit();
-	    Utility.facebook.logout(getBaseContext());
+	    Utility.getInstance().facebook.logout(getBaseContext());
 	} catch (Exception e) {
 	    Log.v("Splash", "ERROR: " + e.getMessage());
 	}
@@ -143,7 +142,7 @@ public class SplashActivity extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	super.onActivityResult(requestCode, resultCode, data);
-	Utility.facebook.authorizeCallback(requestCode, resultCode, data);
+	Utility.getInstance().facebook.authorizeCallback(requestCode, resultCode, data);
     }
 
     /*
@@ -166,7 +165,7 @@ public class SplashActivity extends Activity {
 	// Send a new request only if there are none currently
 	if ((userRequestListener == null) || (!userRequestListener.completed))
 	    userRequestListener = new UserRequestListener();
-	Utility.mAsyncRunner.request("me", params, userRequestListener);
+	Utility.getInstance().mAsyncRunner.request("me", params, userRequestListener);
     }
 
     /*
@@ -180,30 +179,17 @@ public class SplashActivity extends Activity {
 	    JSONObject jsonObject;
 	    try {
 		jsonObject = new JSONObject(response);
-
-		final String picURL = jsonObject.getString("picture");
-		Utility.userName = jsonObject.getString("name");
+		final FBUserInfo userInfo = new FBUserInfo(jsonObject);
+		Utility.getInstance().fbUserInfo = userInfo;
 		mHandler.post(new Runnable() {
 		    @Override
 		    public void run() {
-			Toast.makeText(getApplicationContext(), "Welcome " + Utility.userName + "!", Toast.LENGTH_LONG).show();
-		    }
-		});
-		Utility.firstName = jsonObject.getString("first_name");
-		long userID = jsonObject.getLong("id");
-		String birthday = jsonObject.getString("birthday");
-		Utility.gender = jsonObject.getString("gender");
-		Utility.age = Utility.calcAge(new Date(birthday));
-
-		mHandler.post(new Runnable() {
-		    @Override
-		    public void run() {
-			Utility.userPic = Utility.getBitmap(picURL);
+			Toast.makeText(getApplicationContext(), "Welcome " + userInfo.name + "!", Toast.LENGTH_LONG).show();
 		    }
 		});
 
 		// Register/login
-		ServerFacade.register(userID);
+		ServerFacade.register(userInfo.id);
 
 		dialog.dismiss(); // Dismiss the loading dialog
 		// Continue to the main activity

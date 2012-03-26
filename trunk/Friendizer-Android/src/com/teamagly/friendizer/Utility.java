@@ -1,149 +1,39 @@
 package com.teamagly.friendizer;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Hashtable;
-
-import org.json.JSONObject;
-
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
 
 import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
-import android.net.http.AndroidHttpClient;
 import android.provider.MediaStore;
 
 public class Utility extends Application {
 
-    public static Facebook facebook;
-    public static AsyncFacebookRunner mAsyncRunner;
-    public static JSONObject mFriendsList;
-    public static FriendsGetProfilePics model = new FriendsGetProfilePics();;
-    public static AndroidHttpClient httpclient = null;
-    public static Hashtable<String, String> currentPermissions = new Hashtable<String, String>();
-    static Bitmap userPic;
-    static String userName;
-    static String firstName;
-    static String age;
-    static String gender;
-    static UserInfo userInfo;
+    Facebook facebook;
+    AsyncFacebookRunner mAsyncRunner;
+    FBUserInfo fbUserInfo;
+    UserInfo userInfo;
+    ImageLoader imageLoader;
 
-    private static int MAX_IMAGE_DIMENSION = 720;
+    // private static int MAX_IMAGE_DIMENSION = 720;
     public static final String PREFS_NAME = "FriendizerPreferences";
     public static int DEFAULT_DISTANCE = 1000;
 
-    public static Bitmap getBitmap(String url) {
-	Bitmap bm = null;
-	try {
-	    URL aURL = new URL(url);
-	    URLConnection conn = aURL.openConnection();
-	    conn.connect();
-	    InputStream is = conn.getInputStream();
-	    BufferedInputStream bis = new BufferedInputStream(is);
-	    bm = BitmapFactory.decodeStream(new FlushedInputStream(is));
-	    bis.close();
-	    is.close();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	} finally {
-	    if (httpclient != null) {
-		httpclient.close();
-	    }
-	}
-	return bm;
+    private Utility() {
     }
 
-    static class FlushedInputStream extends FilterInputStream {
-	public FlushedInputStream(InputStream inputStream) {
-	    super(inputStream);
-	}
-
-	@Override
-	public long skip(long n) throws IOException {
-	    long totalBytesSkipped = 0L;
-	    while (totalBytesSkipped < n) {
-		long bytesSkipped = in.skip(n - totalBytesSkipped);
-		if (bytesSkipped == 0L) {
-		    int b = read();
-		    if (b < 0) {
-			break; // we reached EOF
-		    } else {
-			bytesSkipped = 1; // we read one byte
-		    }
-		}
-		totalBytesSkipped += bytesSkipped;
-	    }
-	    return totalBytesSkipped;
-	}
+    private static class SingletonHolder {
+	public static final Utility instance = new Utility();
     }
 
-    public static byte[] scaleImage(Context context, Uri photoUri) throws IOException {
-	InputStream is = context.getContentResolver().openInputStream(photoUri);
-	BitmapFactory.Options dbo = new BitmapFactory.Options();
-	dbo.inJustDecodeBounds = true;
-	BitmapFactory.decodeStream(is, null, dbo);
-	is.close();
-
-	int rotatedWidth, rotatedHeight;
-	int orientation = getOrientation(context, photoUri);
-
-	if (orientation == 90 || orientation == 270) {
-	    rotatedWidth = dbo.outHeight;
-	    rotatedHeight = dbo.outWidth;
-	} else {
-	    rotatedWidth = dbo.outWidth;
-	    rotatedHeight = dbo.outHeight;
-	}
-
-	Bitmap srcBitmap;
-	is = context.getContentResolver().openInputStream(photoUri);
-	if (rotatedWidth > MAX_IMAGE_DIMENSION || rotatedHeight > MAX_IMAGE_DIMENSION) {
-	    float widthRatio = ((float) rotatedWidth) / ((float) MAX_IMAGE_DIMENSION);
-	    float heightRatio = ((float) rotatedHeight) / ((float) MAX_IMAGE_DIMENSION);
-	    float maxRatio = Math.max(widthRatio, heightRatio);
-
-	    // Create the bitmap from file
-	    BitmapFactory.Options options = new BitmapFactory.Options();
-	    options.inSampleSize = (int) maxRatio;
-	    srcBitmap = BitmapFactory.decodeStream(is, null, options);
-	} else {
-	    srcBitmap = BitmapFactory.decodeStream(is);
-	}
-	is.close();
-
-	/*
-	 * if the orientation is not 0 (or -1, which means we don't know), we have to do a rotation.
-	 */
-	if (orientation > 0) {
-	    Matrix matrix = new Matrix();
-	    matrix.postRotate(orientation);
-
-	    srcBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
-	}
-
-	String type = context.getContentResolver().getType(photoUri);
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	if (type.equals("image/png")) {
-	    srcBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-	} else if (type.equals("image/jpg") || type.equals("image/jpeg")) {
-	    srcBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-	}
-	byte[] bMapArray = baos.toByteArray();
-	baos.close();
-	return bMapArray;
+    public static Utility getInstance() {
+	return SingletonHolder.instance;
     }
 
     public static int getOrientation(Context context, Uri photoUri) {
@@ -157,6 +47,21 @@ public class Utility extends Application {
 
 	cursor.moveToFirst();
 	return cursor.getInt(0);
+    }
+
+    // Taken from LazyList
+    public static void CopyStream(InputStream is, OutputStream os) {
+	final int buffer_size = 1024;
+	try {
+	    byte[] bytes = new byte[buffer_size];
+	    for (;;) {
+		int count = is.read(bytes, 0, buffer_size);
+		if (count == -1)
+		    break;
+		os.write(bytes, 0, count);
+	    }
+	} catch (Exception ex) {
+	}
     }
 
     public static String calcAge(Date birthday) {
