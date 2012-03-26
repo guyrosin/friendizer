@@ -16,7 +16,7 @@ public final class ServerFacade {
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	in.close();
 	// Get the user's details
-	Utility.userInfo = userDetails(userID);
+	Utility.getInstance().userInfo = userDetails(userID);
     }
 
     public static UserInfo userDetails(long userID) throws Exception {

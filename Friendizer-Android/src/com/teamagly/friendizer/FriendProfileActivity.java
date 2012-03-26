@@ -42,8 +42,8 @@ public class FriendProfileActivity extends Activity {
 	ageTitle = (TextView) findViewById(R.id.age_title);
 	gender = (TextView) findViewById(R.id.gender);
 
-	if (userPic != null)
-	    userPic.setImageBitmap(Utility.getBitmap(intent.getStringExtra("picture")));
+	if (intent.hasExtra("picture"))
+	    Utility.getInstance().imageLoader.displayImage(intent.getStringExtra("picture"), userPic);
 	name.setText(intent.getStringExtra("name"));
 	String genderStr = "";
 	if (intent.hasExtra("gender"))
@@ -80,7 +80,7 @@ public class FriendProfileActivity extends Activity {
 	    btn1.setOnClickListener(new View.OnClickListener() {
 		public void onClick(View v) {
 		    try {
-			ServerFacade.buy(Utility.userInfo.getId(), fbid);
+			ServerFacade.buy(Utility.getInstance().userInfo.getId(), fbid);
 		    } catch (Exception e) {
 			Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
 		    }

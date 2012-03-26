@@ -37,20 +37,20 @@ public class MyProfileActivity extends Activity {
 	ownerName = (TextView) MyProfileActivity.this.findViewById(R.id.owner_name);
 	ownerPic = (ImageView) MyProfileActivity.this.findViewById(R.id.owner_pic);
 
-	if (userPic != null)
-	    userPic.setImageBitmap(Utility.userPic);
-	userName.setText(Utility.userName);
-	age.setText(Utility.age);
-	gender.setText(Utility.gender);
-	if (Utility.userInfo != null) {
-	    value.setText(String.valueOf(Utility.userInfo.getValue()));
-	    money.setText(String.valueOf(Utility.userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.userInfo.getOwnsList().length));
+	Utility.getInstance().imageLoader.displayImage(Utility.getInstance().fbUserInfo.picURL, userPic);
+	userName.setText(Utility.getInstance().fbUserInfo.name);
+	age.setText(Utility.getInstance().fbUserInfo.age);
+	gender.setText(Utility.getInstance().fbUserInfo.gender);
+	if (Utility.getInstance().userInfo != null) {
+	    value.setText(String.valueOf(Utility.getInstance().userInfo.getValue()));
+	    money.setText(String.valueOf(Utility.getInstance().userInfo.getMoney()));
+	    owns.setText(String.valueOf(Utility.getInstance().userInfo.getOwnsList().length));
 
 	    // Get the owner's name and picture from Facebook
 	    Bundle params = new Bundle();
 	    params.putString("fields", "name, picture");
-	    Utility.mAsyncRunner.request(String.valueOf(Utility.userInfo.getOwner()), params, new UserRequestListener());
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwner()), params,
+		    new UserRequestListener());
 	}
     }
 
@@ -62,21 +62,21 @@ public class MyProfileActivity extends Activity {
     protected void onResume() {
 	super.onResume();
 	// Update the views (if necessary)
-	if (userPic != null)
-	    userPic.setImageBitmap(Utility.userPic);
-	userName.setText(Utility.userName);
-	age.setText(Utility.age);
-	gender.setText(Utility.gender);
+	Utility.getInstance().imageLoader.displayImage(Utility.getInstance().fbUserInfo.picURL, userPic);
+	userName.setText(Utility.getInstance().fbUserInfo.name);
+	age.setText(Utility.getInstance().fbUserInfo.age);
+	gender.setText(Utility.getInstance().fbUserInfo.gender);
 
-	if (Utility.userInfo != null) {
-	    value.setText(String.valueOf(Utility.userInfo.getValue()));
-	    money.setText(String.valueOf(Utility.userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.userInfo.getOwnsList().length));
+	if (Utility.getInstance().userInfo != null) {
+	    value.setText(String.valueOf(Utility.getInstance().userInfo.getValue()));
+	    money.setText(String.valueOf(Utility.getInstance().userInfo.getMoney()));
+	    owns.setText(String.valueOf(Utility.getInstance().userInfo.getOwnsList().length));
 
 	    // Get the owner's name and picture from Facebook
 	    Bundle params = new Bundle();
 	    params.putString("fields", "name, picture");
-	    Utility.mAsyncRunner.request(String.valueOf(Utility.userInfo.getOwner()), params, new UserRequestListener());
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwner()), params,
+		    new UserRequestListener());
 	}
     }
 
@@ -97,7 +97,7 @@ public class MyProfileActivity extends Activity {
 		new Handler().post(new Runnable() {
 		    @Override
 		    public void run() {
-			ownerPic.setImageBitmap(Utility.getBitmap(picURL));
+			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic);
 		    }
 		});
 

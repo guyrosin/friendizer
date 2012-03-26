@@ -7,30 +7,22 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
-import android.graphics.Bitmap;
-
 /**
  * @author Guy
  * 
  */
 public class FBUserInfo {
-    String id;
+    long id;
+    String firstName;
     String name;
     String gender;
     String age;
-    Bitmap pic;
     String picURL;
 
     public FBUserInfo(final JSONObject jsonObject) {
-	// Note we don't load the pic here! (It has to be done in the main UI thread)
-	id = jsonObject.optString("id");
+	id = jsonObject.optLong("id");
 	picURL = jsonObject.optString("picture");
-	// new Handler(Looper.getMainLooper()).post(new Runnable() { // -- It's not working
-	// @Override
-	// public void run() {
-	// pic = Utility.model.getImage(jsonObject.optString("id"), picURL);
-	// }
-	// });
+	firstName = jsonObject.optString("first_name");
 	name = jsonObject.optString("name");
 	gender = jsonObject.optString("gender");
 
