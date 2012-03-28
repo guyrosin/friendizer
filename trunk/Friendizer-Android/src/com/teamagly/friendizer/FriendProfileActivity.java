@@ -3,8 +3,6 @@
  */
 package com.teamagly.friendizer;
 
-import java.util.Arrays;
-
 import com.teamagly.friendizer.R;
 import android.app.Activity;
 import android.content.Intent;
@@ -42,31 +40,28 @@ public class FriendProfileActivity extends Activity {
 	ageTitle = (TextView) findViewById(R.id.age_title);
 	gender = (TextView) findViewById(R.id.gender);
 
-	if (intent.hasExtra("picture"))
-	    Utility.getInstance().imageLoader.displayImage(intent.getStringExtra("picture"), userPic);
-	name.setText(intent.getStringExtra("name"));
+	UserInfo userInfo = (UserInfo) intent.getSerializableExtra("user");
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic);
+	name.setText(userInfo.name);
 	String genderStr = "";
-	if (intent.hasExtra("gender"))
-	    genderStr = intent.getStringExtra("gender");
+	genderStr = userInfo.gender;
 	// Capitalize the first letter
 	if (genderStr.equals("male"))
 	    genderStr = "Male";
 	else if (genderStr.equals("female"))
 	    genderStr = "Female";
-	else { // No gender
-	    ageTitle.setText("age: "); // Remove the separator from the age title
-	}
+	else
+	    ageTitle.setText("age: "); // No gender -> remove the separator from the age title
 	gender.setText(genderStr);
-	age.setText(intent.getStringExtra("age"));
+	age.setText(userInfo.age);
 	if (age.getText().length() == 0)
 	    ageTitle.setText("");
-	fbid = intent.getLongExtra("fbid", 0);
-	long[] ownsList = intent.getLongArrayExtra("ownsList");
+	fbid = userInfo.id;
 
 	final Button btn1 = (Button) findViewById(R.id.btn1);
 	final Button btn2 = (Button) findViewById(R.id.btn2);
 
-	if (Arrays.asList(ownsList).contains(fbid)) { // If I own this user
+	if (userInfo.ownerID == Utility.getInstance().userInfo.id) { // If I own this user
 	    // Define the first button
 	    btn1.setText("Chat");
 	    btn1.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +75,7 @@ public class FriendProfileActivity extends Activity {
 	    btn1.setOnClickListener(new View.OnClickListener() {
 		public void onClick(View v) {
 		    try {
-			ServerFacade.buy(Utility.getInstance().userInfo.getId(), fbid);
+			ServerFacade.buy(Utility.getInstance().userInfo.id, fbid);
 		    } catch (Exception e) {
 			Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
 		    }

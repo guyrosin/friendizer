@@ -35,10 +35,6 @@ public class SplashActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.splash);
-	if (!isOnline()) {
-	    ((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
-	    return;
-	}
 	Intent intent = getIntent();
 	if (intent.getBooleanExtra("logout", false))
 	    logout();
@@ -67,6 +63,10 @@ public class SplashActivity extends Activity {
     protected void onResume() {
 	super.onResume();
 
+	if (!isOnline()) {
+	    ((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
+	    return;
+	}
 	/*
 	 * Get existing access_token if any
 	 */
@@ -79,7 +79,6 @@ public class SplashActivity extends Activity {
 	    Utility.getInstance().facebook.setAccessExpires(expires);
 	}
 
-	// Toast.makeText(getApplicationContext(), "Session is " + Utility.facebook.isSessionValid(), Toast.LENGTH_SHORT).show();
 	/*
 	 * Only call authorize if the access_token has expired.
 	 */
@@ -156,7 +155,7 @@ public class SplashActivity extends Activity {
     }
 
     /*
-     * Request user name, and picture to show on the main screen.
+     * Request user details from Facebook
      */
     public void requestUserData() {
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true); // Show a loading dialog
@@ -179,8 +178,8 @@ public class SplashActivity extends Activity {
 	    JSONObject jsonObject;
 	    try {
 		jsonObject = new JSONObject(response);
-		final FBUserInfo userInfo = new FBUserInfo(jsonObject);
-		Utility.getInstance().fbUserInfo = userInfo;
+		final UserInfo userInfo = new UserInfo(jsonObject);
+		Utility.getInstance().userInfo = userInfo;
 		mHandler.post(new Runnable() {
 		    @Override
 		    public void run() {

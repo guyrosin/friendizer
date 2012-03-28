@@ -2,14 +2,15 @@ package com.teamagly.friendizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
-import android.app.Dialog;
+
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,7 +30,8 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
     private boolean list_type;
     private GridView gridView;
     private FriendsAdapter friendsAdapter;
-    private ArrayList<FBUserInfo> usersList = new ArrayList<FBUserInfo>();
+    private ArrayList<UserInfo> usersList = new ArrayList<UserInfo>();
+    private int sortBy = 0;
 
     /*
      * (non-Javadoc)
@@ -45,9 +47,7 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	list_type = type;
 	updateListType(type);
-	Bundle params = new Bundle();
-	params.putString("fields", "name, picture, birthday, gender");
-	Utility.getInstance().mAsyncRunner.request("me/friends", params, new UserRequestListener());
+	requestConnections();
     }
 
     /*
@@ -61,6 +61,18 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	if (type != list_type) { // A change occurred -> redraw the view
 	    list_type = type;
 	    updateListType(type);
+	}
+    }
+
+    /**
+     * Clears the current users list and request the information from Facebook
+     */
+    protected void requestConnections() {
+	usersList.clear();
+	for (long fbid : Utility.getInstance().userInfo.ownsList) { // Request the details of each user I own
+	    Bundle params = new Bundle();
+	    params.putString("fields", "name, picture, birthday, gender");
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener());
 	}
     }
 
@@ -111,11 +123,37 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	    startActivity(intent);
 	    return true;
 	case R.id.sort:
-	    Dialog dialog = new Dialog(this);
-	    // TODO: options to sort the friends
-	    dialog.setContentView(R.layout.about_layout);
-	    dialog.setTitle("About Us");
-	    dialog.show();
+	    final String[] options = { "Alphabeth", "Value", "Matching" };
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Sort By");
+	    builder.setItems(options, new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int item) {
+		    if (item != sortBy) {
+			switch (item) {
+			case 0:
+			    Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+			    break;
+			case 1:
+			    Collections.sort(usersList, (new Comparators()).new ValueComparator());
+			    break;
+			case 2:
+			    Collections.sort(usersList, (new Comparators()).new MatchingComparator());
+			    break;
+			}
+			sortBy = item;
+			runOnUiThread(new Runnable() {
+			    public void run() {
+				friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
+			    }
+			});
+		    }
+		}
+	    });
+	    AlertDialog alert = builder.create();
+	    alert.show();
+	    return true;
+	case R.id.refresh:
+	    requestConnections();
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
@@ -128,33 +166,40 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
      */
     @Override
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-	FBUserInfo userInfo = usersList.get(position);
+	UserInfo userInfo = usersList.get(position);
 	// Create an intent with the friend's data
 	Intent intent = new Intent().setClass(ConnectionsActivity.this, FriendProfileActivity.class);
-	intent.putExtra("fbid", userInfo.id);
-	intent.putExtra("name", userInfo.name);
-	intent.putExtra("gender", userInfo.gender);
-	intent.putExtra("picture", userInfo.picURL);
-	intent.putExtra("age", userInfo.age);
+	intent.putExtra("user", userInfo);
 	startActivity(intent);
     }
 
     /*
-     * Callback for fetching current user's name, picture, uid.
+     * Callback for fetching a user's name, picture, uid.
      */
     public class UserRequestListener extends BaseRequestListener {
 
 	@Override
 	public void onComplete(final String response, final Object state) {
 	    try {
-		JSONArray jsonArray = new JSONObject(response).getJSONArray("data");
-		// Convert the JSON array to a regular Java list
-		usersList.clear();
-		int len = jsonArray.length();
-		for (int i = 0; i < len; i++)
-		    usersList.add(new FBUserInfo(jsonArray.getJSONObject(i)));
+		JSONObject jsonObject = new JSONObject(response);
+		UserInfo userInfo = new UserInfo(jsonObject);
+		usersList.add(userInfo);
+		final int len = usersList.size();
 		// Sort the list alphabetically
 		Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+		// Load each user's details from our servers, in the background
+		new Handler(Looper.getMainLooper()).post(new Runnable() {
+		    @Override
+		    public void run() {
+			for (int i = 0; i < len; i++) {
+			    try {
+				usersList.get(i).updateFriendizerData(ServerFacade.userDetails(usersList.get(i).id));
+			    } catch (Exception e) {
+				e.printStackTrace();
+			    }
+			}
+		    }
+		});
 		runOnUiThread(new Runnable() {
 		    public void run() {
 			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)

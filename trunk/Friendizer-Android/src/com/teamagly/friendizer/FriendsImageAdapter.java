@@ -22,7 +22,7 @@ public class FriendsImageAdapter extends FriendsAdapter {
      * @param textViewResourceId
      * @param objects
      */
-    public FriendsImageAdapter(Context context, int textViewResourceId, List<FBUserInfo> objects) {
+    public FriendsImageAdapter(Context context, int textViewResourceId, List<UserInfo> objects) {
 	super(context, textViewResourceId, objects);
     }
 
@@ -41,8 +41,8 @@ public class FriendsImageAdapter extends FriendsAdapter {
 	} else
 	    imageView = (ImageView) convertView;
 
-	FBUserInfo user = getItem(position);
-	Utility.getInstance().imageLoader.displayImage(user.picURL, imageView);
+	UserInfo userInfo = getItem(position);
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, imageView);
 	return imageView;
     }
 

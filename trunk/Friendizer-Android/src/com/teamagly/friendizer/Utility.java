@@ -17,7 +17,6 @@ public class Utility extends Application {
 
     Facebook facebook;
     AsyncFacebookRunner mAsyncRunner;
-    FBUserInfo fbUserInfo;
     UserInfo userInfo;
     ImageLoader imageLoader;
 
