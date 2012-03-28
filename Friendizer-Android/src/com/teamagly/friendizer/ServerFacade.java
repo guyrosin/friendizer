@@ -15,8 +15,11 @@ public final class ServerFacade {
 	URL url = new URL(serverAddress + "register?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	in.close();
-	// Get the user's details
-	Utility.getInstance().userInfo = userDetails(userID);
+	// Get the user's details and update the userInfo object
+	if (Utility.getInstance().userInfo == null)
+	    Utility.getInstance().userInfo = userDetails(userID);
+	else
+	    Utility.getInstance().userInfo.updateFriendizerData(userDetails(userID));
     }
 
     public static UserInfo userDetails(long userID) throws Exception {

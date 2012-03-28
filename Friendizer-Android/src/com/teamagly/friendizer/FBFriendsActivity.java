@@ -61,12 +61,8 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	    JSONObject jsonObject = jsonArray.getJSONObject(position);
 	    // Create an intent with the friend's data
 	    Intent intent = new Intent().setClass(FBFriendsActivity.this, FriendProfileActivity.class);
-	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
-	    intent.putExtra("fbid", userInfo.id);
-	    intent.putExtra("name", userInfo.name);
-	    intent.putExtra("picture", userInfo.picURL);
-	    intent.putExtra("gender", userInfo.gender);
-	    intent.putExtra("age", userInfo.age);
+	    UserInfo userInfo = new UserInfo(jsonObject);
+	    intent.putExtra("user", userInfo);
 	    startActivity(intent);
 	} catch (JSONException e) {
 	    showToast("Error: " + e.getMessage());
@@ -135,7 +131,7 @@ public class FBFriendsActivity extends ListActivity implements OnItemClickListen
 	    }
 
 	    ViewHolder holder = (ViewHolder) hView.getTag();
-	    FBUserInfo userInfo = new FBUserInfo(jsonObject);
+	    UserInfo userInfo = new UserInfo(jsonObject);
 	    Utility.getInstance().imageLoader.displayImage(userInfo.picURL, holder.profile_pic);
 	    holder.name.setText(userInfo.name);
 	    return hView;

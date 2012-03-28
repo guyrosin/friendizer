@@ -1,11 +1,15 @@
 package com.teamagly.friendizer;
 
 import java.util.ArrayList;
+import java.util.Collections;
+
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,11 +26,12 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 public class PeopleRadarActivity extends ListActivity implements OnItemClickListener {
-    // ProgressDialog dialog;
+    ProgressDialog dialog;
     private boolean list_type;
     private GridView gridView;
-    private ArrayList<FBUserInfo> usersList = new ArrayList<FBUserInfo>();
-    private ArrayAdapter<FBUserInfo> listAdapter;
+    private ArrayList<UserInfo> usersList = new ArrayList<UserInfo>();
+    private ArrayAdapter<UserInfo> peopleAdapter;
+    private int sortBy = 4; // Default order is by matching
 
     /*
      * (non-Javadoc)
@@ -38,22 +43,10 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	setContentView(R.layout.connections_layout);
 	gridView = (GridView) findViewById(R.id.gridview);
 
-	// dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	list_type = type;
 	updateListType(type);
-	try {
-	    long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId(), Utility.DEFAULT_DISTANCE);
-	    for (long fbid : nearbyUsers) { // Request the details of each nearby user
-		Bundle params = new Bundle();
-		params.putString("fields", "name, picture, birthday, gender");
-		Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener(this));
-	    }
-	} catch (Exception e) {
-	    showToast("An error occured");
-	    // dialog.dismiss();
-	    e.printStackTrace();
-	}
+	requestPeople();
     }
 
     /*
@@ -70,16 +63,36 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	}
     }
 
+    /**
+     * Clears the current users list and request the information from Facebook
+     */
+    protected void requestPeople() {
+	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
+	usersList.clear();
+	try {
+	    long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.id, Utility.DEFAULT_DISTANCE);
+	    for (long fbid : nearbyUsers) { // Request the details of each nearby user
+		Bundle params = new Bundle();
+		params.putString("fields", "name, picture, birthday, gender");
+		Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener(this));
+	    }
+	} catch (Exception e) {
+	    showToast("An error occured");
+	    e.printStackTrace();
+	}
+	dialog.dismiss();
+    }
+
     protected void updateListType(boolean type) {
 	if (type) { // => show in a list
 	    gridView.setAdapter(null);
-	    listAdapter = new FriendsListAdapter(this, R.layout.connection_list_item, usersList);
+	    peopleAdapter = new FriendsListAdapter(this, R.layout.connection_list_item, usersList);
 	    getListView().setOnItemClickListener(this);
-	    getListView().setAdapter(listAdapter);
+	    getListView().setAdapter(peopleAdapter);
 	} else { // => show in a GridView
 	    getListView().setAdapter(null);
-	    listAdapter = new FriendsImageAdapter(this, 0, usersList);
-	    gridView.setAdapter(listAdapter);
+	    peopleAdapter = new FriendsImageAdapter(this, 0, usersList);
+	    gridView.setAdapter(peopleAdapter);
 	    gridView.setOnItemClickListener(this);
 	}
     }
@@ -91,7 +104,7 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
     @Override
     protected void onPause() {
 	super.onPause();
-	// dialog.dismiss(); // Dismiss the dialog
+	dialog.dismiss(); // Dismiss the dialog
     }
 
     /*
@@ -128,11 +141,40 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	    startActivity(intent);
 	    return true;
 	case R.id.sort:
-	    Dialog dialog = new Dialog(this);
-	    // TODO: options to sort the friends
-	    dialog.setContentView(R.layout.about_layout);
-	    dialog.setTitle("About Us");
-	    dialog.show();
+	    final String[] options = { "Alphabeth", "Value", "Matching", "Distance" };
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    builder.setTitle("Sort By");
+	    builder.setItems(options, new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int item) {
+		    if (item != sortBy) {
+			switch (item) {
+			case 0:
+			    Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+			    break;
+			case 1:
+			    Collections.sort(usersList, (new Comparators()).new ValueComparator());
+			    break;
+			case 2:
+			    Collections.sort(usersList, (new Comparators()).new MatchingComparator());
+			    break;
+			case 3:
+			    Collections.sort(usersList, (new Comparators()).new DistanceComparator());
+			    break;
+			}
+			sortBy = item;
+			runOnUiThread(new Runnable() {
+			    public void run() {
+				peopleAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
+			    }
+			});
+		    }
+		}
+	    });
+	    AlertDialog alert = builder.create();
+	    alert.show();
+	    return true;
+	case R.id.refresh:
+	    requestPeople();
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
@@ -147,12 +189,8 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 	// Create an intent with the dude's data
 	Intent intent = new Intent().setClass(PeopleRadarActivity.this, FriendProfileActivity.class);
-	FBUserInfo userInfo = usersList.get(position);
-	intent.putExtra("fbid", userInfo.id);
-	intent.putExtra("name", userInfo.name);
-	intent.putExtra("gender", userInfo.gender);
-	intent.putExtra("picture", userInfo.picURL);
-	intent.putExtra("age", userInfo.age);
+	UserInfo userInfo = usersList.get(position);
+	intent.putExtra("user", userInfo);
 	startActivity(intent);
     }
 
@@ -173,7 +211,7 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
     }
 
     /*
-     * Callback for fetching current user's name, picture, uid.
+     * Callback for fetching a user's name, picture, uid.
      */
     public class UserRequestListener extends BaseRequestListener {
 	PeopleRadarActivity curActivity;
@@ -186,11 +224,13 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	public void onComplete(final String response, final Object state) {
 	    try {
 		JSONObject jsonObject = new JSONObject(response);
-		FBUserInfo userInfo = new FBUserInfo(jsonObject);
+		UserInfo userInfo = new UserInfo(jsonObject);
 		usersList.add(userInfo);
+		// Sort the list by matching
+		Collections.sort(usersList, (new Comparators()).new MatchingComparator());
 		runOnUiThread(new Runnable() {
 		    public void run() {
-			listAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
+			peopleAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
 		    }
 		});
 	    } catch (Exception e) {

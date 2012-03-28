@@ -33,6 +33,13 @@ public class ImageLoader {
 
     final int stub_id = R.drawable.stub;
 
+    /**
+     * Fetches the image, from the cache if possible
+     * 
+     * @param url
+     *            URL of an image
+     * @param imageView
+     */
     public void displayImage(String url, ImageView imageView) {
 	imageViews.put(imageView, url);
 	Bitmap bitmap = memoryCache.get(url);
@@ -42,6 +49,19 @@ public class ImageLoader {
 	    queuePhoto(url, imageView);
 	    imageView.setImageResource(stub_id);
 	}
+    }
+
+    /**
+     * Fetches the image from the given URL, and NOT from the cache.
+     * 
+     * @param url
+     *            URL of an image
+     * @param imageView
+     */
+    public void displayNewImage(String url, ImageView imageView) {
+	imageViews.put(imageView, url);
+	queuePhoto(url, imageView);
+	imageView.setImageResource(stub_id);
     }
 
     private void queuePhoto(String url, ImageView imageView) {

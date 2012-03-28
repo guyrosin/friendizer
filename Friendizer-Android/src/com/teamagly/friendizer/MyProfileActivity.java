@@ -1,11 +1,13 @@
 package com.teamagly.friendizer;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,7 +20,7 @@ public class MyProfileActivity extends Activity {
     private TextView money;
     private TextView owns;
     private TextView ownerName;
-    ImageView ownerPic;
+    private ImageView ownerPic;
 
     /*
      * (non-Javadoc)
@@ -37,21 +39,15 @@ public class MyProfileActivity extends Activity {
 	ownerName = (TextView) MyProfileActivity.this.findViewById(R.id.owner_name);
 	ownerPic = (ImageView) MyProfileActivity.this.findViewById(R.id.owner_pic);
 
-	Utility.getInstance().imageLoader.displayImage(Utility.getInstance().fbUserInfo.picURL, userPic);
-	userName.setText(Utility.getInstance().fbUserInfo.name);
-	age.setText(Utility.getInstance().fbUserInfo.age);
-	gender.setText(Utility.getInstance().fbUserInfo.gender);
-	if (Utility.getInstance().userInfo != null) {
-	    value.setText(String.valueOf(Utility.getInstance().userInfo.getValue()));
-	    money.setText(String.valueOf(Utility.getInstance().userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.getInstance().userInfo.getOwnsList().length));
-
-	    // Get the owner's name and picture from Facebook
-	    Bundle params = new Bundle();
-	    params.putString("fields", "name, picture");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwner()), params,
-		    new UserRequestListener());
-	}
+	UserInfo userInfo = Utility.getInstance().userInfo;
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic);
+	userName.setText(userInfo.name);
+	age.setText(userInfo.age);
+	gender.setText(userInfo.gender);
+	value.setText(String.valueOf(userInfo.value));
+	money.setText(String.valueOf(userInfo.money));
+	if (userInfo.ownsList != null)
+	    owns.setText(String.valueOf(userInfo.ownsList.length));
     }
 
     /*
@@ -61,29 +57,78 @@ public class MyProfileActivity extends Activity {
     @Override
     protected void onResume() {
 	super.onResume();
-	// Update the views (if necessary)
-	Utility.getInstance().imageLoader.displayImage(Utility.getInstance().fbUserInfo.picURL, userPic);
-	userName.setText(Utility.getInstance().fbUserInfo.name);
-	age.setText(Utility.getInstance().fbUserInfo.age);
-	gender.setText(Utility.getInstance().fbUserInfo.gender);
+	// Reload the user's details from our servers (in the background)
+	new Handler().post(new Runnable() {
+	    @Override
+	    public void run() {
+		try {
+		    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo.id));
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+		// Update the views
+		UserInfo userInfo = Utility.getInstance().userInfo;
+		value.setText(String.valueOf(userInfo.value));
+		money.setText(String.valueOf(userInfo.money));
+		if (userInfo.ownsList != null)
+		    owns.setText(String.valueOf(userInfo.ownsList.length));
+	    }
+	});
 
-	if (Utility.getInstance().userInfo != null) {
-	    value.setText(String.valueOf(Utility.getInstance().userInfo.getValue()));
-	    money.setText(String.valueOf(Utility.getInstance().userInfo.getMoney()));
-	    owns.setText(String.valueOf(Utility.getInstance().userInfo.getOwnsList().length));
+	// Get the owner's name and picture from Facebook
+	Bundle params = new Bundle();
+	params.putString("fields", "name, picture");
+	Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.ownerID), params,
+		new OwnerRequestListener());
+    }
 
-	    // Get the owner's name and picture from Facebook
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case R.id.refresh:
+	    // Reload the user's details from Facebook
 	    Bundle params = new Bundle();
-	    params.putString("fields", "name, picture");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwner()), params,
-		    new UserRequestListener());
+	    params.putString("fields", "name, first_name, picture, birthday, gender");
+	    Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
+	    onResume();
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
 	}
     }
 
     /*
-     * Callback for fetching owner's details
+     * Callback for fetching user's details from Facebook
      */
     public class UserRequestListener extends BaseRequestListener {
+
+	@Override
+	public void onComplete(final String response, final Object state) {
+	    JSONObject jsonObject;
+	    try {
+		jsonObject = new JSONObject(response);
+		final UserInfo userInfo = new UserInfo(jsonObject);
+		// Update the user's details from Facebook
+		Utility.getInstance().userInfo.updateFacebookData(userInfo);
+		// Update the views (has to be done from the main thread)
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic);
+			userName.setText(userInfo.name);
+			age.setText(userInfo.age);
+			gender.setText(userInfo.gender);
+		    }
+		});
+	    } catch (JSONException e) {
+		e.printStackTrace();
+	    }
+	}
+    }
+
+    /*
+     * Callback for fetching owner's details from Facebook
+     */
+    public class OwnerRequestListener extends BaseRequestListener {
 
 	@Override
 	public void onComplete(final String response, final Object state) {
