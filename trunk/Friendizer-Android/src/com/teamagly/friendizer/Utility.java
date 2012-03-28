@@ -23,8 +23,14 @@ public class Utility extends Application {
     // private static int MAX_IMAGE_DIMENSION = 720;
     public static final String PREFS_NAME = "FriendizerPreferences";
     public static int DEFAULT_DISTANCE = 1000;
+    public static final String APP_ID = "273844699335189";
 
     private Utility() {
+	// Create the Facebook object using the app ID.
+	facebook = new Facebook(APP_ID);
+	// Instantiate the asyncrunner object for asynchronous api calls.
+	mAsyncRunner = new AsyncFacebookRunner(facebook);
+	imageLoader = new ImageLoader(this);
     }
 
     private static class SingletonHolder {
