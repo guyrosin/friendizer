@@ -9,28 +9,28 @@
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/friendizer_logo"
         android:gravity="center_horizontal"
         android:paddingTop="20dp"
-        android:textSize="36sp"
         android:src="@drawable/logo"
-        android:contentDescription="@string/friendizer_logo" />
+        android:textSize="36sp" />
 
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:contentDescription="@string/people_radar"
         android:paddingTop="10dp"
         android:scaleType="center"
-        android:src="@drawable/radar_icon"
-        android:contentDescription="@string/people_radar" />
+        android:src="@drawable/radar_icon" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/loading"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <ImageView
@@ -38,8 +38,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:contentDescription="@string/facebook_login"
         android:paddingTop="40dp"
-        android:src="@drawable/facebook_login"
-        android:contentDescription="@string/facebook_login" />
+        android:src="@drawable/facebook_login" />
 
 </LinearLayout>

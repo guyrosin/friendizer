@@ -1,5 +1,6 @@
 package com.teamagly.friendizer;
 
+import com.facebook.android.Util;
 import com.teamagly.friendizer.R;
 import android.app.TabActivity;
 import android.content.Context;
@@ -71,6 +72,20 @@ public class FriendizerActivity extends TabActivity {
 	tabHost.addTab(peopleRadarSpec); // Adding People Radar tab
 	tabHost.addTab(connectionsSpec); // Adding Friends tab
 	tabHost.addTab(myProfileSpec); // Adding My Profile tab
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.ActivityGroup#onResume()
+     */
+    @Override
+    protected void onResume() {
+	// TODO Auto-generated method stub
+	super.onResume();
+
+	if (!Utility.getInstance().facebook.isSessionValid()) {
+	    Util.showAlert(this, "Warning", "You must first log in.");
+	}
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
