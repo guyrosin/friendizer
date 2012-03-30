@@ -23,6 +23,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ConnectionsActivity extends ListActivity implements OnItemClickListener {
@@ -44,6 +46,8 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
 	gridView = (GridView) findViewById(R.id.gridview);
 
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
+	TextView empty = (TextView) findViewById(R.id.forever_alone_text);
+	empty.setText("Forever Alone! (you have no connections)");
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	list_type = type;
 	updateListType(type);
@@ -69,7 +73,13 @@ public class ConnectionsActivity extends ListActivity implements OnItemClickList
      */
     protected void requestConnections() {
 	usersList.clear();
-	for (long fbid : Utility.getInstance().userInfo.ownsList) { // Request the details of each user I own
+	long[] ownsList = Utility.getInstance().userInfo.ownsList;
+	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
+	if (ownsList.length == 0)
+	    empty.setVisibility(View.VISIBLE);
+	else
+	    empty.setVisibility(View.GONE);
+	for (long fbid : ownsList) { // Request the details of each user I own
 	    Bundle params = new Bundle();
 	    params.putString("fields", "name, picture, birthday, gender");
 	    Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener());

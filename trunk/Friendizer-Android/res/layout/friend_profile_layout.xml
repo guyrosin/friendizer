@@ -7,6 +7,7 @@
 
     <LinearLayout
         android:id="@+id/buttons"
+        style="@android:style/ButtonBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -34,14 +35,15 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="3px"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" >
 
             <TextView
                 android:id="@+id/name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:padding="15dip"
+                android:paddingBottom="15dip"
                 android:textSize="18dip" />
 
             <RelativeLayout
@@ -55,7 +57,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
-                    android:layout_marginLeft="20dp"
                     android:contentDescription="Profile Picture" />
 
                 <TextView
@@ -63,25 +64,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
-                    android:layout_marginLeft="26dp"
+                    android:layout_marginLeft="20dp"
                     android:layout_marginRight="2dp"
-                    android:layout_toRightOf="@+id/user_pic"
-                    android:textSize="16sp" />
+                    android:layout_toRightOf="@+id/user_pic" />
 
                 <TextView
                     android:id="@+id/age_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@+id/gender"
-                    android:text=", age: "
-                    android:textSize="16sp" />
+                    android:text=", age: " />
 
                 <TextView
                     android:id="@+id/age"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/age_title"
-                    android:textSize="16sp" />
+                    android:layout_toRightOf="@+id/age_title" />
 
                 <TextView
                     android:id="@+id/value"
@@ -89,8 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/gender"
-                    android:text="Value: 10,000"
-                    android:textSize="16sp" />
+                    android:text="Value: 10,000" />
 
                 <TextView
                     android:id="@+id/money"
@@ -98,8 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/value"
-                    android:text="Money: 20,000"
-                    android:textSize="16sp" />
+                    android:text="Money: 20,000" />
 
                 <TextView
                     android:id="@+id/owns"
@@ -107,8 +103,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/money"
-                    android:text="Owns: 10 people"
-                    android:textSize="16sp" />
+                    android:text="Owns: 10 people" />
             </RelativeLayout>
 
             <TextView
@@ -116,30 +111,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Last achievements:"
-                android:textSize="16sp" />
+                android:text="Last achievements:" />
 
             <ListView
                 android:id="@+id/achievements_list"
                 android:layout_width="wrap_content"
                 android:layout_height="0dip"
                 android:layout_weight="1"
-                android:background="#000000"
                 android:drawSelectorOnTop="false" />
 
             <TextView
                 android:id="@+id/history_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Action History:"
-                android:textSize="16sp" />
+                android:text="Action History:" />
 
             <ListView
                 android:id="@+id/history_list"
                 android:layout_width="wrap_content"
                 android:layout_height="0dip"
                 android:layout_weight="1"
-                android:background="#000000"
                 android:drawSelectorOnTop="false" />
         </LinearLayout>
     </ScrollView>

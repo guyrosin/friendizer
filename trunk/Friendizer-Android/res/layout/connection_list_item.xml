@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:padding="3dip" >
+    android:layout_height="fill_parent" >
 
     <ImageView
         android:id="@+id/profile_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="5dp"
         android:contentDescription="@string/profile_pic"
         android:src="@android:drawable/ic_dialog_info" />
 
@@ -18,11 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="6dp"
+        android:layout_marginLeft="6dp"
         android:layout_toRightOf="@+id/profile_pic"
-        android:textSize="16sp"
+        android:paddingRight="6dp"
+        android:text="Name"
         android:textStyle="bold" />
 
     <TextView
@@ -30,23 +27,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/name"
-        android:text=" age "
-        android:textSize="16sp" />
+        android:text=" age: " />
 
     <TextView
         android:id="@+id/age"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/age_title"
-        android:textSize="16sp" />
+        android:layout_toRightOf="@+id/age_title" />
 
     <TextView
         android:id="@+id/gender"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:layout_toRightOf="@+id/age"
-        android:textSize="16sp" />
+        android:layout_toRightOf="@+id/age" />
 
     <TextView
         android:id="@+id/value_title"
@@ -54,8 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/name"
         android:layout_below="@+id/name"
-        android:text="Value: "
-        android:textSize="16sp" />
+        android:text="Value: " />
 
     <TextView
         android:id="@+id/value"
@@ -63,8 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/value_title"
         android:layout_toRightOf="@+id/value_title"
-        android:text="20,000"
-        android:textSize="16sp" />
+        android:text="20,000" />
 
     <TextView
         android:id="@+id/matching_title"
@@ -72,8 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/value_title"
         android:layout_below="@+id/value_title"
-        android:text="Matching: "
-        android:textSize="16sp" />
+        android:text="Matching: " />
 
     <TextView
         android:id="@+id/matching"
@@ -81,7 +72,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/matching_title"
         android:layout_toRightOf="@+id/matching_title"
-        android:text="80%"
-        android:textSize="16sp" />
+        android:text="80%" />
 
 </RelativeLayout>

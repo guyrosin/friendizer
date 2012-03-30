@@ -5,6 +5,8 @@ package com.teamagly.friendizer;
 
 import java.util.List;
 
+import com.teamagly.friendizer.ImageLoader.Type;
+
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,12 +39,13 @@ public class FriendsImageAdapter extends FriendsAdapter {
 	    imageView = new ImageView(getContext());
 	    imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
 	    imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-	    imageView.setPadding(5, 5, 5, 5);
+	    imageView.setPadding(3, 3, 3, 3);
+	    imageView.setBackgroundResource(R.drawable.image_border);
 	} else
 	    imageView = (ImageView) convertView;
 
 	UserInfo userInfo = getItem(position);
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, imageView);
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, imageView, Type.ROUND_CORNERS);
 	return imageView;
     }
 

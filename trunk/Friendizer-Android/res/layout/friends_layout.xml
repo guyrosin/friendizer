@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:background="#000000"
         android:drawSelectorOnTop="false" />
 
 </LinearLayout>
