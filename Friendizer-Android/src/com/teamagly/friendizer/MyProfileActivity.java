@@ -4,6 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.ImageLoader.Type;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -40,7 +42,7 @@ public class MyProfileActivity extends Activity {
 	ownerPic = (ImageView) MyProfileActivity.this.findViewById(R.id.owner_pic);
 
 	UserInfo userInfo = Utility.getInstance().userInfo;
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic);
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
 	userName.setText(userInfo.name);
 	age.setText(userInfo.age);
 	gender.setText(userInfo.gender);

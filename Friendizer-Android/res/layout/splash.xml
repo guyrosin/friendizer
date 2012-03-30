@@ -12,7 +12,7 @@
         android:contentDescription="@string/friendizer_logo"
         android:gravity="center_horizontal"
         android:paddingTop="20dp"
-        android:src="@drawable/logo"
+        android:src="@drawable/friendizer"
         android:textSize="36sp" />
 
     <ImageView

@@ -23,6 +23,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class PeopleRadarActivity extends ListActivity implements OnItemClickListener {
@@ -42,6 +44,8 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.connections_layout);
 	gridView = (GridView) findViewById(R.id.gridview);
+	TextView empty = (TextView) findViewById(R.id.forever_alone_text);
+	empty.setText("Forever Alone! (no people nearby)");
 
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	list_type = type;
@@ -68,9 +72,14 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
      */
     protected void requestPeople() {
 	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
+	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
 	usersList.clear();
 	try {
 	    long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.id, Utility.DEFAULT_DISTANCE);
+	    if (nearbyUsers.length == 0)
+		empty.setVisibility(View.VISIBLE);
+	    else
+		empty.setVisibility(View.GONE);
 	    for (long fbid : nearbyUsers) { // Request the details of each nearby user
 		Bundle params = new Bundle();
 		params.putString("fields", "name, picture, birthday, gender");
@@ -78,6 +87,7 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	    }
 	} catch (Exception e) {
 	    showToast("An error occured");
+	    empty.setVisibility(View.VISIBLE);
 	    e.printStackTrace();
 	}
 	dialog.dismiss();

@@ -26,6 +26,10 @@ public class ImageLoader {
     private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
     ExecutorService executorService;
 
+    enum Type {
+	REGULAR, ROUND_CORNERS
+    }
+
     public ImageLoader(Context context) {
 	fileCache = new FileCache(context);
 	executorService = Executors.newFixedThreadPool(5);
@@ -46,26 +50,35 @@ public class ImageLoader {
 	if (bitmap != null)
 	    imageView.setImageBitmap(bitmap);
 	else {
-	    queuePhoto(url, imageView);
+	    queuePhoto(url, imageView, Type.REGULAR);
 	    imageView.setImageResource(stub_id);
 	}
     }
 
     /**
-     * Fetches the image from the given URL, and NOT from the cache.
+     * Fetches the image, from the cache if possible
      * 
      * @param url
      *            URL of an image
      * @param imageView
+     * @param type
+     *            whether to show the original image or not
      */
-    public void displayNewImage(String url, ImageView imageView) {
+    public void displayImage(String url, ImageView imageView, Type type) {
 	imageViews.put(imageView, url);
-	queuePhoto(url, imageView);
-	imageView.setImageResource(stub_id);
+	Bitmap bitmap = memoryCache.get(url);
+	if (bitmap != null) {
+	    if (type == Type.ROUND_CORNERS)
+		bitmap = Utility.getRoundedCornerBitmap(bitmap);
+	    imageView.setImageBitmap(bitmap);
+	} else {
+	    queuePhoto(url, imageView, type);
+	    imageView.setImageResource(stub_id);
+	}
     }
 
-    private void queuePhoto(String url, ImageView imageView) {
-	PhotoToLoad p = new PhotoToLoad(url, imageView);
+    private void queuePhoto(String url, ImageView imageView, Type type) {
+	PhotoToLoad p = new PhotoToLoad(url, imageView, type);
 	executorService.submit(new PhotosLoader(p));
     }
 
@@ -130,10 +143,12 @@ public class ImageLoader {
     private class PhotoToLoad {
 	public String url;
 	public ImageView imageView;
+	public Type type;
 
-	public PhotoToLoad(String u, ImageView i) {
+	public PhotoToLoad(String u, ImageView i, Type t) {
 	    url = u;
 	    imageView = i;
+	    type = t;
 	}
     }
 
@@ -152,6 +167,8 @@ public class ImageLoader {
 	    memoryCache.put(photoToLoad.url, bmp);
 	    if (imageViewReused(photoToLoad))
 		return;
+	    if (photoToLoad.type == Type.ROUND_CORNERS)
+		bmp = Utility.getRoundedCornerBitmap(bmp);
 	    BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad);
 	    Activity a = (Activity) photoToLoad.imageView.getContext();
 	    a.runOnUiThread(bd);
