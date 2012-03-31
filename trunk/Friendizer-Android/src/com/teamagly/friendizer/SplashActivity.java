@@ -23,6 +23,7 @@ import com.teamagly.friendizer.SessionEvents.AuthListener;
 import com.teamagly.friendizer.SessionEvents.LogoutListener;
 
 public class SplashActivity extends Activity {
+    private final String TAG = getClass().getName();
     private Handler mHandler;
     ProgressDialog dialog;
     UserRequestListener userRequestListener;
@@ -101,7 +102,7 @@ public class SplashActivity extends Activity {
 	    AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(Utility.getInstance().facebook);
 	    asyncRunner.logout(getBaseContext(), new LogoutRequestListener());
 	} catch (Exception e) {
-	    Log.v("SplashActivity", "ERROR: " + e.getMessage());
+	    Log.e(TAG, "", e);
 	}
     }
 
@@ -178,6 +179,7 @@ public class SplashActivity extends Activity {
 		finish();
 
 	    } catch (Exception e) {
+		Log.e(TAG, "", e);
 	    }
 	}
     }

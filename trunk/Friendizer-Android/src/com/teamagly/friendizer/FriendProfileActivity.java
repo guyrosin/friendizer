@@ -3,10 +3,16 @@
  */
 package com.teamagly.friendizer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.ImageLoader.Type;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,12 +24,18 @@ import android.widget.Toast;
  * 
  */
 public class FriendProfileActivity extends Activity {
-    private long fbid;
+    private final String TAG = getClass().getName();
+    UserInfo userInfo;
     private ImageView userPic;
     private TextView name;
     private TextView age;
     private TextView ageTitle;
     private TextView gender;
+    private TextView value;
+    private TextView money;
+    private TextView owns;
+    private TextView ownerName;
+    private ImageView ownerPic;
 
     /*
      * (non-Javadoc)
@@ -39,24 +51,14 @@ public class FriendProfileActivity extends Activity {
 	age = (TextView) findViewById(R.id.age);
 	ageTitle = (TextView) findViewById(R.id.age_title);
 	gender = (TextView) findViewById(R.id.gender);
+	value = (TextView) findViewById(R.id.value);
+	money = (TextView) findViewById(R.id.money);
+	owns = (TextView) findViewById(R.id.owns);
+	ownerName = (TextView) findViewById(R.id.owner_name);
+	ownerPic = (ImageView) findViewById(R.id.owner_pic);
 
-	UserInfo userInfo = (UserInfo) intent.getSerializableExtra("user");
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic);
-	name.setText(userInfo.name);
-	String genderStr = "";
-	genderStr = userInfo.gender;
-	// Capitalize the first letter
-	if (genderStr.equals("male"))
-	    genderStr = "Male";
-	else if (genderStr.equals("female"))
-	    genderStr = "Female";
-	else
-	    ageTitle.setText("age: "); // No gender -> remove the separator from the age title
-	gender.setText(genderStr);
-	age.setText(userInfo.age);
-	if (age.getText().length() == 0)
-	    ageTitle.setText("");
-	fbid = userInfo.id;
+	userInfo = (UserInfo) intent.getSerializableExtra("user");
+	updateViews();
 
 	final Button btn1 = (Button) findViewById(R.id.btn1);
 	final Button btn2 = (Button) findViewById(R.id.btn2);
@@ -75,9 +77,10 @@ public class FriendProfileActivity extends Activity {
 	    btn1.setOnClickListener(new View.OnClickListener() {
 		public void onClick(View v) {
 		    try {
-			ServerFacade.buy(Utility.getInstance().userInfo.id, fbid);
+			ServerFacade.buy(Utility.getInstance().userInfo.id, userInfo.id);
 		    } catch (Exception e) {
-			Toast.makeText(getApplicationContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
+			Log.e(TAG, "", e);
+			Toast.makeText(getBaseContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
 		    }
 		}
 	    });
@@ -89,6 +92,131 @@ public class FriendProfileActivity extends Activity {
 	    public void onClick(View v) {
 	    }
 	});
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+	super.onResume();
+	// Reload the user's details from our servers (in the background)
+	new Thread(new Runnable() {
+	    public void run() {
+		try {
+		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+		} catch (Exception e) {
+		    Log.e(TAG, "", e);
+		}
+		// Update the views from the main thread
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			updateFriendizerViews();
+		    }
+		});
+	    }
+	}).start();
+
+	if (userInfo.ownerID > 0) {
+	    // Get the owner's name and picture from Facebook
+	    Bundle params = new Bundle();
+	    params.putString("fields", "name, picture");
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.ownerID), params, new OwnerRequestListener());
+	}
+    }
+
+    protected void updateViews() {
+	updateFriendizerViews();
+	updateFacebookViews();
+    }
+
+    protected void updateFriendizerViews() {
+	value.setText(String.valueOf(userInfo.value));
+	money.setText(String.valueOf(userInfo.money));
+	if (userInfo.ownsList != null)
+	    owns.setText(String.valueOf(userInfo.ownsList.length));
+    }
+
+    protected void updateFacebookViews() {
+	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
+	name.setText(userInfo.name);
+	age.setText(userInfo.age);
+	if (userInfo.age.length() == 0)
+	    ageTitle.setVisibility(View.GONE);
+	else
+	    ageTitle.setVisibility(View.VISIBLE);
+	String genderStr = userInfo.gender;
+	// Capitalize the first letter
+	gender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case R.id.refresh:
+	    // Reload the user's details from Facebook
+	    Bundle params = new Bundle();
+	    params.putString("fields", "name, first_name, picture, birthday, gender");
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.id), params, new UserRequestListener());
+	    onResume();
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
+	}
+    }
+
+    /*
+     * Callback for fetching user's details from Facebook
+     */
+    public class UserRequestListener extends BaseRequestListener {
+
+	@Override
+	public void onComplete(final String response, final Object state) {
+	    JSONObject jsonObject;
+	    try {
+		jsonObject = new JSONObject(response);
+		final UserInfo newUserInfo = new UserInfo(jsonObject);
+		// Update the user's details from Facebook
+		userInfo.updateFacebookData(newUserInfo);
+		// Update the views (has to be done from the main thread)
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			updateFacebookViews();
+		    }
+		});
+	    } catch (JSONException e) {
+		Log.e(TAG, "", e);
+	    }
+	}
+    }
+
+    /*
+     * Callback for fetching owner's details from Facebook
+     */
+    public class OwnerRequestListener extends BaseRequestListener {
+
+	@Override
+	public void onComplete(final String response, final Object state) {
+	    JSONObject jsonObject;
+	    try {
+		jsonObject = new JSONObject(response);
+
+		final String ownerNameStr = jsonObject.getString("name");
+		final String picURL = jsonObject.getString("picture");
+
+		runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			ownerName.setText(ownerNameStr);
+			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic);
+		    }
+		});
+	    } catch (Exception e) {
+		Log.e(TAG, "", e);
+	    }
+	}
     }
 
 }

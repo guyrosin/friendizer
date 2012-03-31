@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.ImageView;
 
 public class ImageLoader {
@@ -105,6 +106,7 @@ public class ImageLoader {
 	    bitmap = decodeFile(f);
 	    return bitmap;
 	} catch (Exception ex) {
+	    Log.e("ImageLoader", "", ex);
 	    ex.printStackTrace();
 	    return null;
 	}

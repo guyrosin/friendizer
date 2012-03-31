@@ -9,18 +9,25 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.Toast;
-import android.widget.TabHost.TabSpec;
+import android.widget.TextView;
 
 /**
  * @author Guy
  * 
  */
 public class FriendizerActivity extends TabActivity {
+    private final String TAG = getClass().getName();
+    private TabHost tabHost;
+    ActionBar actionBar;
 
     // Provides access to the system location services
     private LocationManager locationManager;
@@ -48,30 +55,26 @@ public class FriendizerActivity extends TabActivity {
 	// Register the listener with the Location Manager to receive location updates from the GPS provider
 	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, gpsLocationListener);
 
-	TabHost tabHost = getTabHost();
+	actionBar = (ActionBar) findViewById(R.id.actionbar);
+	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		// Tell the current child activity to refresh
+		Intent i = new Intent().setClass(FriendizerActivity.this, getCurrentActivity().getClass());
+		i.putExtra("refresh", true);
+		i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		getLocalActivityManager().startActivity(tabHost.getCurrentTabTag(), i);
+	    }
+	});
+	// actionBar.setTitle(R.string.some_title);
+	// Intent homeIntent = new Intent(this, FriendizerActivity.class);
+	// homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	// actionBar.setHomeAction(new IntentAction(this, homeIntent, R.drawable.friendizer_white));
+	// actionBar.addAction(new ActionBar.NoAction(R.drawable.ic_action_refresh));
+	// actionBar.setProgressBarVisibility(View.VISIBLE);
+	// actionBar.setProgressBarVisibility(View.GONE);
 
-	// Tab for People Radar
-	TabSpec peopleRadarSpec = tabHost.newTabSpec("People Radar");
-	peopleRadarSpec.setIndicator("People Radar", getResources().getDrawable(R.drawable.icon_peopleradar_tab));
-	Intent peopleRadarIntent = new Intent(this, PeopleRadarActivity.class);
-	peopleRadarSpec.setContent(peopleRadarIntent);
-
-	// Tab for Connections
-	TabSpec connectionsSpec = tabHost.newTabSpec("Connections");
-	connectionsSpec.setIndicator("Connections", getResources().getDrawable(R.drawable.icon_friends_tab));
-	Intent connectionsIntent = new Intent(this, ConnectionsActivity.class);
-	connectionsSpec.setContent(connectionsIntent);
-
-	// Tab for My Profile
-	TabSpec myProfileSpec = tabHost.newTabSpec("My Profile");
-	myProfileSpec.setIndicator("My Profile", getResources().getDrawable(R.drawable.icon_myprofile_tab));
-	Intent myProfileIntent = new Intent(this, MyProfileActivity.class);
-	myProfileSpec.setContent(myProfileIntent);
-
-	// Adding all TabSpec to TabHost
-	tabHost.addTab(peopleRadarSpec); // Adding People Radar tab
-	tabHost.addTab(connectionsSpec); // Adding Friends tab
-	tabHost.addTab(myProfileSpec); // Adding My Profile tab
+	setTabs();
     }
 
     /*
@@ -80,12 +83,53 @@ public class FriendizerActivity extends TabActivity {
      */
     @Override
     protected void onResume() {
-	// TODO Auto-generated method stub
 	super.onResume();
 
+	// TODO necessary?
 	if (!Utility.getInstance().facebook.isSessionValid()) {
 	    Util.showAlert(this, "Warning", "You must first log in.");
 	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onNewIntent(android.content.Intent)
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+	super.onNewIntent(intent);
+	// Check for a loading message
+	if (intent.hasExtra("loading")) {
+	    if (intent.getBooleanExtra("loading", false))
+		actionBar.setProgressBarVisibility(View.VISIBLE);
+	    else
+		actionBar.setProgressBarVisibility(View.GONE);
+	}
+    }
+
+    private void setTabs() {
+	tabHost = getTabHost();
+
+	addTab(R.string.people_radar, R.drawable.icon_peopleradar_tab, PeopleRadarActivity.class);
+	addTab(R.string.connections, R.drawable.icon_friends_tab, ConnectionsActivity.class);
+	addTab(R.string.my_profile, R.drawable.icon_myprofile_tab, MyProfileActivity.class);
+    }
+
+    private void addTab(int labelId, int drawableId, Class<?> target) {
+	Intent intent = new Intent(this, target);
+	TabHost.TabSpec spec = tabHost.newTabSpec("tab" + labelId);
+
+	View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator, getTabWidget(), false);
+
+	TextView title = (TextView) tabIndicator.findViewById(R.id.title);
+	title.setText(labelId);
+	ImageView icon = (ImageView) tabIndicator.findViewById(R.id.icon);
+	icon.setImageResource(drawableId);
+
+	spec.setIndicator(tabIndicator);
+	spec.setContent(intent);
+	tabHost.addTab(spec);
+
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -138,23 +182,26 @@ public class FriendizerActivity extends TabActivity {
 	@Override
 	public void onLocationChanged(Location location) {
 
+	    final Location curLocation = location;
 	    /*
-	     * If there is a new location
+	     * If there is a new location, update in the background
 	     */
 	    if (location != null) {
-		try {
-		    // Update the server with the new location
-		    ServerFacade.changeLocation(Utility.getInstance().userInfo.id, location.getLatitude(),
-			    location.getLongitude());
-		} catch (Exception e) {
-		    System.out.println("Can't update the server with the new location");
-		}
+		new Thread(new Runnable() {
+		    public void run() {
+			try {
+			    // Update the server with the new location
+			    ServerFacade.changeLocation(Utility.getInstance().userInfo.id, curLocation.getLatitude(),
+				    curLocation.getLongitude());
+			} catch (Exception e) {
+			    Log.e(TAG, "Can't update the server with the new location", e);
+			}
 
-		// Display the new location information on the screen
-		Toast.makeText(
-			getBaseContext(),
-			"Location changed : (" + location.getLatitude() + "," + location.getLongitude() + ")	Provided by "
-				+ provider, Toast.LENGTH_SHORT).show();
+			// Display the new location information on the screen
+			// Toast.makeText(getBaseContext(),"Location changed : (" + curLocation.getLatitude() + "," +
+			// curLocation.getLongitude()+ ")	Provided by " + provider, Toast.LENGTH_SHORT).show();
+		    }
+		}).start();
 	    }
 	}
 

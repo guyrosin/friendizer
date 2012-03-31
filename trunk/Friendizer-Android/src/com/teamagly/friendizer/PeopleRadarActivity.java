@@ -1,39 +1,25 @@
 package com.teamagly.friendizer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
-import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class PeopleRadarActivity extends ListActivity implements OnItemClickListener {
-    ProgressDialog dialog;
-    private boolean list_type;
-    private GridView gridView;
-    private ArrayList<UserInfo> usersList = new ArrayList<UserInfo>();
-    private ArrayAdapter<UserInfo> peopleAdapter;
-    private int sortBy = 4; // Default order is by matching
+public class PeopleRadarActivity extends AbstractFriendsListActivity {
+    private final String TAG = getClass().getName();
 
     /*
      * (non-Javadoc)
@@ -46,32 +32,15 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 	gridView = (GridView) findViewById(R.id.gridview);
 	TextView empty = (TextView) findViewById(R.id.forever_alone_text);
 	empty.setText("Forever Alone! (no people nearby)");
-
-	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
-	list_type = type;
-	updateListType(type);
-	requestPeople();
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onResume()
-     */
-    @Override
-    protected void onResume() {
-	super.onResume();
-	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
-	if (type != list_type) { // A change occurred -> redraw the view
-	    list_type = type;
-	    updateListType(type);
-	}
+	updateListType(list_type);
+	requestFriends();
     }
 
     /**
      * Clears the current users list and request the information from Facebook
      */
-    protected void requestPeople() {
-	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
+    @Override
+    protected void requestFriends() {
 	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
 	usersList.clear();
 	try {
@@ -86,109 +55,11 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 		Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener(this));
 	    }
 	} catch (Exception e) {
-	    showToast("An error occured");
 	    empty.setVisibility(View.VISIBLE);
-	    e.printStackTrace();
+	    showToast("An error occured");
+	    // Log.e(TAG, "", e);
 	}
 	dialog.dismiss();
-    }
-
-    protected void updateListType(boolean type) {
-	if (type) { // => show in a list
-	    gridView.setAdapter(null);
-	    peopleAdapter = new FriendsListAdapter(this, R.layout.connection_list_item, usersList);
-	    getListView().setOnItemClickListener(this);
-	    getListView().setAdapter(peopleAdapter);
-	} else { // => show in a GridView
-	    getListView().setAdapter(null);
-	    peopleAdapter = new FriendsImageAdapter(this, 0, usersList);
-	    gridView.setAdapter(peopleAdapter);
-	    gridView.setOnItemClickListener(this);
-	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onPause()
-     */
-    @Override
-    protected void onPause() {
-	super.onPause();
-	dialog.dismiss(); // Dismiss the dialog
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.ListActivity#onDestroy()
-     */
-    @Override
-    protected void onDestroy() {
-	getListView().setAdapter(null);
-	gridView.setAdapter(null);
-	super.onDestroy();
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-	super.onCreateOptionsMenu(menu);
-	menu.clear(); // Clear the main activity's menu
-	MenuInflater inflater = getMenuInflater();
-	inflater.inflate(R.menu.connections_menu, menu);
-	return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-	switch (item.getItemId()) {
-	case R.id.settings: // Move to the settings activity
-	    startActivity(new Intent(this, FriendsPrefs.class));
-	    return true;
-	case R.id.invite: // Show the Facebook invitation dialog
-	    Bundle params = new Bundle();
-	    params.putString("message", getString(R.string.invitation_msg));
-	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
-	    return true;
-	case R.id.facebook_friends: // Move to my Facebook friends activity
-	    Intent intent = new Intent().setClass(PeopleRadarActivity.this, FBFriendsActivity.class);
-	    startActivity(intent);
-	    return true;
-	case R.id.sort:
-	    final String[] options = { "Alphabeth", "Value", "Matching", "Distance" };
-	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	    builder.setTitle("Sort By");
-	    builder.setItems(options, new DialogInterface.OnClickListener() {
-		public void onClick(DialogInterface dialog, int item) {
-		    if (item != sortBy) {
-			switch (item) {
-			case 0:
-			    Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
-			    break;
-			case 1:
-			    Collections.sort(usersList, (new Comparators()).new ValueComparator());
-			    break;
-			case 2:
-			    Collections.sort(usersList, (new Comparators()).new MatchingComparator());
-			    break;
-			case 3:
-			    Collections.sort(usersList, (new Comparators()).new DistanceComparator());
-			    break;
-			}
-			sortBy = item;
-			runOnUiThread(new Runnable() {
-			    public void run() {
-				peopleAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
-			    }
-			});
-		    }
-		}
-	    });
-	    AlertDialog alert = builder.create();
-	    alert.show();
-	    return true;
-	case R.id.refresh:
-	    requestPeople();
-	    return true;
-	default:
-	    return super.onOptionsItemSelected(item);
-	}
     }
 
     /*
@@ -211,10 +82,10 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
      *            a message to show
      */
     public void showToast(final String msg) {
-	new Handler().post(new Runnable() {
+	new Handler(Looper.getMainLooper()).post(new Runnable() {
 	    @Override
 	    public void run() {
-		Toast toast = Toast.makeText(PeopleRadarActivity.this, msg, Toast.LENGTH_LONG);
+		Toast toast = Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG);
 		toast.show();
 	    }
 	});
@@ -236,20 +107,15 @@ public class PeopleRadarActivity extends ListActivity implements OnItemClickList
 		JSONObject jsonObject = new JSONObject(response);
 		UserInfo userInfo = new UserInfo(jsonObject);
 		usersList.add(userInfo);
-		// Sort the list by matching
-		Collections.sort(usersList, (new Comparators()).new MatchingComparator());
+		// Sort the list alphabetically
+		Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
 		runOnUiThread(new Runnable() {
 		    public void run() {
-			peopleAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
+			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must do from the main thread)
 		    }
 		});
-	    } catch (Exception e) {
-		new Handler(Looper.getMainLooper()).post(new Runnable() {
-		    @Override
-		    public void run() {
-			Toast.makeText(getApplicationContext(), "Failed to request user data", Toast.LENGTH_SHORT).show();
-		    }
-		});
+	    } catch (JSONException e) {
+		Log.e(TAG, "", e);
 	    }
 	}
     }

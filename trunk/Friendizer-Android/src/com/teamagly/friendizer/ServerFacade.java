@@ -74,9 +74,12 @@ public final class ServerFacade {
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	ArrayList<Long> list = new ArrayList<Long>();
 	String inputLine = in.readLine();
-	while (inputLine != null) {
-	    list.add(Long.parseLong(inputLine));
-	    inputLine = in.readLine();
+	try {
+	    while (inputLine != null) {
+		list.add(Long.parseLong(inputLine));
+		inputLine = in.readLine();
+	    }
+	} catch (Exception e) { // If an error occurred (e.g. user doesn't exist), ignore it
 	}
 	in.close();
 	long[] retArray = new long[list.size()];

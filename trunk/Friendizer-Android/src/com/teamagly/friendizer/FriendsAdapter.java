@@ -11,12 +11,10 @@ import android.widget.ArrayAdapter;
 public abstract class FriendsAdapter extends ArrayAdapter<UserInfo> {
 
     protected static LayoutInflater inflater = null;
-    public ImageLoader imageLoader;
 
     public FriendsAdapter(Context context, int textViewResourceId, List<UserInfo> objects) {
 	super(context, textViewResourceId, objects);
 	inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	imageLoader = new ImageLoader(context);
     }
 
     public abstract View getView(int position, View convertView, ViewGroup parent);

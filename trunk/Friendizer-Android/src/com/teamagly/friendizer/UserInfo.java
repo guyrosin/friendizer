@@ -23,6 +23,10 @@ public class UserInfo implements Serializable {
     String age;
     String picURL;
 
+    enum FBQueryType {
+	GRAPH, FQL
+    }
+
     private static final long serialVersionUID = 8643574985757595599L;
 
     public UserInfo(long id, long value, long money, long owner, long[] ownsList) {
@@ -33,17 +37,36 @@ public class UserInfo implements Serializable {
 	this.ownsList = ownsList;
     }
 
+    // Just to make life easier, because most of the queries will be using the Graph API
     public UserInfo(final JSONObject jsonObject) {
-	id = jsonObject.optLong("id");
-	picURL = jsonObject.optString("picture");
-	firstName = jsonObject.optString("first_name");
-	name = jsonObject.optString("name");
-	gender = jsonObject.optString("gender");
+	this(jsonObject, FBQueryType.GRAPH);
+    }
 
-	try {
-	    age = Utility.calcAge(new Date(jsonObject.optString("birthday")));
-	} catch (IllegalArgumentException e) {
-	    age = "";
+    public UserInfo(final JSONObject jsonObject, FBQueryType type) {
+	if (type == FBQueryType.GRAPH) {
+	    id = jsonObject.optLong("id");
+	    picURL = jsonObject.optString("picture");
+	    firstName = jsonObject.optString("first_name");
+	    name = jsonObject.optString("name");
+	    gender = jsonObject.optString("gender");
+
+	    try {
+		age = Utility.calcAge(new Date(jsonObject.optString("birthday")));
+	    } catch (IllegalArgumentException e) {
+		age = "";
+	    }
+	} else { // FQL Query
+	    id = jsonObject.optLong("uid");
+	    picURL = jsonObject.optString("pic_square");
+	    firstName = jsonObject.optString("first_name");
+	    name = jsonObject.optString("name");
+	    gender = jsonObject.optString("sex");
+
+	    try {
+		age = Utility.calcAge(new Date(jsonObject.optString("birthday_date")));
+	    } catch (IllegalArgumentException e) {
+		age = "";
+	    }
 	}
     }
 

@@ -8,6 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_marginTop="5dp"
         android:contentDescription="@string/profile_pic"
         android:src="@android:drawable/ic_dialog_info" />
 
@@ -56,7 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/value_title"
         android:layout_toRightOf="@+id/value_title"
-        android:text="20,000" />
+        android:text="0" />
 
     <TextView
         android:id="@+id/matching_title"
@@ -64,6 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/value_title"
         android:layout_below="@+id/value_title"
+        android:paddingBottom="4dp"
         android:text="Matching: " />
 
     <TextView
@@ -72,6 +74,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/matching_title"
         android:layout_toRightOf="@+id/matching_title"
-        android:text="80%" />
+        android:text="0%" />
 
 </RelativeLayout>

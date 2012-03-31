@@ -82,28 +82,83 @@
                     android:layout_toRightOf="@+id/age_title" />
 
                 <TextView
-                    android:id="@+id/value"
+                    android:id="@+id/value_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/gender"
-                    android:text="Value: 10,000" />
+                    android:text="Value: " />
+
+                <TextView
+                    android:id="@+id/value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/gender"
+                    android:layout_toRightOf="@+id/value_title"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/money_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/gender"
+                    android:layout_below="@+id/value"
+                    android:text="Money: " />
 
                 <TextView
                     android:id="@+id/money"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/value"
-                    android:text="Money: 20,000" />
+                    android:layout_toRightOf="@+id/money_title"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/owns_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/gender"
+                    android:layout_below="@+id/money"
+                    android:text="Owns: " />
 
                 <TextView
                     android:id="@+id/owns"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
                     android:layout_below="@+id/money"
-                    android:text="Owns: 10 people" />
+                    android:layout_toRightOf="@+id/owns_title"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/owns_cont"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/money"
+                    android:layout_toRightOf="@+id/owns"
+                    android:text=" people" />
+
+                <TextView
+                    android:id="@+id/owner_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/gender"
+                    android:layout_below="@+id/owns"
+                    android:text="Owner: " />
+
+                <TextView
+                    android:id="@+id/owner_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/owns"
+                    android:layout_toRightOf="@+id/owner_title"
+                    android:text="none" />
+
+                <ImageView
+                    android:id="@+id/owner_pic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/owner_title"
+                    android:layout_toRightOf="@+id/owner_name" />
             </RelativeLayout>
 
             <TextView
