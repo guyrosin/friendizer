@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/name"
             android:layout_toRightOf="@+id/value_title"
-            android:text="10,000" />
+            android:text="0" />
 
         <TextView
             android:id="@+id/money_title"
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/money"
             android:layout_toRightOf="@+id/owns_title"
-            android:text="10" />
+            android:text="0" />
 
         <TextView
             android:id="@+id/owns_cont"
