@@ -1,193 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/buttons"
-        style="@android:style/ButtonBar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal" >
+    <com.teamagly.friendizer.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBar" />
 
-        <Button
-            android:id="@+id/btn1"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="50" />
-
-        <Button
-            android:id="@+id/btn2"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="50" />
-    </LinearLayout>
-
-    <ScrollView
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/root"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@id/buttons"
-        android:fillViewport="true" >
+        android:orientation="vertical" >
 
         <LinearLayout
+            android:id="@+id/buttons"
+            style="@android:style/ButtonBar"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp" >
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal" >
 
-            <TextView
-                android:id="@+id/name"
+            <Button
+                android:id="@+id/btn1"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="15dip"
-                android:textSize="18dip" />
+                android:layout_weight="50" />
 
-            <RelativeLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
+            <Button
+                android:id="@+id/btn2"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="14dp" >
-
-                <ImageView
-                    android:id="@+id/user_pic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:contentDescription="Profile Picture" />
-
-                <TextView
-                    android:id="@+id/gender"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_toRightOf="@+id/user_pic" />
-
-                <TextView
-                    android:id="@+id/age_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/gender"
-                    android:text=", age: " />
-
-                <TextView
-                    android:id="@+id/age"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/age_title" />
-
-                <TextView
-                    android:id="@+id/value_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/gender"
-                    android:text="Value: " />
-
-                <TextView
-                    android:id="@+id/value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/gender"
-                    android:layout_toRightOf="@+id/value_title"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/money_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/value"
-                    android:text="Money: " />
-
-                <TextView
-                    android:id="@+id/money"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/value"
-                    android:layout_toRightOf="@+id/money_title"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/owns_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/money"
-                    android:text="Owns: " />
-
-                <TextView
-                    android:id="@+id/owns"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/money"
-                    android:layout_toRightOf="@+id/owns_title"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/owns_cont"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/money"
-                    android:layout_toRightOf="@+id/owns"
-                    android:text=" people" />
-
-                <TextView
-                    android:id="@+id/owner_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/owns"
-                    android:text="Owner: " />
-
-                <TextView
-                    android:id="@+id/owner_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/owns"
-                    android:layout_toRightOf="@+id/owner_title"
-                    android:text="none" />
-
-                <ImageView
-                    android:id="@+id/owner_pic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/owner_title"
-                    android:layout_toRightOf="@+id/owner_name" />
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/achievements_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Last achievements:" />
-
-            <ListView
-                android:id="@+id/achievements_list"
-                android:layout_width="wrap_content"
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:drawSelectorOnTop="false" />
-
-            <TextView
-                android:id="@+id/history_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Action History:" />
-
-            <ListView
-                android:id="@+id/history_list"
-                android:layout_width="wrap_content"
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:drawSelectorOnTop="false" />
+                android:layout_weight="50" />
         </LinearLayout>
-    </ScrollView>
 
-</RelativeLayout>
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_above="@id/buttons"
+            android:fillViewport="true"
+            android:paddingTop="4dp" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp" >
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="15dip"
+                    android:textSize="18dip" />
+
+                <RelativeLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="14dp" >
+
+                    <ImageView
+                        android:id="@+id/user_pic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:contentDescription="Profile Picture" />
+
+                    <TextView
+                        android:id="@+id/gender"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="2dp"
+                        android:layout_toRightOf="@+id/user_pic" />
+
+                    <TextView
+                        android:id="@+id/age_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/gender"
+                        android:text=", age: " />
+
+                    <TextView
+                        android:id="@+id/age"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/age_title" />
+
+                    <TextView
+                        android:id="@+id/value_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignLeft="@+id/gender"
+                        android:layout_below="@+id/gender"
+                        android:text="Value: " />
+
+                    <TextView
+                        android:id="@+id/value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/gender"
+                        android:layout_toRightOf="@+id/value_title"
+                        android:text="0" />
+
+                    <TextView
+                        android:id="@+id/money_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignLeft="@+id/gender"
+                        android:layout_below="@+id/value"
+                        android:text="Money: " />
+
+                    <TextView
+                        android:id="@+id/money"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/value"
+                        android:layout_toRightOf="@+id/money_title"
+                        android:text="0" />
+
+                    <TextView
+                        android:id="@+id/owns_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignLeft="@+id/gender"
+                        android:layout_below="@+id/money"
+                        android:text="Owns: " />
+
+                    <TextView
+                        android:id="@+id/owns"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/money"
+                        android:layout_toRightOf="@+id/owns_title"
+                        android:text="0" />
+
+                    <TextView
+                        android:id="@+id/owns_cont"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/money"
+                        android:layout_toRightOf="@+id/owns"
+                        android:text=" people" />
+
+                    <TextView
+                        android:id="@+id/owner_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignLeft="@+id/gender"
+                        android:layout_below="@+id/owns"
+                        android:text="Owner: " />
+
+                    <TextView
+                        android:id="@+id/owner_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/owns"
+                        android:layout_toRightOf="@+id/owner_title"
+                        android:text="none" />
+
+                    <ImageView
+                        android:id="@+id/owner_pic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/owner_title"
+                        android:layout_toRightOf="@+id/owner_name" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/achievements_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Last achievements:" />
+
+                <ListView
+                    android:id="@+id/achievements_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:drawSelectorOnTop="false" />
+
+                <TextView
+                    android:id="@+id/history_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Action History:" />
+
+                <ListView
+                    android:id="@+id/history_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:drawSelectorOnTop="false" />
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+</LinearLayout>

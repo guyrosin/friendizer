@@ -8,13 +8,13 @@ import org.json.JSONObject;
 public class UserInfo implements Serializable {
 
     // Data from our servers
-    long id;
-    long value;
-    long money;
-    long ownerID;
-    long[] ownsList;
-    long distance;
-    int matching;
+    long id = 0;
+    long value = 0;
+    long money = 0;
+    long ownerID = 0;
+    long[] ownsList = {};
+    long distance = 0;
+    int matching = 0;
 
     // Data from Facebook
     String firstName;

@@ -1,10 +1,8 @@
 package com.teamagly.friendizer;
 
-import java.util.Collections;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import org.json.JSONArray;
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.UserInfo.FBQueryType;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -28,8 +26,6 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
 	empty.setText("Forever Alone! (you have no connections)");
 	gridView = (GridView) findViewById(R.id.gridview);
 	updateListType(list_type);
-
-	requestFriends();
     }
 
     /**
@@ -38,63 +34,57 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
     @Override
     protected void requestFriends() {
 	usersList.clear();
-	long[] ownsList = Utility.getInstance().userInfo.ownsList;
+	final long[] ownsList = Utility.getInstance().userInfo.ownsList;
 	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
-	if (ownsList.length == 0)
+	if (ownsList.length == 0) {
+	    showLoadingIcon(false);
 	    empty.setVisibility(View.VISIBLE);
-	else
+	} else {
 	    empty.setVisibility(View.GONE);
-	for (long fbid : ownsList) { // Request the details of each user I own
-	    Bundle params = new Bundle();
-	    params.putString("fields", "name, picture, birthday, gender");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(fbid), params, new UserRequestListener());
-	}
-    }
-
-    protected void updateUsersFromFriendizer() {
-	// Load each user's details from our servers in the background
-	new Thread(new Runnable() {
-	    public void run() {
-		for (int i = 0; i < usersList.size(); i++) {
+	    // TODO: this can be done faster (?) if we request data from Facebook and Friendizer at the same time, in separate
+	    // threads, using a concurrent map:
+	    // ConcurrentHashMap<Long, UserInfo> usersMap = new ConcurrentHashMap<Long, UserInfo>();
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    // Build a comma separated string of all the users' IDs
+		    StringBuilder IDsBuilder = new StringBuilder();
+		    for (int i = 0; i < ownsList.length - 1; i++)
+			IDsBuilder.append(ownsList[i] + ",");
+		    IDsBuilder.append(ownsList[ownsList.length - 1]);
+		    Bundle params = new Bundle();
 		    try {
-			usersList.get(i).updateFriendizerData(ServerFacade.userDetails(usersList.get(i).id));
+			// Request the details of each user I own
+			String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
+				+ IDsBuilder.toString() + ") order by name";
+			params.putString("method", "fql.query");
+			params.putString("query", query);
+			String response = Utility.getInstance().facebook.request(params);
+			JSONArray jsonArray = new JSONArray(response);
+			int len = jsonArray.length();
+			for (int i = 0; i < len; i++) {
+			    UserInfo userInfo = new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL);
+			    usersList.add(userInfo);
+			    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+			    handler.post(new Runnable() {
+				@Override
+				public void run() {
+				    friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+				}
+			    });
+			}
 		    } catch (Exception e) {
-			Log.e(TAG, "", e);
+			Log.e(TAG, e.getMessage());
+		    } finally {
+			handler.post(new Runnable() {
+			    @Override
+			    public void run() {
+				showLoadingIcon(false);
+			    }
+			});
 		    }
 		}
-		runOnUiThread(new Runnable() {
-		    public void run() {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main thread)
-		    }
-		});
-	    }
-	}).start();
-    }
-
-    /*
-     * Callback for fetching a user's name, picture, uid.
-     */
-    public class UserRequestListener extends BaseRequestListener {
-
-	@Override
-	public void onComplete(final String response, final Object state) {
-	    try {
-		JSONObject jsonObject = new JSONObject(response);
-		UserInfo userInfo = new UserInfo(jsonObject);
-		usersList.add(userInfo);
-		// Sort the list alphabetically
-		Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
-		updateUsersFromFriendizer();
-		runOnUiThread(new Runnable() {
-		    public void run() {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main thread)
-		    }
-		});
-		dialog.dismiss(); // Dismiss the loading dialog
-
-	    } catch (JSONException e) {
-		Log.e(TAG, "", e);
-	    }
+	    }).start();
 	}
     }
 }

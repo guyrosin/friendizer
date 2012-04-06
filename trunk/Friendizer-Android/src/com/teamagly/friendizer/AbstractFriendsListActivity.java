@@ -6,12 +6,13 @@ package com.teamagly.friendizer;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -25,15 +26,17 @@ import android.widget.AdapterView.OnItemClickListener;
 /**
  * @author Guy
  * 
+ *         Note: the child class has to call showLoadingIcon(false) after it's done reloading the data in order to stop the
+ *         loading indicator
  */
 public abstract class AbstractFriendsListActivity extends ListActivity implements OnItemClickListener {
-    private final String TAG = getClass().getName();
-    ProgressDialog dialog;
+    private final String TAG = "AbstractFriendsListActivity";
     protected boolean list_type;
     protected GridView gridView;
     protected FriendsAdapter friendsAdapter;
     protected ArrayList<UserInfo> usersList = new ArrayList<UserInfo>();
     protected int sortBy = 0;
+    final Handler handler = new Handler();
 
     /*
      * (non-Javadoc)
@@ -42,7 +45,6 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	dialog = ProgressDialog.show(this, "", getString(R.string.please_wait), true, true);
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	list_type = type;
     }
@@ -54,6 +56,8 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
     @Override
     protected void onResume() {
 	super.onResume();
+	showLoadingIcon(true);
+	requestFriends();
 	boolean type = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("friends_list_type", false);
 	if (type != list_type) { // A change occurred -> redraw the view
 	    list_type = type;
@@ -80,26 +84,18 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onPause()
+    /**
+     * @param show
+     *            whether to show or hide the loading icon (in the parent activity)
      */
-    @Override
-    protected void onPause() {
-	super.onPause();
-	dialog.dismiss(); // Dismiss the dialog
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onNewIntent(android.content.Intent)
-     */
-    @Override
-    protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
-	// Check for a refresh message
-	if (intent.getBooleanExtra("refresh", false))
-	    requestFriends();
+    protected void showLoadingIcon(boolean show) {
+	Log.d(TAG, "showLoadingIcon: " + show);
+	try {
+	    Activity parent = getParent();
+	    if (parent != null)
+		((FriendizerActivity) parent).actionBar.showProgressBar(show);
+	} catch (Exception e) {
+	}
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,9 +139,10 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 			    break;
 			}
 			sortBy = item;
-			runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
+			    @Override
 			    public void run() {
-				friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main thread)
+				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 			    }
 			});
 		    }
@@ -155,6 +152,7 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	    optionsDialog.show();
 	    return true;
 	case R.id.refresh:
+	    showLoadingIcon(true);
 	    requestFriends();
 	    return true;
 	default:
@@ -186,9 +184,10 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 			Log.e(TAG, "", e);
 		    }
 		}
-		runOnUiThread(new Runnable() {
+		handler.post(new Runnable() {
+		    @Override
 		    public void run() {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main thread)
+			friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 		    }
 		});
 	    }

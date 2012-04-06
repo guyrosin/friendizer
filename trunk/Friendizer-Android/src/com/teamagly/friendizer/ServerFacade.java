@@ -1,6 +1,7 @@
 package com.teamagly.friendizer;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public final class ServerFacade {
 	in.close();
     }
 
-    public static long[] nearbyUsers(long userID, double distance) throws Exception {
+    public static long[] nearbyUsers(long userID, double distance) throws IOException {
 	URL url = new URL(serverAddress + "nearbyUsers?userID=" + userID + "&distance=" + distance);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	ArrayList<Long> list = new ArrayList<Long>();

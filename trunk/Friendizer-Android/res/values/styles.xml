@@ -34,7 +34,7 @@
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
-     limitations under the License.
+     limitations under the License.
     -->
 
     <style name="ActionBar">
@@ -57,7 +57,5 @@
         <item name="android:layout_marginRight">1px</item>
         <item name="android:layout_marginLeft">0px</item>
     </style>
-
-    <style name="ActionBarProgressBar" parent="@android:style/Widget.ProgressBar.Small"></style>
 
 </resources>
