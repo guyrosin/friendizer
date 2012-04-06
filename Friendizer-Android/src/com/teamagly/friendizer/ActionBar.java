@@ -9,8 +9,6 @@
 package com.teamagly.friendizer;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -127,19 +125,6 @@ public class ActionBar extends RelativeLayout implements OnClickListener {
     }
 
     /**
-     * Adds a list of {@link Action}s.
-     * 
-     * @param actionList
-     *            the actions to add
-     */
-    public void addActions(ActionList actionList) {
-	int actions = actionList.size();
-	for (int i = 0; i < actions; i++) {
-	    addAction(actionList.get(i));
-	}
-    }
-
-    /**
      * Adds a new {@link Action}.
      * 
      * @param action
@@ -231,12 +216,6 @@ public class ActionBar extends RelativeLayout implements OnClickListener {
 	view.setTag(action);
 	view.setOnClickListener(this);
 	return view;
-    }
-
-    /**
-     * A {@link LinkedList} that holds a list of {@link Action}s.
-     */
-    public static class ActionList extends LinkedList<Action> {
     }
 
     public interface Action {

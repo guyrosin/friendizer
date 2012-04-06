@@ -7,7 +7,6 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.ImageLoader.Type;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -54,6 +53,10 @@ public class MyProfileActivity extends Activity {
     protected void onResume() {
 	super.onResume();
 	showLoadingIcon(true);
+	// Reload the user's details from Facebook
+	Bundle params = new Bundle();
+	params.putString("fields", "name, first_name, picture, birthday, gender");
+	Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
 	// Reload the user's details from our servers (in the background)
 	new Thread(new Runnable() {
 	    public void run() {
@@ -74,7 +77,7 @@ public class MyProfileActivity extends Activity {
 
 	if (Utility.getInstance().userInfo.ownerID > 0) {
 	    // Get the owner's name and picture from Facebook
-	    Bundle params = new Bundle();
+	    params = new Bundle();
 	    params.putString("fields", "name, picture");
 	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.ownerID), params,
 		    new OwnerRequestListener());
@@ -85,21 +88,21 @@ public class MyProfileActivity extends Activity {
      * (non-Javadoc)
      * @see android.app.Activity#onNewIntent(android.content.Intent)
      */
-    @Override
-    protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
-	// Check for a refresh message
-	if (intent.getBooleanExtra("refresh", false))
-	    refresh();
-    }
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//	super.onNewIntent(intent);
+//	// Check for a refresh message
+//	if (intent.getBooleanExtra("refresh", false))
+//	    refresh();
+//    }
 
     /**
      * @param show
-     *            whether to show or hide the loading icon
+     *            whether to show or hide the loading icon (in the parent activity)
      */
     protected void showLoadingIcon(boolean show) {
-	Activity parent = getParent();
 	try {
+	    Activity parent = getParent();
 	    if (parent != null)
 		((FriendizerActivity) parent).actionBar.showProgressBar(show);
 	} catch (Exception e) {
@@ -131,19 +134,11 @@ public class MyProfileActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
 	switch (item.getItemId()) {
 	case R.id.refresh:
-	    refresh();
+	    onResume();
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
 	}
-    }
-
-    private void refresh() {
-	// Reload the user's details from Facebook
-	Bundle params = new Bundle();
-	params.putString("fields", "name, first_name, picture, birthday, gender");
-	Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
-	onResume();
     }
 
     /*

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 public class FBFriendsActivity extends AbstractFriendsListActivity {
     private final String TAG = getClass().getName();
     protected static JSONArray jsonArray;
+    ActionBar actionBar;
 
     /*
      * (non-Javadoc)
@@ -25,12 +27,31 @@ public class FBFriendsActivity extends AbstractFriendsListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	setContentView(R.layout.connections_layout);
+	setContentView(R.layout.friends_layout);
+	actionBar = (ActionBar) findViewById(R.id.actionbar);
+	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		onResume();
+	    }
+	});
+
 	TextView empty = (TextView) findViewById(R.id.forever_alone_text);
 	empty.setText("Forever Alone! (you have no Facebook friends)");
 	gridView = (GridView) findViewById(R.id.gridview);
 	updateListType(list_type);
-	requestFriends();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.teamagly.friendizer.AbstractFriendsListActivity#showLoadingIcon(boolean)
+     */
+    @Override
+    protected void showLoadingIcon(boolean show) {
+	try {
+	    actionBar.showProgressBar(show);
+	} catch (Exception e) {
+	}
     }
 
     /**
@@ -75,24 +96,30 @@ public class FBFriendsActivity extends AbstractFriendsListActivity {
 	    usersList.clear();
 	    LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
 	    final int len = jsonArray.length();
-	    if (jsonArray.length() == 0)
+	    if (len == 0)
 		empty.setVisibility(View.VISIBLE);
 	    else
 		empty.setVisibility(View.GONE);
 
-	    try {
-		for (int i = 0; i < len; i++)
-		    usersList.add(new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL));
-		dialog.dismiss(); // Dismiss the loading dialog
-		runOnUiThread(new Runnable() {
-		    public void run() {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main thread)
-		    }
-		});
-		updateUsersFromFriendizer();
-	    } catch (Exception e) {
-		Log.e(TAG, "", e);
+	    for (int i = 0; i < len; i++) {
+		try {
+		    UserInfo userInfo = new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL);
+		    usersList.add(userInfo);
+		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+		    handler.post(new Runnable() {
+			public void run() {
+			    friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+			}
+		    });
+		} catch (Exception e) {
+		    Log.w(TAG, "", e);
+		}
 	    }
+	    handler.post(new Runnable() {
+		public void run() {
+		    showLoadingIcon(false); // Done loading the data (roughly...)
+		}
+	    });
 	}
     }
 }

@@ -1,6 +1,5 @@
 package com.teamagly.friendizer;
 
-import com.facebook.android.Util;
 import com.teamagly.friendizer.R;
 import android.app.TabActivity;
 import android.content.Context;
@@ -66,13 +65,6 @@ public class FriendizerActivity extends TabActivity {
 		getLocalActivityManager().startActivity(tabHost.getCurrentTabTag(), i);
 	    }
 	});
-	// actionBar.setTitle(R.string.some_title);
-	// Intent homeIntent = new Intent(this, FriendizerActivity.class);
-	// homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-	// actionBar.setHomeAction(new IntentAction(this, homeIntent, R.drawable.friendizer_white));
-	// actionBar.addAction(new ActionBar.NoAction(R.drawable.ic_action_refresh));
-	// actionBar.setProgressBarVisibility(View.VISIBLE);
-	// actionBar.setProgressBarVisibility(View.GONE);
 
 	setTabs();
     }
@@ -85,10 +77,10 @@ public class FriendizerActivity extends TabActivity {
     protected void onResume() {
 	super.onResume();
 
-	// TODO necessary?
-	if (!Utility.getInstance().facebook.isSessionValid()) {
-	    Util.showAlert(this, "Warning", "You must first log in.");
-	}
+	// TODO use in the background (and not here)
+	// if (!Utility.getInstance().facebook.isSessionValid()) {
+	// Util.showAlert(this, "Warning", "You must first log in.");
+	// }
     }
 
     /*

@@ -11,9 +11,10 @@ import com.teamagly.friendizer.ImageLoader.Type;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,6 +37,8 @@ public class FriendProfileActivity extends Activity {
     private TextView owns;
     private TextView ownerName;
     private ImageView ownerPic;
+    ActionBar actionBar;
+    final Handler handler = new Handler();
 
     /*
      * (non-Javadoc)
@@ -46,6 +49,13 @@ public class FriendProfileActivity extends Activity {
 	super.onCreate(savedInstanceState);
 	Intent intent = getIntent();
 	setContentView(R.layout.friend_profile_layout);
+	actionBar = (ActionBar) findViewById(R.id.actionbar);
+	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		onResume();
+	    }
+	});
 	userPic = (ImageView) findViewById(R.id.user_pic);
 	name = (TextView) findViewById(R.id.name);
 	age = (TextView) findViewById(R.id.age);
@@ -101,29 +111,44 @@ public class FriendProfileActivity extends Activity {
     @Override
     protected void onResume() {
 	super.onResume();
+	showLoadingIcon(true);
+	// Reload the user's details from Facebook
+	Bundle params = new Bundle();
+	params.putString("fields", "name, first_name, picture, birthday, gender");
+	Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.id), params, new UserRequestListener());
+
 	// Reload the user's details from our servers (in the background)
 	new Thread(new Runnable() {
 	    public void run() {
 		try {
 		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+		    if (userInfo.ownerID > 0) {
+			// Get the owner's name and picture from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name, picture");
+			Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.ownerID), params,
+				new OwnerRequestListener());
+		    }
 		} catch (Exception e) {
 		    Log.e(TAG, "", e);
 		}
 		// Update the views from the main thread
-		runOnUiThread(new Runnable() {
+		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
 			updateFriendizerViews();
+			showLoadingIcon(false); // Done loading the data (roughly...)
 		    }
 		});
 	    }
 	}).start();
 
-	if (userInfo.ownerID > 0) {
-	    // Get the owner's name and picture from Facebook
-	    Bundle params = new Bundle();
-	    params.putString("fields", "name, picture");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.ownerID), params, new OwnerRequestListener());
+    }
+
+    protected void showLoadingIcon(boolean show) {
+	try {
+	    actionBar.showProgressBar(show);
+	} catch (Exception e) {
 	}
     }
 
@@ -152,20 +177,6 @@ public class FriendProfileActivity extends Activity {
 	gender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
     }
 
-    public boolean onOptionsItemSelected(MenuItem item) {
-	switch (item.getItemId()) {
-	case R.id.refresh:
-	    // Reload the user's details from Facebook
-	    Bundle params = new Bundle();
-	    params.putString("fields", "name, first_name, picture, birthday, gender");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.id), params, new UserRequestListener());
-	    onResume();
-	    return true;
-	default:
-	    return super.onOptionsItemSelected(item);
-	}
-    }
-
     /*
      * Callback for fetching user's details from Facebook
      */
@@ -180,7 +191,7 @@ public class FriendProfileActivity extends Activity {
 		// Update the user's details from Facebook
 		userInfo.updateFacebookData(newUserInfo);
 		// Update the views (has to be done from the main thread)
-		runOnUiThread(new Runnable() {
+		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
 			updateFacebookViews();
@@ -199,14 +210,13 @@ public class FriendProfileActivity extends Activity {
 
 	@Override
 	public void onComplete(final String response, final Object state) {
-	    JSONObject jsonObject;
 	    try {
-		jsonObject = new JSONObject(response);
+		JSONObject jsonObject = new JSONObject(response);
 
 		final String ownerNameStr = jsonObject.getString("name");
 		final String picURL = jsonObject.getString("picture");
 
-		runOnUiThread(new Runnable() {
+		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
 			ownerName.setText(ownerNameStr);
