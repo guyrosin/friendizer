@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -123,8 +124,8 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	case R.id.sort:
 	    final String[] options = { "Alphabeth", "Value", "Matching" };
 	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	    builder.setTitle("Sort By");
-	    builder.setItems(options, new DialogInterface.OnClickListener() {
+	    builder.setTitle("Sort by");
+	    builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
 		public void onClick(DialogInterface dialog, int item) {
 		    if (item != sortBy) {
 			switch (item) {
@@ -151,9 +152,31 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	    AlertDialog optionsDialog = builder.create();
 	    optionsDialog.show();
 	    return true;
-	case R.id.refresh:
-	    showLoadingIcon(true);
-	    requestFriends();
+	case R.id.view_by:
+	    // Show a dialog
+	    final String[] items = { "Grid", "List" };
+	    builder = new AlertDialog.Builder(this);
+	    builder.setTitle("View by");
+	    int i_list_type = 0;
+	    if (list_type)
+		i_list_type = 1;
+	    builder.setSingleChoiceItems(items, i_list_type, new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface dialog, int item) {
+		    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+		    boolean choise = false; // Default is grid
+		    if (item == 1) // The user chose list
+			choise = true;
+		    if (list_type != choise) { // If the user changed the type, redraw the view
+			list_type = choise;
+			updateListType(choise);
+			// Update the preference
+			editor.putBoolean("friends_list_type", choise);
+			editor.commit();
+		    }
+		    dialog.dismiss();
+		}
+	    });
+	    builder.show();
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
