@@ -20,7 +20,7 @@ import android.preference.PreferenceManager;
  */
 public class FriendsPrefs extends PreferenceActivity {
     SharedPreferences prefs;
-    OnSharedPreferenceChangeListener listener;
+    //OnSharedPreferenceChangeListener listener;
     ProgressDialog dialog;
 
     @Override
@@ -29,16 +29,16 @@ public class FriendsPrefs extends PreferenceActivity {
 	addPreferencesFromResource(R.xml.settings);
 	prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-	listener = new OnSharedPreferenceChangeListener() {
-	    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-		SharedPreferences.Editor editor = prefs.edit();
-		if (key.equals("friends_list_type")) {
-		    CheckBoxPreference friendsListType = (CheckBoxPreference) getPreferenceScreen().findPreference(key);
-		    editor.putBoolean(key, friendsListType.isChecked());
-		    editor.commit();
-		}
-	    }
-	};
+//	listener = new OnSharedPreferenceChangeListener() {
+//	    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+//		SharedPreferences.Editor editor = prefs.edit();
+//		if (key.equals("friends_list_type")) {
+//		    CheckBoxPreference friendsListType = (CheckBoxPreference) getPreferenceScreen().findPreference(key);
+//		    editor.putBoolean(key, friendsListType.isChecked());
+//		    editor.commit();
+//		}
+//	    }
+//	};
 	Preference logoutBtn = (Preference) findPreference("logout");
 	logoutBtn.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference preference) {

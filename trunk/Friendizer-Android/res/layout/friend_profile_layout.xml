@@ -65,8 +65,8 @@
 
                     <ImageView
                         android:id="@+id/user_pic"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
                         android:layout_alignParentLeft="true"
                         android:contentDescription="Profile Picture" />
 

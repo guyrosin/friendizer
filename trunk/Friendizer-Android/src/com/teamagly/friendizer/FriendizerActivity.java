@@ -1,6 +1,7 @@
 package com.teamagly.friendizer;
 
 import com.teamagly.friendizer.R;
+
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,10 +20,6 @@ import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-/**
- * @author Guy
- * 
- */
 public class FriendizerActivity extends TabActivity {
     private final String TAG = getClass().getName();
     private TabHost tabHost;
@@ -58,11 +55,7 @@ public class FriendizerActivity extends TabActivity {
 	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
 	    @Override
 	    public void onClick(View v) {
-		// Tell the current child activity to refresh
-		Intent i = new Intent().setClass(FriendizerActivity.this, getCurrentActivity().getClass());
-		i.putExtra("refresh", true);
-		i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		getLocalActivityManager().startActivity(tabHost.getCurrentTabTag(), i);
+		tellCurrentTabToRefresh();
 	    }
 	});
 
@@ -121,7 +114,14 @@ public class FriendizerActivity extends TabActivity {
 	spec.setIndicator(tabIndicator);
 	spec.setContent(intent);
 	tabHost.addTab(spec);
+    }
 
+    protected void tellCurrentTabToRefresh() {
+	// Tell the current child activity to refresh
+	Intent i = new Intent().setClass(FriendizerActivity.this, getCurrentActivity().getClass());
+	i.putExtra("refresh", true);
+	i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+	getLocalActivityManager().startActivity(tabHost.getCurrentTabTag(), i);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -133,6 +133,9 @@ public class FriendizerActivity extends TabActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
 	switch (item.getItemId()) {
+	case R.id.refresh:
+	    tellCurrentTabToRefresh();
+	    return true;
 	case R.id.settings_title:
 	    startActivity(new Intent(this, FriendsPrefs.class));
 	    return true;

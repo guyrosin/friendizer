@@ -20,7 +20,8 @@
     <string name="made_by">Made By</string>
     <string name="team_agly">Team AGLY</string>
     <string name="facebook_friends">Facebook Friends</string>
-    <string name="sort_by">Sort By</string>
+    <string name="sort_by">Sort by</string>
+    <string name="view_by">View by</string>
     <string name="facebook_login">Login with Facebook</string>
     <string name="actionbar_activity_not_found">Failed to open intent</string>
 

@@ -9,7 +9,6 @@ import com.teamagly.friendizer.ImageLoader.Type;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -84,18 +83,6 @@ public class MyProfileActivity extends Activity {
 	}
     }
 
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onNewIntent(android.content.Intent)
-     */
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//	super.onNewIntent(intent);
-//	// Check for a refresh message
-//	if (intent.getBooleanExtra("refresh", false))
-//	    refresh();
-//    }
-
     /**
      * @param show
      *            whether to show or hide the loading icon (in the parent activity)
@@ -129,16 +116,6 @@ public class MyProfileActivity extends Activity {
 	userName.setText(userInfo.name);
 	age.setText(userInfo.age);
 	gender.setText(userInfo.gender);
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-	switch (item.getItemId()) {
-	case R.id.refresh:
-	    onResume();
-	    return true;
-	default:
-	    return super.onOptionsItemSelected(item);
-	}
     }
 
     /*

@@ -220,7 +220,7 @@ public class FriendProfileActivity extends Activity {
 		    @Override
 		    public void run() {
 			ownerName.setText(ownerNameStr);
-			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic);
+			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
 		    }
 		});
 	    } catch (Exception e) {
