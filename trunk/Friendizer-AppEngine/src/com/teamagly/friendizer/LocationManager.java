@@ -2,82 +2,84 @@ package com.teamagly.friendizer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
+
+import org.json.JSONArray;
+
+import com.google.android.c2dm.server.PMF;
 
 @SuppressWarnings("serial")
 public class LocationManager extends HttpServlet {
-	private HashMap<Long, UserLocation> onlineUsers;
-
-	public LocationManager() {
-		onlineUsers = new HashMap<Long, UserLocation>();
-	}
-
 	@Override
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		if (request.getRequestURI().endsWith("/changeLocation"))
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String address = request.getRequestURI();
+		String servlet = address.substring(address.lastIndexOf("/") + 1);
+		if (servlet.intern() == "changeLocation")
 			changeLocation(request, response);
-		else if (request.getRequestURI().endsWith("/exit"))
-			exit(request, response);
 		else
 			nearbyUsers(request, response);
 	}
 
-	private void changeLocation(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	@SuppressWarnings("unchecked")
+	private void changeLocation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
-		double xCord = Double.parseDouble(request.getParameter("xCord"));
-		double yCord = Double.parseDouble(request.getParameter("yCord"));
-		UserLocation location = onlineUsers.get(userID);
-		if (location == null) {
-			onlineUsers.put(userID, new UserLocation(xCord, yCord));
-			response.getWriter().println("User added");
-		} else {
-			location.setXCord(xCord);
-			location.setYCord(yCord);
-			response.getWriter().println("User changed");
-		}
-	}
-
-	private void exit(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		long userID = Long.parseLong(request.getParameter("userID"));
-		UserLocation location = onlineUsers.get(userID);
-		if (location == null)
-			response.getWriter().println("User doesn't exist");
-		else {
-			onlineUsers.remove(userID);
-			response.getWriter().println("User deleted");
-		}
-	}
-
-	private void nearbyUsers(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		long userID = Long.parseLong(request.getParameter("userID"));
-		double distance = Double.parseDouble(request.getParameter("distance"));
+		double latitude = Double.parseDouble(request.getParameter("latitude"));
+		double longitude = Double.parseDouble(request.getParameter("longitude"));
 		PrintWriter out = response.getWriter();
-		UserLocation location = onlineUsers.get(userID);
-		if (location == null) {
-			out.println("User doesn't exist");
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(User.class);
+		query.setFilter("id == " + userID);
+		List<User> result = (List<User>) query.execute();
+		query.closeAll();
+		if (result.isEmpty()) {
+			out.println("This user doesn't exist");
 			return;
 		}
-		for (Entry<Long, UserLocation> entry : onlineUsers.entrySet()) {
-			if ((entry.getKey() != userID)
-					&& (Math.pow(
-							entry.getValue().getXCord() - location.getXCord(),
-							2)
-							+ Math.pow(
-									entry.getValue().getYCord()
-											- location.getYCord(), 2) <= Math
-								.pow(distance, 2))) {
-				out.println(entry.getKey());
+		User user = result.get(0);
+		user.setLatitude(latitude);
+		user.setLongitude(longitude);
+		user.setSince(new Date());
+		pm.close();
+		out.println("The user location was changed");
+	}
+
+	@SuppressWarnings("unchecked")
+	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		PrintWriter out = response.getWriter();
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(User.class);
+		query.setFilter("id == " + userID);
+		List<User> result = (List<User>) query.execute();
+		query.closeAll();
+		if (result.isEmpty()) {
+			out.println("This user doesn't exist");
+			return;
+		}
+		User user = result.get(0);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.MINUTE, -30);
+		Date updated = cal.getTime();
+		query = pm.newQuery(User.class);
+		query.setFilter("since > updatedDate");
+		query.declareParameters("java.util.Date updatedDate");
+		result = (List<User>) query.execute(updated);
+		query.closeAll();
+		JSONArray nearbyUsers = new JSONArray();
+		for (User nearbyUser : result) {
+			if ((nearbyUser.getId() != userID) && (user.getLatitude() - nearbyUser.getLatitude()) * (user.getLatitude() - nearbyUser.getLatitude()) + 
+					(user.getLongitude() - nearbyUser.getLongitude()) * (user.getLongitude() - nearbyUser.getLongitude()) <= 1000) {
+				nearbyUsers.put(nearbyUser.toJSONObject());
 			}
 		}
+		pm.close();
+		out.println(nearbyUsers);
 	}
 }

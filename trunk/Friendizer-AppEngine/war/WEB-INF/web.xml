@@ -40,7 +40,7 @@
   
   <servlet>
   	<servlet-name>LocationManager</servlet-name>
-  	<servlet-class>com.teamagly.friendizer.server.LocationManager</servlet-class>
+  	<servlet-class>com.teamagly.friendizer.LocationManager</servlet-class>
   </servlet>
   
   <servlet-mapping>
@@ -52,7 +52,7 @@
   
   <servlet>
   	<servlet-name>MarketManager</servlet-name>
-  	<servlet-class>com.teamagly.friendizer.server.MarketManager</servlet-class>
+  	<servlet-class>com.teamagly.friendizer.MarketManager</servlet-class>
   </servlet>
   
   <servlet-mapping>
