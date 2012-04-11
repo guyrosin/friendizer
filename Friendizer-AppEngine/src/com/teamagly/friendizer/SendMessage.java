@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.teamagly.friendizer.server;
+package com.teamagly.friendizer;
 
 import com.google.android.c2dm.server.C2DMessaging;
 import com.google.android.c2dm.server.PMF;
