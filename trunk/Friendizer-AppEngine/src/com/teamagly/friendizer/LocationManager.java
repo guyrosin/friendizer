@@ -1,4 +1,4 @@
-package com.teamagly.friendizer.server;
+package com.teamagly.friendizer;
 
 import java.io.IOException;
 import java.io.PrintWriter;

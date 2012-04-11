@@ -1,4 +1,4 @@
-package com.teamagly.friendizer.server;
+package com.teamagly.friendizer;
 
 public class UserLocation {
 	private double xCord;
