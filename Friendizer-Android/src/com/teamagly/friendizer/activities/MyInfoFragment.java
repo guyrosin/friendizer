@@ -3,24 +3,18 @@
  */
 package com.teamagly.friendizer.activities;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.*;
+import android.widget.*;
 
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.UserInfo;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.utils.*;
 import com.teamagly.friendizer.utils.ImageLoader.Type;
 
 /**
@@ -46,19 +40,19 @@ public class MyInfoFragment extends Fragment {
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-	// Inflate the layout for this fragment
-	View view = inflater.inflate(R.layout.profile_info_layout, container, false);
-	userPic = (ImageView) view.findViewById(R.id.user_pic);
-	userName = (TextView) view.findViewById(R.id.name);
-	age = (TextView) view.findViewById(R.id.age);
-	gender = (TextView) view.findViewById(R.id.gender);
-	value = (TextView) view.findViewById(R.id.value);
-	money = (TextView) view.findViewById(R.id.money);
-	owns = (TextView) view.findViewById(R.id.owns);
-	ownerName = (TextView) view.findViewById(R.id.owner_name);
-	ownerPic = (ImageView) view.findViewById(R.id.owner_pic);
-	updateViews();
-	return view;
+		// Inflate the layout for this fragment
+		View view = inflater.inflate(R.layout.profile_info_layout, container, false);
+		userPic = (ImageView) view.findViewById(R.id.user_pic);
+		userName = (TextView) view.findViewById(R.id.name);
+		age = (TextView) view.findViewById(R.id.age);
+		gender = (TextView) view.findViewById(R.id.gender);
+		value = (TextView) view.findViewById(R.id.value);
+		money = (TextView) view.findViewById(R.id.money);
+		owns = (TextView) view.findViewById(R.id.owns);
+		ownerName = (TextView) view.findViewById(R.id.owner_name);
+		ownerPic = (ImageView) view.findViewById(R.id.owner_pic);
+		updateViews();
+		return view;
     }
 
     /*
@@ -67,59 +61,58 @@ public class MyInfoFragment extends Fragment {
      */
     @Override
     public void onResume() {
-	super.onResume();
-	showLoadingIcon(true);
-	// Reload the user's details from Facebook
-	Bundle params = new Bundle();
-	params.putString("fields", "name, first_name, picture, birthday, gender");
-	Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
-	// Reload the user's details from our servers (in the background)
-	new Thread(new Runnable() {
-	    public void run() {
-		try {
-		    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo.id));
-		    // Update the view from the main thread
-		    getActivity().runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-			    updateFriendizerViews();
-			}
-		    });
-		} catch (Exception e) {
-		    Log.w(TAG, "", e);
+		super.onResume();
+		showLoadingIcon(true);
+		// Reload the user's details from Facebook
+		Bundle params = new Bundle();
+		params.putString("fields", "name, first_name, picture, birthday, gender");
+		Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
+		// Reload the user's details from our servers (in the background)
+		new Thread(new Runnable() {
+		    public void run() {
+				try {
+				    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo.id));
+				    // Update the view from the main thread
+				    getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+						    updateFriendizerViews();
+						}
+				    });
+				} catch (Exception e) {
+				    Log.w(TAG, "", e);
+				}
+		    }
+		}).start();
+	
+		if (Utility.getInstance().userInfo.ownerID > 0) {
+		    // Get the owner's name and picture from Facebook
+		    params = new Bundle();
+		    params.putString("fields", "name, picture");
+		    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.ownerID), params, new OwnerRequestListener());
 		}
-	    }
-	}).start();
-
-	if (Utility.getInstance().userInfo.ownerID > 0) {
-	    // Get the owner's name and picture from Facebook
-	    params = new Bundle();
-	    params.putString("fields", "name, picture");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.ownerID), params,
-		    new OwnerRequestListener());
-	}
     }
 
     protected void updateViews() {
-	updateFriendizerViews();
-	updateFacebookViews();
+		updateFriendizerViews();
+		updateFacebookViews();
     }
 
     protected void updateFriendizerViews() {
-	UserInfo userInfo = Utility.getInstance().userInfo;
-	value.setText(String.valueOf(userInfo.value));
-	money.setText(String.valueOf(userInfo.money));
-	if (userInfo.ownsList != null)
-	    owns.setText(String.valueOf(userInfo.ownsList.length));
-	showLoadingIcon(false);
+		UserInfo userInfo = Utility.getInstance().userInfo;
+		value.setText(String.valueOf(userInfo.value));
+		money.setText(String.valueOf(userInfo.money));
+		if (userInfo.ownsList != null)
+		    owns.setText(String.valueOf(userInfo.ownsList.length));
+		showLoadingIcon(false);
     }
 
     protected void updateFacebookViews() {
-	UserInfo userInfo = Utility.getInstance().userInfo;
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
-	userName.setText(userInfo.name);
-	age.setText(userInfo.age);
-	gender.setText(userInfo.gender);
+		UserInfo userInfo = Utility.getInstance().userInfo;
+		Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
+		userName.setText(userInfo.name);
+		age.setText(userInfo.age);
+		gender.setText(userInfo.gender);
     }
 
     /**
@@ -127,64 +120,64 @@ public class MyInfoFragment extends Fragment {
      *            whether to show or hide the loading icon (in the parent activity)
      */
     protected void showLoadingIcon(boolean show) {
-	try {
-	    Activity parent = getActivity().getParent();
-	    if (parent != null)
-		((FriendizerActivity) parent).actionBar.showProgressBar(show);
-	} catch (Exception e) {
-	}
+		try {
+		    Activity parent = getActivity().getParent();
+		    if (parent != null)
+		    	((FriendizerActivity) parent).actionBar.showProgressBar(show);
+		} catch (Exception e) {
+		}
     }
 
     /*
      * Callback for fetching user's details from Facebook
      */
     public class UserRequestListener extends BaseRequestListener {
-
-	@Override
-	public void onComplete(final String response, final Object state) {
-	    JSONObject jsonObject;
-	    try {
-		jsonObject = new JSONObject(response);
-		final UserInfo userInfo = new UserInfo(jsonObject);
-		// Update the user's details from Facebook
-		Utility.getInstance().userInfo.updateFacebookData(userInfo);
-		// Update the views (has to be done from the main thread)
-		getActivity().runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			updateFacebookViews();
+	
+		@Override
+		public void onComplete(final String response, final Object state) {
+		    JSONObject jsonObject;
+		    try {
+				jsonObject = new JSONObject(response);
+				final UserInfo userInfo = new UserInfo(jsonObject);
+				// Update the user's details from Facebook
+				Utility.getInstance().userInfo.updateFacebookData(userInfo);
+				// Update the views (has to be done from the main thread)
+				getActivity().runOnUiThread(new Runnable() {
+				    @Override
+				    public void run() {
+				    	updateFacebookViews();
+				    }
+				});
+		    } catch (JSONException e) {
+		    	Log.w(TAG, "", e);
 		    }
-		});
-	    } catch (JSONException e) {
-		Log.w(TAG, "", e);
-	    }
-	}
+		}
     }
 
     /*
      * Callback for fetching owner's details from Facebook
      */
     public class OwnerRequestListener extends BaseRequestListener {
-
-	@Override
-	public void onComplete(final String response, final Object state) {
-	    JSONObject jsonObject;
-	    try {
-		jsonObject = new JSONObject(response);
-
-		final String ownerNameStr = jsonObject.getString("name");
-		final String picURL = jsonObject.getString("picture");
-
-		getActivity().runOnUiThread(new Runnable() {
-		    @Override
-		    public void run() {
-			ownerName.setText(ownerNameStr);
-			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+	
+		@Override
+		public void onComplete(final String response, final Object state) {
+		    JSONObject jsonObject;
+		    try {
+				jsonObject = new JSONObject(response);
+		
+				final String ownerNameStr = jsonObject.getString("name");
+				final String picURL = jsonObject.getString("picture");
+		
+				getActivity().runOnUiThread(new Runnable() {
+				    @Override
+				    public void run() {
+						ownerName.setText(ownerNameStr);
+						Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+				    }
+				});
+		    } catch (Exception e) {
+		    	Log.w(TAG, "", e);
 		    }
-		});
-	    } catch (Exception e) {
-		Log.w(TAG, "", e);
-	    }
-	}
+		}
     }
 }
