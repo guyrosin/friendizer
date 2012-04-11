@@ -21,7 +21,7 @@
 
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Friendizer.html</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
 
   <!-- Other servlets -->
@@ -68,7 +68,7 @@
   <!--  Require user login for the .html welcome page -->
   <security-constraint>
     <web-resource-collection>
-      <url-pattern>/Friendizer.html</url-pattern>
+      <url-pattern>/index.html</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
