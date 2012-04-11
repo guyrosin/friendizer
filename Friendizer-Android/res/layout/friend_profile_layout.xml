@@ -4,7 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <com.teamagly.friendizer.ActionBar
+    <com.teamagly.friendizer.widgets.ActionBar
         android:id="@+id/actionbar"
         style="@style/ActionBar" />
 

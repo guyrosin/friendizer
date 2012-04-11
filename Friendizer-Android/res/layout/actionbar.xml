@@ -66,7 +66,7 @@
             android:paddingRight="7dip"
             android:visibility="gone" />
 
-        <com.teamagly.friendizer.ScrollingTextView
+        <com.teamagly.friendizer.widgets.ScrollingTextView
             android:id="@+id/actionbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
