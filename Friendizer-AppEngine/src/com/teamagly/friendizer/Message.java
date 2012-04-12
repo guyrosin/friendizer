@@ -1,64 +1,138 @@
-/*******************************************************************************
- * Copyright 2011 Google Inc. All Rights Reserved.
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
 package com.teamagly.friendizer;
 
-import java.util.logging.Logger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
-import javax.servlet.ServletContext;
+import javax.jdo.annotations.IdGeneratorStrategy;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Date;
+
+@PersistenceCapable
 public class Message {
+	//TODO: Add time of message
 
-  private static final Logger log = Logger.getLogger(Message.class.getName());
+	@PrimaryKey
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+	private Long id;
+	
+	@Persistent
+	private long source;
+	
+	@Persistent
+	private long destination;
+	
+	@Persistent
+	private String text;
+	
+	@Persistent
+	private Date time;
+	
+	@Persistent
+	private boolean unread;
+	
+	
+	
+	public Message() {
+		
+	}
+	
+	public Message(long source, long destination, String text) {
+		super();
+		this.source = source;
+		this.destination = destination;
+		this.text = text;
+		this.unread = true;
+		this.time = new Date();
+	}
+	
+	public Message(String jsonString) throws JSONException {
+		JSONObject obj = new JSONObject(jsonString);
+		this.id = obj.getLong("id");
+		this.source = obj.getLong("source");
+		this.destination = obj.getLong("destination");
+		this.text = obj.getString("text");
+		this.unread = obj.getBoolean("unread");
+		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		try {
+			this.time = format.parse(obj.getString("time"));
+		} catch (ParseException e) {
+			throw new JSONException("JSONObject[\"time\"] is not a date.");
+		}
+	}
+	
+	
+	@Override
+	public String toString() {
+		return toJSONObject().toString();
+	}
+	
+	public JSONObject toJSONObject() {
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("id", id);
+			obj.put("source", source);
+			obj.put("destination", destination);
+			obj.put("text", text);
+			obj.put("unread", unread);
+			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+			obj.put("time", format.format(time));
+		} catch (JSONException e) {
+		}
+		return obj;
+	}
+	
+	public Long getId() {
+		return id;
+	}
 
-  private final ServletContext context;
+	public void setId(Long key) {
+		this.id = key;
+	}
 
-  String recipient;
+	public long getSource() {
+		return source;
+	}
 
-  String message;
+	public void setSource(long source) {
+		this.source = source;
+	}
 
-  public Message(ServletContext context) {
-    this.context = context;
-  }
+	public long getDestination() {
+		return destination;
+	}
 
-  public String getRecipient() {
-    return recipient;
-  }
+	public void setDestination(long destination) {
+		this.destination = destination;
+	}
 
-  public String getMessage() {
-    return message;
-  }
+	public String getText() {
+		return text;
+	}
 
-  public String send() {
-    log.info("send " + this);
-    try {
-      return SendMessage.sendMessage(context, recipient, message);
-    } catch (Exception e) {
-      return "Failure: Got exception in send: " + e.getMessage();
-    }
-  }
+	public void setText(String text) {
+		this.text = text;
+	}
 
-  public void setRecipient(String recipient) {
-    this.recipient = recipient;
-  }
+	public boolean isUnread() {
+		return unread;
+	}
 
-  public void setMessage(String message) {
-    this.message = message;
-  }
+	public void setUnread(boolean unread) {
+		this.unread = unread;
+	}
 
-  @Override
-  public String toString() {
-    return "Message [recipient=" + recipient + ", message=" + message + "]";
-  }
+	public Date getTime() {
+		return time;
+	}
+
+	public void setTime(Date time) {
+		this.time = time;
+	}
+
 }

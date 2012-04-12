@@ -62,6 +62,18 @@
   	<url-pattern>/ownList</url-pattern>
   	<url-pattern>/buy</url-pattern>
   </servlet-mapping>
+  
+    <servlet>
+  	<servlet-name>InboxManager</servlet-name>
+  	<servlet-class>com.teamagly.friendizer.InboxManager</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>InboxManager</servlet-name>
+  	<url-pattern>/send</url-pattern>
+  	<url-pattern>/read</url-pattern>
+  	<url-pattern>/unread</url-pattern>
+  </servlet-mapping>
 
   <!-- Security -->
 
