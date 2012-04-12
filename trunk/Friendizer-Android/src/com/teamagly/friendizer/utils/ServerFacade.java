@@ -8,6 +8,7 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import com.teamagly.friendizer.model.Message;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.UserInfo;
 
@@ -73,4 +74,49 @@ public final class ServerFacade {
 	}
 	return usersID;
     }
+    
+    public static void sendMessage(long source, long destination, String text) throws Exception {
+		URL url = new URL(serverAddress + "send?src=" + source
+				+ "&dest=" + destination + "&text=" + text);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		in.close();
+	}
+    
+    public static Message[] readMessages(long source, long destination,
+    		long from, long to) throws Exception {
+    	
+		URL url = new URL(serverAddress + "read?src=" + source
+				+ "&dest=" + destination + "&from=" + from + "&to=" + to);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		
+		JSONArray JsonMessages = new JSONArray(in.readLine());	
+		in.close();
+		
+		Message[] messages = new Message[JsonMessages.length()];
+		
+		for (int i = 0; i < JsonMessages.length(); i++) {
+			Message message = new Message(JsonMessages.getJSONObject(i));
+			messages[i] = message;
+		}
+		
+		return messages;
+		
+	}
+    
+    public static Message[] readUnreaded(long source) throws Exception {
+		URL url = new URL(serverAddress + "unread?src=" + source);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		
+		JSONArray JsonMessages = new JSONArray(in.readLine());	
+		in.close();
+		
+		Message[] messages = new Message[JsonMessages.length()];
+		
+		for (int i = 0; i < JsonMessages.length(); i++) {
+			Message message = new Message(JsonMessages.getJSONObject(i));
+			messages[i] = message;
+		}
+		
+		return messages;
+	}
 }
