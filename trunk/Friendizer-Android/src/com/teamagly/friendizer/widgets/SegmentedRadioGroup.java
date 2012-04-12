@@ -17,6 +17,7 @@
 package com.teamagly.friendizer.widgets;
 
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.R.drawable;
 
 import android.content.Context;
 import android.util.AttributeSet;

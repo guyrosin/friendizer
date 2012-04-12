@@ -18,7 +18,8 @@ package com.teamagly.friendizer.utils;
 
 import com.facebook.android.Facebook;
 
-import android.content.*;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class SessionStore {
