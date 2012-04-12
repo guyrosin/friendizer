@@ -1,6 +1,9 @@
 package com.teamagly.friendizer.activities;
 
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.R.id;
+import com.teamagly.friendizer.R.layout;
+import com.teamagly.friendizer.R.string;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,58 +19,58 @@ public class DashboardActivity extends Activity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.dashboard);
-	
-		// Attach event handlers
-		findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
-		    public void onClick(View view) {
-				Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-				intent.putExtra("to", R.string.my_profile);
-				startActivity(intent);
-		    }
-	
-		});
-	
-		// Attach event handlers
-		findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
-		    public void onClick(View view) {
-				Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-				intent.putExtra("to", R.string.my_profile);
-				startActivity(intent);
-		    }
-	
-		});
-	
-		// Attach event handlers
-		findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
-		    public void onClick(View view) {
-				Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-				intent.putExtra("to", R.string.my_profile);
-				startActivity(intent);
-		    }
-	
-		});
-	
-		// Attach event handlers
-		findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
-		    public void onClick(View view) {
-				Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-				intent.putExtra("to", R.string.my_profile);
-				startActivity(intent);
-		    }
-	
-		});
-	
-		// Attach event handlers
-		findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
-		    public void onClick(View view) {
-				Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-				intent.putExtra("to", R.string.my_profile);
-				startActivity(intent);
-		    }
-	
-		});
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.dashboard);
+
+	// Attach event handlers
+	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
+	    public void onClick(View view) {
+		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
+		intent.putExtra("to", R.string.my_profile);
+		startActivity(intent);
+	    }
+
+	});
+
+	// Attach event handlers
+	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
+	    public void onClick(View view) {
+		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
+		intent.putExtra("to", R.string.my_profile);
+		startActivity(intent);
+	    }
+
+	});
+
+	// Attach event handlers
+	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
+	    public void onClick(View view) {
+		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
+		intent.putExtra("to", R.string.my_profile);
+		startActivity(intent);
+	    }
+
+	});
+
+	// Attach event handlers
+	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
+	    public void onClick(View view) {
+		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
+		intent.putExtra("to", R.string.my_profile);
+		startActivity(intent);
+	    }
+
+	});
+
+	// Attach event handlers
+	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
+	    public void onClick(View view) {
+		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
+		intent.putExtra("to", R.string.my_profile);
+		startActivity(intent);
+	    }
+
+	});
 
     }
 }

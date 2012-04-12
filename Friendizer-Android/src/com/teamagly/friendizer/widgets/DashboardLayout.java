@@ -18,7 +18,8 @@ package com.teamagly.friendizer.widgets;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.*;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Custom layout that arranges children in a grid-like manner, optimizing for even horizontal and

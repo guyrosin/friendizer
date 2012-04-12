@@ -4,7 +4,10 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
 
 import android.os.Bundle;
-import android.support.v4.app.*;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 
@@ -21,11 +24,11 @@ public class MyProfileActivity extends FragmentActivity implements OnCheckedChan
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.profile_layout);
-		segmentedControl = (SegmentedRadioGroup) findViewById(R.id.segment_text);
-		segmentedControl.setOnCheckedChangeListener(this);
-		navigateTo(new MyInfoFragment());
+	super.onCreate(savedInstanceState);
+	setContentView(R.layout.profile_layout);
+	segmentedControl = (SegmentedRadioGroup) findViewById(R.id.segment_text);
+	segmentedControl.setOnCheckedChangeListener(this);
+	navigateTo(new MyInfoFragment());
     }
 
     /*
@@ -34,13 +37,13 @@ public class MyProfileActivity extends FragmentActivity implements OnCheckedChan
      */
     @Override
     public void onCheckedChanged(RadioGroup group, int checkedId) {
-		if (checkedId == R.id.button_one) {
-		    navigateTo(new MyInfoFragment());
-		} else if (checkedId == R.id.button_two) {
-		    navigateTo(new AchievmentsFragment());
-		} else if (checkedId == R.id.button_three) {
-		    navigateTo(new ActionHistoryFragment());
-		}
+	if (checkedId == R.id.button_one) {
+	    navigateTo(new MyInfoFragment());
+	} else if (checkedId == R.id.button_two) {
+	    navigateTo(new AchievmentsFragment());
+	} else if (checkedId == R.id.button_three) {
+	    navigateTo(new ActionHistoryFragment());
+	}
     }
 
     /**
@@ -49,9 +52,9 @@ public class MyProfileActivity extends FragmentActivity implements OnCheckedChan
      * @param newFragment
      */
     protected void navigateTo(Fragment newFragment) {
-		FragmentManager manager = getSupportFragmentManager();
-		FragmentTransaction ft = manager.beginTransaction();
-		ft.replace(R.id.content, newFragment);
-		ft.commit();
+	FragmentManager manager = getSupportFragmentManager();
+	FragmentTransaction ft = manager.beginTransaction();
+	ft.replace(R.id.content, newFragment);
+	ft.commit();
     }
 }
