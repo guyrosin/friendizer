@@ -73,6 +73,16 @@
   	<url-pattern>/getUnread</url-pattern>
   	<url-pattern>/getInbox</url-pattern>
   </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>AchievementsManager</servlet-name>
+  	<servlet-class>com.teamagly.friendizer.AchievementsManager</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>AchievementsManager</servlet-name>
+  	<url-pattern>/achievements</url-pattern>
+  </servlet-mapping>
 
   <!-- Security -->
 
