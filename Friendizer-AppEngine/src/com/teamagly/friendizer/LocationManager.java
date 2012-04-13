@@ -1,7 +1,6 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -31,37 +30,31 @@ public class LocationManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		double latitude = Double.parseDouble(request.getParameter("latitude"));
 		double longitude = Double.parseDouble(request.getParameter("longitude"));
-		PrintWriter out = response.getWriter();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
 		List<User> result = (List<User>) query.execute();
 		query.closeAll();
-		if (result.isEmpty()) {
-			out.println("This user doesn't exist");
-			return;
-		}
+		if (result.isEmpty())
+			throw new ServletException("This user doesn't exist");
 		User user = result.get(0);
 		user.setLatitude(latitude);
 		user.setLongitude(longitude);
 		user.setSince(new Date());
 		pm.close();
-		out.println("The user location was changed");
+		response.getWriter().println("The user location was changed");
 	}
 
 	@SuppressWarnings("unchecked")
 	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
-		PrintWriter out = response.getWriter();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
 		List<User> result = (List<User>) query.execute();
 		query.closeAll();
-		if (result.isEmpty()) {
-			out.println("This user doesn't exist");
-			return;
-		}
+		if (result.isEmpty())
+			throw new ServletException("This user doesn't exist");
 		User user = result.get(0);
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
@@ -80,6 +73,6 @@ public class LocationManager extends HttpServlet {
 			}
 		}
 		pm.close();
-		out.println(nearbyUsers);
+		response.getWriter().println(nearbyUsers);
 	}
 }

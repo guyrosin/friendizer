@@ -41,17 +41,16 @@ public class User {
 		this.since = since;
 	}
 	
-	public User(String jsonString) throws JSONException {
-		JSONObject obj = new JSONObject(jsonString);
-		this.id = obj.getLong("id");
-		this.owner = obj.getLong("owner");
-		this.value = obj.getLong("value");
-		this.money = obj.getLong("money");
-		this.latitude = obj.getDouble("latitude");
-		this.longitude = obj.getDouble("longitude");
+	public User(JSONObject obj) throws JSONException {
+		id = obj.getLong("id");
+		owner = obj.getLong("owner");
+		value = obj.getLong("value");
+		money = obj.getLong("money");
+		latitude = obj.getDouble("latitude");
+		longitude = obj.getDouble("longitude");
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		try {
-			this.since = format.parse(obj.getString("since"));
+			since = format.parse(obj.getString("since"));
 		} catch (ParseException e) {
 			throw new JSONException("JSONObject[\"since\"] is not a date.");
 		}

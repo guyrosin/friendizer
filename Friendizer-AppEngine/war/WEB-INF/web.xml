@@ -46,7 +46,6 @@
   <servlet-mapping>
   	<servlet-name>LocationManager</servlet-name>
   	<url-pattern>/changeLocation</url-pattern>
-  	<url-pattern>/exit</url-pattern>
   	<url-pattern>/nearbyUsers</url-pattern>
   </servlet-mapping>
   
@@ -57,7 +56,6 @@
   
   <servlet-mapping>
   	<servlet-name>MarketManager</servlet-name>
-  	<url-pattern>/register</url-pattern>
   	<url-pattern>/userDetails</url-pattern>
   	<url-pattern>/ownList</url-pattern>
   	<url-pattern>/buy</url-pattern>
