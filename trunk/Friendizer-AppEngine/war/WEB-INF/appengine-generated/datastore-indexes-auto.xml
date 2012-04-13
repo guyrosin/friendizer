@@ -1,12 +1,4 @@
-<!-- Indices written at Wed, 11 Apr 2012 15:21:26 UTC -->
+<!-- Indices written at Fri, 13 Apr 2012 16:10:34 UTC -->
 
-<datastore-indexes>
+<datastore-indexes/>
 
-    <!-- Used 2 times in query history -->
-    <datastore-index kind="Message" ancestor="false" source="auto">
-        <property name="source" direction="asc"/>
-        <property name="unread" direction="asc"/>
-        <property name="__key__" direction="desc"/>
-    </datastore-index>
-
-</datastore-indexes>
