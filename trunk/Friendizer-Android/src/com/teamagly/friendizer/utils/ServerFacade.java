@@ -1,16 +1,11 @@
 package com.teamagly.friendizer.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.json.*;
 
-import com.teamagly.friendizer.model.Message;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.*;
 
 public final class ServerFacade {
     private static final String serverAddress = "http://friendizer.appspot.com/";
@@ -32,7 +27,7 @@ public final class ServerFacade {
     public static UserInfo userDetails(long userID) throws Exception {
 	URL url = new URL(serverAddress + "userDetails?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-	User user = new User(in.readLine());
+	User user = new User(new JSONObject(in.readLine()));
 	in.close();
 	return new UserInfo(userID, user.getValue(), user.getMoney(), user.getOwner(), ownList(userID));
     }
@@ -44,7 +39,7 @@ public final class ServerFacade {
 	in.close();
 	long[] usersID = new long[users.length()];
 	for (int i = 0; i < users.length(); i++) {
-	    User user = new User(users.getString(i));
+	    User user = new User(users.getJSONObject(i));
 	    usersID[i] = user.getId();
 	}
 	return usersID;
@@ -69,7 +64,7 @@ public final class ServerFacade {
 	in.close();
 	long[] usersID = new long[users.length()];
 	for (int i = 0; i < users.length(); i++) {
-	    User user = new User(users.getString(i));
+	    User user = new User(users.getJSONObject(i));
 	    usersID[i] = user.getId();
 	}
 	return usersID;
@@ -119,4 +114,15 @@ public final class ServerFacade {
 		
 		return messages;
 	}
+    
+    public static AchievementInfo[] achievements(long userID) throws Exception {
+    	URL url = new URL(serverAddress + "nearbyUsers?userID=" + userID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	JSONArray userAchvs = new JSONArray(in.readLine());
+    	in.close();
+    	AchievementInfo[] achvs = new AchievementInfo[userAchvs.length()];
+    	for (int i = 0; i < userAchvs.length(); i++)
+    		achvs[i] = new AchievementInfo(userAchvs.getJSONObject(i));
+    	return achvs;
+    }
 }
