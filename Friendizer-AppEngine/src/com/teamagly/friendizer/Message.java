@@ -51,8 +51,8 @@ public class Message {
 		this.time = new Date();
 	}
 	
-	public Message(String jsonString) throws JSONException {
-		JSONObject obj = new JSONObject(jsonString);
+	public Message(JSONObject obj) throws JSONException {
+		//JSONObject obj = new JSONObject(jsonString);
 		this.id = obj.getLong("id");
 		this.source = obj.getLong("source");
 		this.destination = obj.getLong("destination");

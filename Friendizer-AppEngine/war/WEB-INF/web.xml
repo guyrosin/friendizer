@@ -71,8 +71,9 @@
   <servlet-mapping>
   	<servlet-name>InboxManager</servlet-name>
   	<url-pattern>/send</url-pattern>
-  	<url-pattern>/read</url-pattern>
-  	<url-pattern>/unread</url-pattern>
+  	<url-pattern>/getConversation</url-pattern>
+  	<url-pattern>/getUnread</url-pattern>
+  	<url-pattern>/getInbox</url-pattern>
   </servlet-mapping>
 
   <!-- Security -->

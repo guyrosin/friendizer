@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
+
 import com.google.android.c2dm.server.PMF;
 
 @SuppressWarnings("serial")
@@ -23,10 +25,12 @@ public class InboxManager extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 		if (request.getRequestURI().endsWith("/send"))
 			send(request, response);
-		else if (request.getRequestURI().endsWith("/read"))
-			read(request, response);
-		else if (request.getRequestURI().endsWith("/unread"))
-			unread(request, response);
+		else if (request.getRequestURI().endsWith("/getConversation"))
+			getConversation(request, response);
+		else if (request.getRequestURI().endsWith("/getUnread"))
+			getUnread(request, response);
+		else if (request.getRequestURI().endsWith("/getInbox"))
+			getInbox(request, response);
 	}
 
 	private void send(HttpServletRequest request, HttpServletResponse response)
@@ -51,67 +55,93 @@ public class InboxManager extends HttpServlet {
 
 	}
 
-	private void read(HttpServletRequest request, HttpServletResponse response)
+	private void getConversation(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 
-		long source = Long.parseLong(request.getParameter("src"));
-		//String tmp = request.getParameter("dest");
-		long destination = Long.parseLong(request.getParameter("dest"));
+		long user1 = Long.parseLong(request.getParameter("user1"));
+		long user2 = Long.parseLong(request.getParameter("user2"));
+		
 		long from = Long.parseLong(request.getParameter("from"));
 		int to = Integer.parseInt(request.getParameter("to"));
 		
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
 		Query query = pm.newQuery(Message.class);
-		query.setFilter("source == src && destination == dest");
-		query.setOrdering("id desc");
+		query.setFilter("(source == user1 || source == user2)" +
+						" && (destination == user2 || destination == user1)");
+		query.setOrdering("time desc");
 		query.setRange(from,to);
-		query.declareParameters("long src, long dest");
+		query.declareParameters("long user1, long user2");
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(source,
-					destination);
+			List<Message> results = (List<Message>) query.execute(user1,user2);
 			if (!results.isEmpty()) {
+				JSONArray messages = new JSONArray();
 				for (Message m : results) {
-					out.println(m);
+					messages.put(m.toJSONObject());
 				}
-			} else {
-				out.println("no messages");
+				out.println(messages);
 			}
 		} finally {
 			query.closeAll();
 		}
 	}
 	
-	private void unread(HttpServletRequest request, HttpServletResponse response)
+	private void getUnread(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 
-		long source = Long.parseLong(request.getParameter("src"));
-		//long destination = Long.parseLong(request.getParameter("dest"));
+		long destination = Long.parseLong(request.getParameter("userID"));
 		
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
 		Query query = pm.newQuery(Message.class);
-		//query.setFilter("source == src && destination == dest && unread == true");
+		query.setFilter("destination == dest && unread == true");
+		query.setOrdering("id time");
+		query.declareParameters("long dest");
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<Message> results = (List<Message>) query.execute(destination);
+			if (!results.isEmpty()) {
+				JSONArray messages = new JSONArray();
+				for (Message m : results) {
+					m.setUnread(false);
+					pm.makePersistent(m);
+					messages.put(m);
+				}
+				out.println(messages);
+			}
+		} finally {
+			query.closeAll();
+			pm.close();
+		}
+	}
+	
+	private void getInbox(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+
+		long userId = Long.parseLong(request.getParameter("userID"));
+		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+
+		Query query = pm.newQuery(Message.class);
 		query.setFilter("source == src && unread == true");
 		query.setOrdering("id desc");
-		//query.declareParameters("long src, long dest");
 		query.declareParameters("long src");
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(source);
+			List<Message> results = (List<Message>) query.execute(userId);
 			if (!results.isEmpty()) {
 				for (Message m : results) {
 					out.println(m);
 					m.setUnread(false);
 					pm.makePersistent(m);
 				}
-			} else {
-				out.println("no messages");
 			}
 		} finally {
 			query.closeAll();
