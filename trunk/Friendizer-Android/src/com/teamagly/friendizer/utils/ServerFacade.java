@@ -116,7 +116,7 @@ public final class ServerFacade {
 	}
     
     public static AchievementInfo[] achievements(long userID) throws Exception {
-    	URL url = new URL(serverAddress + "nearbyUsers?userID=" + userID);
+    	URL url = new URL(serverAddress + "?achievements=" + userID);
     	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
     	JSONArray userAchvs = new JSONArray(in.readLine());
     	in.close();
