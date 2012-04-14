@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.User;
 
 import android.app.Application;
 import android.content.Context;
@@ -26,7 +26,7 @@ public class Utility extends Application {
 
     public Facebook facebook;
     public AsyncFacebookRunner mAsyncRunner;
-    public UserInfo userInfo;
+    public User userInfo;
     public ImageLoader imageLoader;
 
     // private static int MAX_IMAGE_DIMENSION = 720;

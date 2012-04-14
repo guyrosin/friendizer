@@ -6,9 +6,7 @@ package com.teamagly.friendizer.adapters;
 import java.util.List;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.id;
-import com.teamagly.friendizer.R.layout;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.Utility;
 
 import android.content.Context;
@@ -28,7 +26,7 @@ public class SimpleFriendsListAdapter extends FriendsAdapter {
      * @param textViewResourceId
      * @param objects
      */
-    public SimpleFriendsListAdapter(Context context, int textViewResourceId, List<UserInfo> objects) {
+    public SimpleFriendsListAdapter(Context context, int textViewResourceId, List<User> objects) {
 	super(context, textViewResourceId, objects);
     }
 
@@ -50,10 +48,10 @@ public class SimpleFriendsListAdapter extends FriendsAdapter {
 	    hView.setTag(holder);
 	}
 
-	UserInfo userInfo = getItem(position);
+	User userInfo = getItem(position);
 	ViewHolder holder = (ViewHolder) hView.getTag();
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, holder.profile_pic);
-	holder.name.setText(userInfo.name);
+	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), holder.profile_pic);
+	holder.name.setText(userInfo.getName());
 	return hView;
     }
 

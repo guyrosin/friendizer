@@ -24,5 +24,6 @@
     <string name="view_by">View by</string>
     <string name="facebook_login">Login with Facebook</string>
     <string name="actionbar_activity_not_found">Failed to open intent</string>
+    <string name="send">Send</string>
 
 </resources>

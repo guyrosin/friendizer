@@ -10,7 +10,7 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.FriendsAdapter;
 import com.teamagly.friendizer.adapters.FriendsImageAdapter;
 import com.teamagly.friendizer.adapters.FriendsListAdapter;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Comparators;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -44,7 +44,7 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
     protected boolean list_type;
     protected GridView gridView;
     protected FriendsAdapter friendsAdapter;
-    protected ArrayList<UserInfo> usersList = new ArrayList<UserInfo>();
+    protected ArrayList<User> usersList = new ArrayList<User>();
     protected int sortBy = 0;
     final Handler handler = new Handler();
 
@@ -145,7 +145,7 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 			    Collections.sort(usersList, (new Comparators()).new ValueComparator());
 			    break;
 			case 2:
-			    Collections.sort(usersList, (new Comparators()).new MatchingComparator());
+			    // Collections.sort(usersList, (new Comparators()).new MatchingComparator());
 			    break;
 			}
 			sortBy = item;
@@ -198,7 +198,7 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
      */
     @Override
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-	UserInfo userInfo = usersList.get(position);
+	User userInfo = usersList.get(position);
 	// Create an intent with the friend's data
 	Intent intent = new Intent().setClass(this, FriendProfileActivity.class);
 	intent.putExtra("user", userInfo);
@@ -211,7 +211,7 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	    public void run() {
 		for (int i = 0; i < usersList.size(); i++) {
 		    try {
-			usersList.get(i).updateFriendizerData(ServerFacade.userDetails(usersList.get(i).id));
+			usersList.get(i).updateFriendizerData(ServerFacade.userDetails(usersList.get(i).getId()));
 		    } catch (Exception e) {
 			Log.e(TAG, "", e);
 		    }

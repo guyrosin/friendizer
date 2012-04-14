@@ -238,7 +238,7 @@ public class FriendizerActivity extends TabActivity {
 		    public void run() {
 			try {
 			    // Update the server with the new location
-			    ServerFacade.changeLocation(Utility.getInstance().userInfo.id, curLocation.getLatitude(),
+			    ServerFacade.changeLocation(Utility.getInstance().userInfo.getId(), curLocation.getLatitude(),
 				    curLocation.getLongitude());
 			} catch (Exception e) {
 			    Log.e(TAG, "Can't update the server with the new location", e);

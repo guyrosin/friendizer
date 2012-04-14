@@ -61,4 +61,5 @@ public class Achievement {
 	public void setReward(int reward) {
 		this.reward = reward;
 	}
+    public boolean earned;
 }

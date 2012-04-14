@@ -21,7 +21,8 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.SessionEvents;
@@ -163,17 +164,17 @@ public class SplashActivity extends Activity {
 	    JSONObject jsonObject;
 	    try {
 		jsonObject = new JSONObject(response);
-		final UserInfo userInfo = new UserInfo(jsonObject);
+		final User userInfo = new User(new FacebookUser(jsonObject));
 		Utility.getInstance().userInfo = userInfo;
 		mHandler.post(new Runnable() {
 		    @Override
 		    public void run() {
-			Toast.makeText(SplashActivity.this, "Welcome " + userInfo.name + "!", Toast.LENGTH_LONG).show();
+			Toast.makeText(SplashActivity.this, "Welcome " + userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
 		    }
 		});
 
-		// Register/login
-		ServerFacade.register(userInfo.id);
+		// Login and retrieve the user details from Friendizer
+		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
 
 		if ((dialog != null) && (dialog.isShowing()))
 		    dialog.dismiss(); // Dismiss the loading dialog

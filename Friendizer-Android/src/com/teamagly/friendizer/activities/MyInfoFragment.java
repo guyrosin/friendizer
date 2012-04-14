@@ -17,7 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
@@ -77,7 +78,8 @@ public class MyInfoFragment extends Fragment {
 	new Thread(new Runnable() {
 	    public void run() {
 		try {
-		    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo.id));
+		    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo
+			    .getId()));
 		    // Update the view from the main thread
 		    getActivity().runOnUiThread(new Runnable() {
 			@Override
@@ -91,11 +93,11 @@ public class MyInfoFragment extends Fragment {
 	    }
 	}).start();
 
-	if (Utility.getInstance().userInfo.ownerID > 0) {
+	if (Utility.getInstance().userInfo.getOwnerID() > 0) {
 	    // Get the owner's name and picture from Facebook
 	    params = new Bundle();
 	    params.putString("fields", "name, picture");
-	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.ownerID), params,
+	    Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwnerID()), params,
 		    new OwnerRequestListener());
 	}
     }
@@ -106,20 +108,20 @@ public class MyInfoFragment extends Fragment {
     }
 
     protected void updateFriendizerViews() {
-	UserInfo userInfo = Utility.getInstance().userInfo;
-	value.setText(String.valueOf(userInfo.value));
-	money.setText(String.valueOf(userInfo.money));
-	if (userInfo.ownsList != null)
-	    owns.setText(String.valueOf(userInfo.ownsList.length));
+	User userInfo = Utility.getInstance().userInfo;
+	value.setText(String.valueOf(userInfo.getValue()));
+	money.setText(String.valueOf(userInfo.getMoney()));
+	if (userInfo.getOwnsList() != null)
+	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
 	showLoadingIcon(false);
     }
 
     protected void updateFacebookViews() {
-	UserInfo userInfo = Utility.getInstance().userInfo;
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
-	userName.setText(userInfo.name);
-	age.setText(userInfo.age);
-	gender.setText(userInfo.gender);
+	User userInfo = Utility.getInstance().userInfo;
+	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), userPic, Type.ROUND_CORNERS);
+	userName.setText(userInfo.getName());
+	age.setText(userInfo.getAge());
+	gender.setText(userInfo.getGender());
     }
 
     /**
@@ -145,9 +147,9 @@ public class MyInfoFragment extends Fragment {
 	    JSONObject jsonObject;
 	    try {
 		jsonObject = new JSONObject(response);
-		final UserInfo userInfo = new UserInfo(jsonObject);
+		final FacebookUser fbUserInfo = new FacebookUser(jsonObject);
 		// Update the user's details from Facebook
-		Utility.getInstance().userInfo.updateFacebookData(userInfo);
+		Utility.getInstance().userInfo.updateFacebookData(fbUserInfo);
 		// Update the views (has to be done from the main thread)
 		getActivity().runOnUiThread(new Runnable() {
 		    @Override
