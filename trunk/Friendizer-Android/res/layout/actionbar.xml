@@ -79,8 +79,7 @@
             android:paddingRight="10dip"
             android:scrollHorizontally="true"
             android:textColor="@color/actionbar_title"
-            android:textSize="16dip"
-            android:textStyle="bold" />
+            android:textSize="16dip" />
     </RelativeLayout>
 
 </RelativeLayout>

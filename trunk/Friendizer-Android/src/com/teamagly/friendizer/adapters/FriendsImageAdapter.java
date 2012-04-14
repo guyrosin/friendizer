@@ -6,8 +6,7 @@ package com.teamagly.friendizer.adapters;
 import java.util.List;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.drawable;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.Utility;
 import com.teamagly.friendizer.utils.ImageLoader.Type;
 
@@ -28,7 +27,7 @@ public class FriendsImageAdapter extends FriendsAdapter {
      * @param textViewResourceId
      * @param objects
      */
-    public FriendsImageAdapter(Context context, int textViewResourceId, List<UserInfo> objects) {
+    public FriendsImageAdapter(Context context, int textViewResourceId, List<User> objects) {
 	super(context, textViewResourceId, objects);
     }
 
@@ -48,8 +47,8 @@ public class FriendsImageAdapter extends FriendsAdapter {
 	} else
 	    imageView = (ImageView) convertView;
 
-	UserInfo userInfo = getItem(position);
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, imageView, Type.ROUND_CORNERS);
+	User userInfo = getItem(position);
+	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), imageView, Type.ROUND_CORNERS);
 	return imageView;
     }
 

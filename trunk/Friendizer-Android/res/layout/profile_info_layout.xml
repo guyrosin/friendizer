@@ -124,5 +124,4 @@
             android:layout_alignTop="@+id/owner_title"
             android:layout_toRightOf="@+id/owner_name" />
     </RelativeLayout>
-
-</LinearLayout>
+</LinearLayout>

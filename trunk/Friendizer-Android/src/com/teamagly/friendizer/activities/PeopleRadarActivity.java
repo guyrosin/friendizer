@@ -2,8 +2,9 @@ package com.teamagly.friendizer.activities;
 
 import org.json.JSONArray;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.UserInfo;
-import com.teamagly.friendizer.model.UserInfo.FBQueryType;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
@@ -100,7 +101,7 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	usersList.clear();
 
 	try {
-	    final long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.id);
+	    final long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
 	    if (nearbyUsers.length == 0) {
 		showLoadingIcon(false);
 		empty.setVisibility(View.VISIBLE);
@@ -125,9 +126,9 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 			    JSONArray jsonArray = new JSONArray(response);
 			    int len = jsonArray.length();
 			    for (int i = 0; i < len; i++) {
-				UserInfo userInfo = new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL);
+				User userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
 				usersList.add(userInfo);
-				userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+				userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
 				runOnUiThread(new Runnable() {
 				    public void run() {
 					friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main
@@ -161,7 +162,7 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 	// Create an intent with the dude's data
 	Intent intent = new Intent().setClass(PeopleRadarActivity.this, FriendProfileActivity.class);
-	UserInfo userInfo = usersList.get(position);
+	User userInfo = usersList.get(position);
 	intent.putExtra("user", userInfo);
 	startActivity(intent);
     }

@@ -7,12 +7,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 import com.teamagly.friendizer.utils.ImageLoader.Type;
 import com.teamagly.friendizer.widgets.ActionBar;
+import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -31,8 +33,12 @@ import android.widget.Toast;
  * 
  */
 public class FriendProfileActivity extends Activity {
+
     private final String TAG = getClass().getName();
-    UserInfo userInfo;
+    ActionBar actionBar;
+    SegmentedRadioGroup segmentedControl;
+    User userInfo;
+
     private ImageView userPic;
     private TextView name;
     private TextView age;
@@ -41,9 +47,9 @@ public class FriendProfileActivity extends Activity {
     private TextView value;
     private TextView money;
     private TextView owns;
+    private TextView matching;
     private TextView ownerName;
     private ImageView ownerPic;
-    ActionBar actionBar;
     final Handler handler = new Handler();
 
     /*
@@ -62,6 +68,7 @@ public class FriendProfileActivity extends Activity {
 		onResume();
 	    }
 	});
+
 	userPic = (ImageView) findViewById(R.id.user_pic);
 	name = (TextView) findViewById(R.id.name);
 	age = (TextView) findViewById(R.id.age);
@@ -70,45 +77,17 @@ public class FriendProfileActivity extends Activity {
 	value = (TextView) findViewById(R.id.value);
 	money = (TextView) findViewById(R.id.money);
 	owns = (TextView) findViewById(R.id.owns);
+	matching = (TextView) findViewById(R.id.matching);
 	ownerName = (TextView) findViewById(R.id.owner_name);
 	ownerPic = (ImageView) findViewById(R.id.owner_pic);
 
-	userInfo = (UserInfo) intent.getSerializableExtra("user");
+	userInfo = (User) intent.getSerializableExtra("user");
+	if (userInfo == null)
+	    if (intent.getLongExtra("userID", 0) > 0) {
+		// Retrieve the user's details
+	    }
 	updateViews();
 
-	final Button btn1 = (Button) findViewById(R.id.btn1);
-	final Button btn2 = (Button) findViewById(R.id.btn2);
-
-	if (userInfo.ownerID == Utility.getInstance().userInfo.id) { // If I own this user
-	    // Define the first button
-	    btn1.setText("Chat");
-	    btn1.setOnClickListener(new View.OnClickListener() {
-		public void onClick(View v) {
-		    // TODO: move to the chat activity
-		}
-	    });
-	} else {
-	    // Define the first button
-	    btn1.setText("Buy");
-	    btn1.setOnClickListener(new View.OnClickListener() {
-		public void onClick(View v) {
-		    try {
-			ServerFacade.buy(Utility.getInstance().userInfo.id, userInfo.id);
-		    } catch (Exception e) {
-			Log.w(TAG, "", e);
-			Toast.makeText(getBaseContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
-		    }
-		    onResume(); // Refresh
-		}
-	    });
-	}
-
-	// Define the second button
-	btn2.setText("Poke");
-	btn2.setOnClickListener(new View.OnClickListener() {
-	    public void onClick(View v) {
-	    }
-	});
     }
 
     /*
@@ -122,18 +101,18 @@ public class FriendProfileActivity extends Activity {
 	// Reload the user's details from Facebook
 	Bundle params = new Bundle();
 	params.putString("fields", "name, first_name, picture, birthday, gender");
-	Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.id), params, new UserRequestListener());
+	Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getId()), params, new UserRequestListener());
 
 	// Reload the user's details from our servers (in the background)
 	new Thread(new Runnable() {
 	    public void run() {
 		try {
-		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
-		    if (userInfo.ownerID > 0) {
+		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
+		    if (userInfo.getOwnerID() > 0) {
 			// Get the owner's name and picture from Facebook
 			Bundle params = new Bundle();
 			params.putString("fields", "name, picture");
-			Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.ownerID), params,
+			Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params,
 				new OwnerRequestListener());
 		    }
 		} catch (Exception e) {
@@ -144,6 +123,7 @@ public class FriendProfileActivity extends Activity {
 		    @Override
 		    public void run() {
 			updateFriendizerViews();
+			updateButtons();
 			showLoadingIcon(false); // Done loading the data (roughly...)
 		    }
 		});
@@ -165,23 +145,67 @@ public class FriendProfileActivity extends Activity {
     }
 
     protected void updateFriendizerViews() {
-	value.setText(String.valueOf(userInfo.value));
-	money.setText(String.valueOf(userInfo.money));
-	if (userInfo.ownsList != null)
-	    owns.setText(String.valueOf(userInfo.ownsList.length));
+	value.setText(String.valueOf(userInfo.getValue()));
+	money.setText(String.valueOf(userInfo.getMoney()));
+	if (userInfo.getOwnsList() != null)
+	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
+//	matching.setText(userInfo.getMatching());
     }
 
     protected void updateFacebookViews() {
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, userPic, Type.ROUND_CORNERS);
-	name.setText(userInfo.name);
-	age.setText(userInfo.age);
-	if (userInfo.age.length() == 0)
+	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), userPic, Type.ROUND_CORNERS);
+	name.setText(userInfo.getName());
+	age.setText(userInfo.getAge());
+	if (userInfo.getAge().length() == 0)
 	    ageTitle.setVisibility(View.GONE);
 	else
 	    ageTitle.setVisibility(View.VISIBLE);
-	String genderStr = userInfo.gender;
+	String genderStr = userInfo.getGender();
 	// Capitalize the first letter
 	gender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
+    }
+
+    protected void updateButtons() {
+	final Button btn1 = (Button) findViewById(R.id.btn1);
+	final Button btn2 = (Button) findViewById(R.id.btn2);
+
+	if (userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) { // If I own this user
+	    // Define the first button
+	    btn1.setText("Chat");
+	    btn1.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		    // Move to the chat activity
+		    Intent intent = new Intent().setClass(FriendProfileActivity.this, MessagesActivity.class);
+		    intent.putExtra("user", userInfo);
+		    startActivity(intent);
+		}
+	    });
+	} else {
+	    // Define the first button
+	    btn1.setText("Buy");
+	    btn1.setOnClickListener(new View.OnClickListener() {
+		public void onClick(View v) {
+		    try {
+			ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
+		    } catch (Exception e) {
+			Log.w(TAG, "", e);
+			Toast.makeText(getBaseContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
+		    }
+		    onResume(); // Refresh
+		}
+	    });
+	}
+
+	// Define the second button
+	btn2.setText("Achievements");
+	btn2.setOnClickListener(new View.OnClickListener() {
+	    public void onClick(View v) {
+		// Move to the achievements activity
+		Intent intent = new Intent().setClass(FriendProfileActivity.this, AchievmentsFragment.class);
+		intent.putExtra("user", userInfo);
+		startActivity(intent);
+	    }
+	});
     }
 
     /*
@@ -194,7 +218,7 @@ public class FriendProfileActivity extends Activity {
 	    JSONObject jsonObject;
 	    try {
 		jsonObject = new JSONObject(response);
-		final UserInfo newUserInfo = new UserInfo(jsonObject);
+		final FacebookUser newUserInfo = new FacebookUser(jsonObject);
 		// Update the user's details from Facebook
 		userInfo.updateFacebookData(newUserInfo);
 		// Update the views (has to be done from the main thread)
@@ -228,6 +252,15 @@ public class FriendProfileActivity extends Activity {
 		    public void run() {
 			ownerName.setText(ownerNameStr);
 			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+			ownerPic.setOnClickListener(new OnClickListener() {
+			    @Override
+			    public void onClick(View v) {
+				// Move to the owner's profile
+				Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendProfileActivity.class);
+				intent.putExtra("userID", userInfo.getOwnerID());
+				startActivity(intent);
+			    }
+			});
 		    }
 		});
 	    } catch (Exception e) {

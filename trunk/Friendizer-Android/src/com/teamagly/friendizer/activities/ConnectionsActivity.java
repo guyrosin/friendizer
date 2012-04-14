@@ -2,10 +2,9 @@ package com.teamagly.friendizer.activities;
 
 import org.json.JSONArray;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.id;
-import com.teamagly.friendizer.R.layout;
-import com.teamagly.friendizer.model.UserInfo;
-import com.teamagly.friendizer.model.UserInfo.FBQueryType;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
@@ -39,7 +38,7 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
     @Override
     protected void requestFriends() {
 	usersList.clear();
-	final long[] ownsList = Utility.getInstance().userInfo.ownsList;
+	final long[] ownsList = Utility.getInstance().userInfo.getOwnsList();
 	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
 	if (ownsList.length == 0) {
 	    showLoadingIcon(false);
@@ -68,9 +67,9 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
 			JSONArray jsonArray = new JSONArray(response);
 			int len = jsonArray.length();
 			for (int i = 0; i < len; i++) {
-			    UserInfo userInfo = new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL);
+			    User userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
 			    usersList.add(userInfo);
-			    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
+			    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
 			    handler.post(new Runnable() {
 				@Override
 				public void run() {

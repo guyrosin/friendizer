@@ -6,9 +6,7 @@ package com.teamagly.friendizer.adapters;
 import java.util.List;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.id;
-import com.teamagly.friendizer.R.layout;
-import com.teamagly.friendizer.model.UserInfo;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.Utility;
 
 import android.content.Context;
@@ -28,7 +26,7 @@ public class FriendsListAdapter extends FriendsAdapter {
      * @param textViewResourceId
      * @param objects
      */
-    public FriendsListAdapter(Context context, int textViewResourceId, List<UserInfo> objects) {
+    public FriendsListAdapter(Context context, int textViewResourceId, List<User> objects) {
 	super(context, textViewResourceId, objects);
     }
 
@@ -49,20 +47,22 @@ public class FriendsListAdapter extends FriendsAdapter {
 	    holder.ageTitle = (TextView) hView.findViewById(R.id.age_title);
 	    holder.value = (TextView) hView.findViewById(R.id.value);
 	    holder.valueTitle = (TextView) hView.findViewById(R.id.value_title);
+	    holder.matching = (TextView) hView.findViewById(R.id.matching);
 	    // holder.online_presence = (TextView) hView.findViewById(R.id.online_presence);
 	    hView.setTag(holder);
 	}
 
-	UserInfo userInfo = getItem(position);
+	User userInfo = getItem(position);
 	ViewHolder holder = (ViewHolder) hView.getTag();
-	Utility.getInstance().imageLoader.displayImage(userInfo.picURL, holder.profile_pic);
-	holder.name.setText(userInfo.name);
-	holder.gender.setText(userInfo.gender);
-	holder.age.setText(userInfo.age);
-	if (userInfo.age.length() == 0)
+	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), holder.profile_pic);
+	holder.name.setText(userInfo.getName());
+	holder.gender.setText(userInfo.getGender());
+	holder.age.setText(userInfo.getAge());
+	if (userInfo.getAge().length() == 0)
 	    holder.ageTitle.setText("");
-	if (userInfo.value > 0) // If value==0 don't show it (it means the user object still isn't loaded)
-	    holder.value.setText(String.valueOf(userInfo.value));
+	if (userInfo.getValue() > 0) // If value==0 don't show it (it means the user object still isn't loaded)
+	    holder.value.setText(String.valueOf(userInfo.getValue()));
+//	holder.matching.setText(String.valueOf(userInfo.getMatching()));
 	return hView;
     }
 
@@ -74,6 +74,6 @@ public class FriendsListAdapter extends FriendsAdapter {
 	TextView ageTitle;
 	TextView value;
 	TextView valueTitle;
+	TextView matching;
     }
-
 }

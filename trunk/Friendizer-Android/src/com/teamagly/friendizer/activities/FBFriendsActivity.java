@@ -4,10 +4,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.id;
-import com.teamagly.friendizer.R.layout;
-import com.teamagly.friendizer.model.UserInfo;
-import com.teamagly.friendizer.model.UserInfo.FBQueryType;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.FriendizerUser;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
@@ -80,7 +80,7 @@ public class FBFriendsActivity extends AbstractFriendsListActivity {
      */
     @Override
     public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-	UserInfo userInfo = usersList.get(position);
+	User userInfo = usersList.get(position);
 	// Create an intent with the friend's data
 	Intent intent = new Intent().setClass(this, FriendProfileActivity.class);
 	intent.putExtra("user", userInfo);
@@ -110,16 +110,22 @@ public class FBFriendsActivity extends AbstractFriendsListActivity {
 		empty.setVisibility(View.GONE);
 
 	    for (int i = 0; i < len; i++) {
+		User userInfo = null;
 		try {
-		    UserInfo userInfo = new UserInfo(jsonArray.getJSONObject(i), FBQueryType.FQL);
+		    userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
 		    usersList.add(userInfo);
-		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.id));
-		    handler.post(new Runnable() {
-			public void run() {
-			    friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-			}
-		    });
+		    FriendizerUser fzUser = ServerFacade.userDetails(userInfo.getId());
+		    if (fzUser != null) {
+			userInfo.updateFriendizerData(fzUser);
+			handler.post(new Runnable() {
+			    public void run() {
+				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+			    }
+			});
+		    } else
+			usersList.remove(userInfo);
 		} catch (Exception e) {
+		    usersList.remove(userInfo);
 		    Log.w(TAG, "", e);
 		}
 	    }

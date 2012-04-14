@@ -47,7 +47,7 @@
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/sl_list_item_achievement_reward"
+                android:id="@+id/achievement_reward"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -56,7 +56,7 @@
                 android:singleLine="true"
                 android:text="25" />
             <TextView
-                android:id="@+id/sl_list_item_achievement_reward_suffix"
+                android:id="@+id/achievement_reward_suffix"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"

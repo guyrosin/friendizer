@@ -53,13 +53,10 @@
         <activity android:name=".activities.FriendizerActivity" />
         <activity android:name=".activities.PeopleRadarActivity" />
         <activity android:name=".activities.MyProfileActivity" />
-        <activity android:name=".activities.MyInfoActivity" />
         <activity android:name=".activities.FriendProfileActivity" />
         <activity android:name=".activities.ConnectionsActivity" />
         <activity android:name=".activities.FBFriendsActivity" />
-        <activity android:name=".activities.ActionHistoryActivity" />
-        <activity android:name=".activities.AchievmentsActivity" >
-        </activity>
+        <activity android:name=".activities.MessagesActivity" />
         <activity
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >
