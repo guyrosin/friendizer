@@ -42,6 +42,6 @@ public class AchievementsManager extends HttpServlet {
 			achvsArray.put(new AchievementInfo(achv, earned).toJSONObject());
 		}
 		pm.close();
-		response.getWriter().println(userAchvs);
+		response.getWriter().println(achvsArray);
 	}
 }
