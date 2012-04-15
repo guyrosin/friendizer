@@ -30,6 +30,7 @@ public class AchievementsManager extends HttpServlet {
 		query = pm.newQuery(UserAchievement.class);
 		query.setFilter("userID == " + userID);
 		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
+		query.closeAll();
 		JSONArray achvsArray = new JSONArray();
 		for (Achievement achv : achvs) {
 			boolean earned = false;
@@ -43,5 +44,43 @@ public class AchievementsManager extends HttpServlet {
 		}
 		pm.close();
 		response.getWriter().println(achvsArray);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void userBoughtSomeone(User user) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + user.getId() + " && achievementID == 28001");
+		List<UserAchievement> result = (List<UserAchievement>) query.execute();
+		query.closeAll();
+		if (result.isEmpty())
+			pm.makePersistent(new UserAchievement(user.getId(), 28001));
+		pm.close();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void someoneBoughtUser(User user) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + user.getId() + " && achievementID == 30001");
+		List<UserAchievement> result = (List<UserAchievement>) query.execute();
+		query.closeAll();
+		if (result.isEmpty())
+			pm.makePersistent(new UserAchievement(user.getId(), 30001));
+		pm.close();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void userValueIncreased(User user) {
+		if (user.getValue() >= 1000) {
+			PersistenceManager pm = PMF.get().getPersistenceManager();
+			Query query = pm.newQuery(UserAchievement.class);
+			query.setFilter("userID == " + user.getId() + " && achievementID == 29001");
+			List<UserAchievement> result = (List<UserAchievement>) query.execute();
+			query.closeAll();
+			if (result.isEmpty())
+				pm.makePersistent(new UserAchievement(user.getId(), 29001));
+			pm.close();
+		}
 	}
 }
