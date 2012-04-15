@@ -4,6 +4,11 @@ import javax.jdo.annotations.*;
 
 @PersistenceCapable
 public class UserAchievement {
+	@SuppressWarnings("unused")
+	@PrimaryKey
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+	private Long id;
+	
 	@Persistent
 	private long userID;
 	
