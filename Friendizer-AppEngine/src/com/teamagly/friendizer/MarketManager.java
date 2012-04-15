@@ -41,7 +41,7 @@ public class MarketManager extends HttpServlet {
 		} else
 			user = result.get(0);
 		pm.close();
-		response.getWriter().println(user);
+		response.getWriter().println(new UserMatching(user, 1));
 	}
 
 	@SuppressWarnings("unchecked")

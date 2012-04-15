@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.jdo.*;
 import javax.servlet.ServletException;
@@ -65,11 +66,15 @@ public class LocationManager extends HttpServlet {
 		query.declareParameters("java.util.Date updatedDate");
 		result = (List<User>) query.execute(updated);
 		query.closeAll();
+		Random random = new Random();
+		int matching;
 		JSONArray nearbyUsers = new JSONArray();
 		for (User nearbyUser : result) {
 			if ((nearbyUser.getId() != userID) && (user.getLatitude() - nearbyUser.getLatitude()) * (user.getLatitude() - nearbyUser.getLatitude()) + 
 					(user.getLongitude() - nearbyUser.getLongitude()) * (user.getLongitude() - nearbyUser.getLongitude()) <= 1000) {
-				nearbyUsers.put(nearbyUser.toJSONObject());
+				matching = (random.nextInt(9)+1) * 10;
+				UserMatching userMatching = new UserMatching(nearbyUser,matching);
+				nearbyUsers.put(userMatching.toJSONObject());
 			}
 		}
 		pm.close();
