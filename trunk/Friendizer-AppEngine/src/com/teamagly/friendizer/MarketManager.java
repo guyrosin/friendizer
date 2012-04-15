@@ -91,6 +91,7 @@ public class MarketManager extends HttpServlet {
 			throw new ServletException("You don't have enough money to buy this user");
 		buyer.setMoney(buyer.getMoney() - buy.getValue());
 		pm.makePersistent(buyer);
+		AchievementsManager.userBoughtSomeone(buyer);
 		if (buy.getOwner() > 0) {
 			query = pm.newQuery(User.class);
 			query.setFilter("id == " + buy.getOwner());
@@ -105,6 +106,8 @@ public class MarketManager extends HttpServlet {
 		buy.setValue(buy.getValue() * 11 / 10);
 		buy.setOwner(userID);
 		pm.makePersistent(buy);
+		AchievementsManager.userValueIncreased(buy);
+		AchievementsManager.someoneBoughtUser(buy);
 		pm.close();
 		response.getWriter().println("Purchase Done");
 	}
