@@ -146,7 +146,7 @@ public class SplashActivity extends Activity {
      */
     public void requestUserData() {
 	Bundle params = new Bundle();
-	params.putString("fields", "name, first_name, picture, birthday, gender, inspirational_people, likes");
+	params.putString("fields", "name, first_name, picture, birthday, gender");
 	// Send a new request only if there are none currently
 	if ((userRequestListener == null) || (!userRequestListener.completed))
 	    userRequestListener = new UserRequestListener();

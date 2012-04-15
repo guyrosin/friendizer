@@ -145,21 +145,17 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 			    Collections.sort(usersList, (new Comparators()).new ValueComparator());
 			    break;
 			case 2:
-			    // Collections.sort(usersList, (new Comparators()).new MatchingComparator());
+			    Collections.sort(usersList, (new Comparators()).new MatchingComparator());
 			    break;
 			}
 			sortBy = item;
-			handler.post(new Runnable() {
-			    @Override
-			    public void run() {
-				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-			    }
-			});
+			// TODO
+			// friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 		    }
+		    dialog.dismiss();
 		}
 	    });
-	    AlertDialog optionsDialog = builder.create();
-	    optionsDialog.show();
+	    builder.show();
 	    return true;
 	case R.id.view_by:
 	    // Show a dialog

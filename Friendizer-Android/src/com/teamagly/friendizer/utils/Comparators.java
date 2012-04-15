@@ -30,12 +30,12 @@ public class Comparators {
 	}
     }
 
-//    public class MatchingComparator implements Comparator<User> {
-//	@Override
-//	public int compare(User u1, User u2) {
-//	    return -((Integer) u1.getMatching()).compareTo(u2.getMatching()); // Descending order
-//	}
-//    }
+    public class MatchingComparator implements Comparator<User> {
+	@Override
+	public int compare(User u1, User u2) {
+	    return -((Integer) u1.getMatching()).compareTo(u2.getMatching()); // Descending order
+	}
+    }
 
     public class DistanceComparator implements Comparator<User> {
 	@Override

@@ -6,6 +6,7 @@ package com.teamagly.friendizer.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.utils.Utility;
 
 /**
  * @author Guy
@@ -47,10 +49,19 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 
 	Achievement achievement = getItem(position);
 	ViewHolder holder = (ViewHolder) hView.getTag();
-	holder.icon.setTag("badge_" + achievement.getIconRes());
+
+	// Load the image resource
+	String uri = "drawable/" + achievement.getIconRes();
+	int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
+	Drawable image = getContext().getResources().getDrawable(imageResource);
+	if (!achievement.isEarned())
+	    image = Utility.convertToGrayscale(image);
+	holder.icon.setImageDrawable(image);
+
+	// holder.icon.setImageResource(Utility.getResId(achievement.getIconRes(), getContext(), Drawable.class));
 	holder.title.setText(achievement.getTitle());
 	holder.description.setText(achievement.getDescription());
-	holder.reward.setText(achievement.getReward());
+	holder.reward.setText(String.valueOf(achievement.getReward()));
 	return hView;
     }
 
