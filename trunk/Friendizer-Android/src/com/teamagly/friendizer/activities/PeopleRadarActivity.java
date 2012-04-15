@@ -37,6 +37,10 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	    mAccelCurrent = (float) Math.sqrt((double) (x * x + y * y + z * z));
 	    float delta = mAccelCurrent - mAccelLast;
 	    mAccel = mAccel * 0.9f + delta; // perform low-cut filter
+
+	    // Check if the device is shaken
+	    if (mAccel > 2)
+		onResume();
 	}
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -55,6 +59,7 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	TextView empty = (TextView) findViewById(R.id.forever_alone_text);
 	empty.setText("Forever Alone! (no people nearby)");
 	updateListType(list_type);
+
 	// Shake to reload functionality
 	mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 	mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
@@ -62,9 +67,6 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	mAccel = 0.00f;
 	mAccelCurrent = SensorManager.GRAVITY_EARTH;
 	mAccelLast = SensorManager.GRAVITY_EARTH;
-
-	if (mAccel > 2) // Then the device is shaken
-	    super.onResume();
     }
 
     /*

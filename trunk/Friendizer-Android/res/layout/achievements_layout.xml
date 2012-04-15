@@ -6,14 +6,6 @@
     android:paddingLeft="4dp"
     android:paddingRight="4dp" >
 
-            <TextView
-                android:id="@+id/achievements_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:singleLine="true"
-                android:text="Achievements" />
-    
     <ListView
         android:id="@+id/achievements_list"
         android:layout_width="match_parent"

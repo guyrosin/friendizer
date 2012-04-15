@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.teamagly.friendizer.model.AchievementInfo;
+import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.Message;
 
@@ -129,14 +129,14 @@ public final class ServerFacade {
 
     }
 
-    public static AchievementInfo[] achievements(long userID) throws Exception {
-	URL url = new URL(serverAddress + "?achievements=" + userID);
+    public static Achievement[] getAchievements(long userID) throws Exception {
+	URL url = new URL(fullServerAddress + "achievements?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	JSONArray userAchvs = new JSONArray(in.readLine());
 	in.close();
-	AchievementInfo[] achvs = new AchievementInfo[userAchvs.length()];
+	Achievement[] achvs = new Achievement[userAchvs.length()];
 	for (int i = 0; i < userAchvs.length(); i++)
-	    achvs[i] = new AchievementInfo(userAchvs.getJSONObject(i));
+	    achvs[i] = new Achievement(userAchvs.getJSONObject(i));
 	return achvs;
     }
 }

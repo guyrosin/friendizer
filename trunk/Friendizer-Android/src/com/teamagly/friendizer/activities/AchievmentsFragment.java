@@ -6,14 +6,18 @@ package com.teamagly.friendizer.activities;
 import java.util.ArrayList;
 
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.adapters.AchievementsAdapter;
 import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
@@ -23,7 +27,7 @@ import android.widget.ListView;
 public class AchievmentsFragment extends Fragment {
 
     private final String TAG = getClass().getName();
-    ArrayAdapter<Achievement> adapter;
+    AchievementsAdapter adapter;
     ArrayList<Achievement> achievements = new ArrayList<Achievement>();
     ListView listView;
 
@@ -47,13 +51,25 @@ public class AchievmentsFragment extends Fragment {
     public void onResume() {
 	super.onResume();
 	showLoadingIcon(true);
-	adapter = new ArrayAdapter<Achievement>(getActivity(), R.layout.connection_list_item, achievements);
+	adapter = new AchievementsAdapter(getActivity(), R.layout.achievements_list_item, achievements);
+	listView.setAdapter(adapter);
 
 	new Thread(new Runnable() {
 	    public void run() {
-		// TODO: server facade -> get achievements
-		adapter.notifyDataSetChanged();
-		showLoadingIcon(false);
+		try {
+		    Achievement[] achvs = ServerFacade.getAchievements(Utility.getInstance().userInfo.getId());
+		    for (Achievement achv : achvs)
+			achievements.add(achv);
+		} catch (Exception e) {
+		    Log.e(TAG, e.getMessage());
+		}
+		getActivity().runOnUiThread(new Runnable() {
+		    @Override
+		    public void run() {
+			adapter.notifyDataSetChanged();
+			showLoadingIcon(false);
+		    }
+		});
 	    }
 	}).start();
 

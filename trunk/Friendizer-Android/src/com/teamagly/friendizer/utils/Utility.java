@@ -13,12 +13,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -48,6 +51,17 @@ public class Utility extends Application {
 
     public static Utility getInstance() {
 	return SingletonHolder.instance;
+    }
+
+    /**
+     * Converts the given Drawable (image) to greyscale
+     */
+    public static Drawable convertToGrayscale(Drawable drawable) {
+	ColorMatrix matrix = new ColorMatrix();
+	matrix.setSaturation(0);
+	ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+	drawable.setColorFilter(filter);
+	return drawable;
     }
 
     public static int getOrientation(Context context, Uri photoUri) {
@@ -89,7 +103,7 @@ public class Utility extends Application {
     }
 
     public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
-	int pixels=4;
+	int pixels = 4;
 	Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
 	Canvas canvas = new Canvas(output);
 

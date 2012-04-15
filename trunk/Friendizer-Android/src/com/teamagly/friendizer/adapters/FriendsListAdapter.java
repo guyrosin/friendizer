@@ -21,18 +21,13 @@ import android.widget.TextView;
  */
 public class FriendsListAdapter extends FriendsAdapter {
 
-    /**
-     * @param context
-     * @param textViewResourceId
-     * @param objects
-     */
     public FriendsListAdapter(Context context, int textViewResourceId, List<User> objects) {
 	super(context, textViewResourceId, objects);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.teamagly.friendizer.FriendsAdapter#getView(int, android.view.View, android.view.ViewGroup)
+     * @see com.teamagly.friendizer.adapters.FriendsAdapter#getView(int, android.view.View, android.view.ViewGroup)
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
