@@ -3,9 +3,9 @@ package com.teamagly.friendizer.activities;
 import org.json.JSONArray;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.User.FBQueryType;
-import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
 import android.os.Bundle;
@@ -37,25 +37,22 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
      */
     @Override
     protected void requestFriends() {
-	usersList.clear();
-	final long[] ownsList = Utility.getInstance().userInfo.getOwnsList();
 	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
+	usersList.clear();
+	final FriendizerUser[] ownsList = Utility.getInstance().userInfo.getOwnsList();
 	if (ownsList.length == 0) {
 	    showLoadingIcon(false);
 	    empty.setVisibility(View.VISIBLE);
 	} else {
 	    empty.setVisibility(View.GONE);
-	    // TODO: this can be done faster (?) if we request data from Facebook and Friendizer at the same time, in separate
-	    // threads, using a concurrent map:
-	    // ConcurrentHashMap<Long, UserInfo> usersMap = new ConcurrentHashMap<Long, UserInfo>();
 	    new Thread(new Runnable() {
 		@Override
 		public void run() {
 		    // Build a comma separated string of all the users' IDs
 		    StringBuilder IDsBuilder = new StringBuilder();
 		    for (int i = 0; i < ownsList.length - 1; i++)
-			IDsBuilder.append(ownsList[i] + ",");
-		    IDsBuilder.append(ownsList[ownsList.length - 1]);
+			IDsBuilder.append(ownsList[i].getId() + ",");
+		    IDsBuilder.append(ownsList[ownsList.length - 1].getId());
 		    Bundle params = new Bundle();
 		    try {
 			// Request the details of each user I own
@@ -67,22 +64,15 @@ public class ConnectionsActivity extends AbstractFriendsListActivity {
 			JSONArray jsonArray = new JSONArray(response);
 			int len = jsonArray.length();
 			for (int i = 0; i < len; i++) {
-			    User userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
-			    usersList.add(userInfo);
-			    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
-			    handler.post(new Runnable() {
-				@Override
-				public void run() {
-				    friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-				}
-			    });
+			    usersList.add(new User(ownsList[i], new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL)));
 			}
 		    } catch (Exception e) {
 			Log.e(TAG, e.getMessage());
 		    } finally {
-			handler.post(new Runnable() {
+			runOnUiThread(new Runnable() {
 			    @Override
 			    public void run() {
+				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 				showLoadingIcon(false);
 			    }
 			});

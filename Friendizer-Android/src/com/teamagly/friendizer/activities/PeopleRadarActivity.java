@@ -3,27 +3,23 @@ package com.teamagly.friendizer.activities;
 import org.json.JSONArray;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class PeopleRadarActivity extends AbstractFriendsListActivity {
     private final String TAG = getClass().getName();
@@ -99,9 +95,8 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
     protected void requestFriends() {
 	LinearLayout empty = (LinearLayout) findViewById(R.id.empty);
 	usersList.clear();
-
 	try {
-	    final long[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+	    final FriendizerUser[] nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
 	    if (nearbyUsers.length == 0) {
 		showLoadingIcon(false);
 		empty.setVisibility(View.VISIBLE);
@@ -113,8 +108,8 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 			// Build a comma separated string of all the users' IDs
 			StringBuilder IDsBuilder = new StringBuilder();
 			for (int i = 0; i < nearbyUsers.length - 1; i++)
-			    IDsBuilder.append(nearbyUsers[i] + ",");
-			IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1]);
+			    IDsBuilder.append(nearbyUsers[i].getId() + ",");
+			IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
 			Bundle params = new Bundle();
 			try {
 			    // Request the details of each user I own
@@ -126,60 +121,26 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 			    JSONArray jsonArray = new JSONArray(response);
 			    int len = jsonArray.length();
 			    for (int i = 0; i < len; i++) {
-				User userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
-				usersList.add(userInfo);
-				userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
-				runOnUiThread(new Runnable() {
-				    public void run() {
-					friendsAdapter.notifyDataSetChanged(); // Notify the adapter (must be done from the main
-									       // thread)
-				    }
-				});
+				usersList.add(new User(nearbyUsers[i], new FacebookUser(jsonArray.getJSONObject(i),
+					FBQueryType.FQL)));
 			    }
 			} catch (Exception e) {
 			    Log.e(TAG, e.getMessage());
-			    showToast("An error occured");
+			} finally {
+			    handler.post(new Runnable() {
+				@Override
+				public void run() {
+				    showLoadingIcon(false);
+				    friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+				}
+			    });
 			}
 		    }
 		}).start();
 	    }
 	} catch (Exception e) {
 	    empty.setVisibility(View.VISIBLE);
-	} finally {
-	    handler.post(new Runnable() {
-		public void run() {
-		    showLoadingIcon(false);
-		}
-	    });
+	    showLoadingIcon(false);
 	}
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
-     */
-    @Override
-    public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-	// Create an intent with the dude's data
-	Intent intent = new Intent().setClass(PeopleRadarActivity.this, FriendProfileActivity.class);
-	User userInfo = usersList.get(position);
-	intent.putExtra("user", userInfo);
-	startActivity(intent);
-    }
-
-    /**
-     * Shows a toast
-     * 
-     * @param msg
-     *            a message to show
-     */
-    public void showToast(final String msg) {
-	new Handler(Looper.getMainLooper()).post(new Runnable() {
-	    @Override
-	    public void run() {
-		Toast toast = Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG);
-		toast.show();
-	    }
-	});
     }
 }

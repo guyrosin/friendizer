@@ -1,7 +1,5 @@
 package com.teamagly.friendizer.model;
 
-import java.text.SimpleDateFormat;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,16 +40,9 @@ public class UserMatching {
     }
 
     public JSONObject toJSONObject() {
-	JSONObject obj = new JSONObject();
+	JSONObject obj = user.fz.toJSONObject();
 	try {
-	    obj.put("id", user.getId());
-	    obj.put("owner", user.getOwnerID());
-	    obj.put("value", user.getValue());
-	    obj.put("money", user.getMoney());
-	    obj.put("latitude", user.getLatitude());
-	    obj.put("longitude", user.getLongitude());
-	    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-	    obj.put("since", format.format(user.getSince()));
+	    obj.put("matching", matching);
 	} catch (JSONException e) {
 	}
 	return obj;

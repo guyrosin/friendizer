@@ -47,9 +47,11 @@ public class FriendProfileActivity extends Activity {
     private TextView value;
     private TextView money;
     private TextView owns;
-    private TextView matching;
+    // private TextView matching;
     private TextView ownerName;
     private ImageView ownerPic;
+    private Button btn1;
+    private Button btn2;
     final Handler handler = new Handler();
 
     /*
@@ -77,9 +79,11 @@ public class FriendProfileActivity extends Activity {
 	value = (TextView) findViewById(R.id.value);
 	money = (TextView) findViewById(R.id.money);
 	owns = (TextView) findViewById(R.id.owns);
-	matching = (TextView) findViewById(R.id.matching);
+	// matching = (TextView) findViewById(R.id.matching);
 	ownerName = (TextView) findViewById(R.id.owner_name);
 	ownerPic = (ImageView) findViewById(R.id.owner_pic);
+	btn1 = (Button) findViewById(R.id.btn1);
+	btn2 = (Button) findViewById(R.id.btn2);
 
 	userInfo = (User) intent.getSerializableExtra("user");
 	if (userInfo == null)
@@ -87,7 +91,7 @@ public class FriendProfileActivity extends Activity {
 		// Retrieve the user's details
 	    }
 	updateViews();
-
+	updateButtons();
     }
 
     /*
@@ -149,7 +153,7 @@ public class FriendProfileActivity extends Activity {
 	money.setText(String.valueOf(userInfo.getMoney()));
 	if (userInfo.getOwnsList() != null)
 	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
-//	matching.setText(userInfo.getMatching());
+	// matching.setText(userInfo.getMatching());
     }
 
     protected void updateFacebookViews() {
@@ -166,8 +170,6 @@ public class FriendProfileActivity extends Activity {
     }
 
     protected void updateButtons() {
-	final Button btn1 = (Button) findViewById(R.id.btn1);
-	final Button btn2 = (Button) findViewById(R.id.btn2);
 
 	if (userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) { // If I own this user
 	    // Define the first button

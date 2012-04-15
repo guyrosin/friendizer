@@ -32,17 +32,17 @@ public final class ServerFacade {
 	return user;
     }
 
-    public static long[] ownList(long userID) throws Exception {
+    public static FriendizerUser[] ownList(long userID) throws Exception {
 	URL url = new URL(fullServerAddress + "ownList?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	JSONArray users = new JSONArray(in.readLine());
 	in.close();
-	long[] usersID = new long[users.length()];
+	FriendizerUser[] fzUsers = new FriendizerUser[users.length()];
 	for (int i = 0; i < users.length(); i++) {
 	    FriendizerUser user = new FriendizerUser(users.getJSONObject(i));
-	    usersID[i] = user.getId();
+	    fzUsers[i] = user;
 	}
-	return usersID;
+	return fzUsers;
     }
 
     public static void buy(long userID, long buyID) throws Exception {
@@ -58,17 +58,17 @@ public final class ServerFacade {
 	in.close();
     }
 
-    public static long[] nearbyUsers(long userID) throws JSONException, IOException {
+    public static FriendizerUser[] nearbyUsers(long userID) throws JSONException, IOException {
 	URL url = new URL(fullServerAddress + "nearbyUsers?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	JSONArray users = new JSONArray(in.readLine());
 	in.close();
-	long[] usersID = new long[users.length()];
+	FriendizerUser[] fzUsers = new FriendizerUser[users.length()];
 	for (int i = 0; i < users.length(); i++) {
 	    FriendizerUser user = new FriendizerUser(users.getJSONObject(i));
-	    usersID[i] = user.getId();
+	    fzUsers[i] = user;
 	}
-	return usersID;
+	return fzUsers;
     }
 
     public static void sendMessage(Message msg) throws Exception {
