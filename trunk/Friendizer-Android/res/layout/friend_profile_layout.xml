@@ -159,7 +159,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@drawable/button_top_selector"
-                        android:text="Achievements" />
+                        android:text="Buy" />
                 </TableRow>
 
                 <TableRow>
@@ -171,7 +171,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="-3dip"
                         android:background="@drawable/button_bottom_selector"
-                        android:text="Buy" />
+                        android:text="Achievements" />
                 </TableRow>
             </TableLayout>
         </LinearLayout>

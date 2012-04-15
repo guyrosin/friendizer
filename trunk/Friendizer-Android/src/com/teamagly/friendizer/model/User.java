@@ -27,6 +27,15 @@ public class User implements Serializable {
     public User() {
     }
 
+    /**
+     * @param friendizerUser
+     * @param facebookUser
+     */
+    public User(FriendizerUser fzUser, FacebookUser fbUser) {
+	fb = new FacebookUser(fbUser);
+	fz = new FriendizerUser(fzUser);
+    }
+
     // Updates the Facebook data from the given FacebookUser object
     public void updateFacebookData(FacebookUser fbUser) {
 	fb = new FacebookUser(fbUser);
@@ -180,7 +189,7 @@ public class User implements Serializable {
     /**
      * @return the ownsList
      */
-    public long[] getOwnsList() {
+    public FriendizerUser[] getOwnsList() {
 	return fz.ownsList;
     }
 
@@ -188,7 +197,7 @@ public class User implements Serializable {
      * @param ownsList
      *            the ownsList to set
      */
-    public void setOwnsList(long[] ownsList) {
+    public void setOwnsList(FriendizerUser[] ownsList) {
 	this.fz.ownsList = ownsList;
     }
 
@@ -250,5 +259,20 @@ public class User implements Serializable {
      */
     public void setDistance(long distance) {
 	this.fz.distance = distance;
+    }
+
+    /**
+     * @return the matching
+     */
+    public int getMatching() {
+	return fz.matching;
+    }
+
+    /**
+     * @param matching
+     *            the matching to set
+     */
+    public void setMatching(int matching) {
+	this.fz.matching = matching;
     }
 }

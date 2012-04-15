@@ -84,9 +84,9 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	if (list_type) { // => show in a list
 	    gridView.setAdapter(null);
 	    friendsAdapter = new FriendsListAdapter(this, R.layout.connection_list_item, usersList);
-	    getListView().setOnItemClickListener(this);
 	    getListView().setAdapter(friendsAdapter);
-	} else { // == show in a GridView
+	    getListView().setOnItemClickListener(this);
+	} else { // => show in a GridView
 	    getListView().setAdapter(null);
 	    friendsAdapter = new FriendsImageAdapter(this, 0, usersList);
 	    gridView.setAdapter(friendsAdapter);
@@ -172,14 +172,14 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 	    builder.setSingleChoiceItems(items, i_list_type, new DialogInterface.OnClickListener() {
 		public void onClick(DialogInterface dialog, int item) {
 		    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-		    boolean choise = false; // Default is grid
+		    boolean choice = false; // Default is grid
 		    if (item == 1) // The user chose list
-			choise = true;
-		    if (list_type != choise) { // If the user changed the type, redraw the view
-			list_type = choise;
-			updateListType(choise);
+			choice = true;
+		    if (list_type != choice) { // If the user changed the type, redraw the view
+			list_type = choice;
+			updateListType(choice);
 			// Update the preference
-			editor.putBoolean("friends_list_type", choise);
+			editor.putBoolean("friends_list_type", choice);
 			editor.commit();
 		    }
 		    dialog.dismiss();

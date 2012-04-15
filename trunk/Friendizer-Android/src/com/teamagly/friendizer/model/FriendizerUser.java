@@ -14,11 +14,12 @@ public class FriendizerUser implements Serializable {
     long value = 0;
     long money = 0;
     long ownerID = 0;
-    long[] ownsList = {};
+    FriendizerUser[] ownsList = {};
     double latitude;
     double longitude;
     Date since;
     long distance = 0;
+    int matching = 0;
 
     private static final long serialVersionUID = -7874788252593417090L;
 
@@ -36,6 +37,7 @@ public class FriendizerUser implements Serializable {
 	ownerID = obj.getLong("owner");
 	latitude = obj.getDouble("latitude");
 	longitude = obj.getDouble("longitude");
+	matching = obj.optInt("matching");
 	SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	try {
 	    since = format.parse(obj.getString("since"));
@@ -60,6 +62,7 @@ public class FriendizerUser implements Serializable {
 	longitude = fzUser.longitude;
 	since = fzUser.since;
 	distance = fzUser.distance;
+	matching = fzUser.matching;
     }
 
     public JSONObject toJSONObject() {
@@ -71,6 +74,7 @@ public class FriendizerUser implements Serializable {
 	    obj.put("owner", ownerID);
 	    obj.put("latitude", latitude);
 	    obj.put("longitude", longitude);
+	    obj.put("matching", matching);
 	    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	    obj.put("since", format.format(since));
 	} catch (JSONException e) {
@@ -141,7 +145,7 @@ public class FriendizerUser implements Serializable {
     /**
      * @return the ownsList
      */
-    public long[] getOwnsList() {
+    public FriendizerUser[] getOwnsList() {
 	return ownsList;
     }
 
@@ -149,7 +153,7 @@ public class FriendizerUser implements Serializable {
      * @param ownsList
      *            the ownsList to set
      */
-    public void setOwnsList(long[] ownsList) {
+    public void setOwnsList(FriendizerUser[] ownsList) {
 	this.ownsList = ownsList;
     }
 
@@ -211,5 +215,20 @@ public class FriendizerUser implements Serializable {
      */
     public void setDistance(long distance) {
 	this.distance = distance;
+    }
+
+    /**
+     * @return the matching
+     */
+    public int getMatching() {
+	return matching;
+    }
+
+    /**
+     * @param matching
+     *            the matching to set
+     */
+    public void setMatching(int matching) {
+	this.matching = matching;
     }
 }
