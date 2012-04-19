@@ -86,12 +86,19 @@ public class FriendProfileActivity extends Activity {
 	btn2 = (Button) findViewById(R.id.btn2);
 
 	userInfo = (User) intent.getSerializableExtra("user");
-	if (userInfo == null)
+	if (userInfo == null) {
+	    // If passed the user's ID, fetching the details will be done in onResume()
 	    if (intent.getLongExtra("userID", 0) > 0) {
-		// Retrieve the user's details
+		userInfo = new User();
+		userInfo.setId(intent.getLongExtra("userID", 0));
+	    } else {
+		Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT);
+		finish();
 	    }
-	updateViews();
-	updateButtons();
+	} else {
+	    updateViews();
+	    updateButtons();
+	}
     }
 
     /*
@@ -108,31 +115,7 @@ public class FriendProfileActivity extends Activity {
 	Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getId()), params, new UserRequestListener());
 
 	// Reload the user's details from our servers (in the background)
-	new Thread(new Runnable() {
-	    public void run() {
-		try {
-		    userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
-		    if (userInfo.getOwnerID() > 0) {
-			// Get the owner's name and picture from Facebook
-			Bundle params = new Bundle();
-			params.putString("fields", "name, picture");
-			Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params,
-				new OwnerRequestListener());
-		    }
-		} catch (Exception e) {
-		    Log.e(TAG, "", e);
-		}
-		// Update the views from the main thread
-		handler.post(new Runnable() {
-		    @Override
-		    public void run() {
-			updateFriendizerViews();
-			updateButtons();
-			showLoadingIcon(false); // Done loading the data (roughly...)
-		    }
-		});
-	    }
-	}).start();
+	new Thread(new FriendizerRunnable()).start();
 
     }
 
@@ -170,7 +153,7 @@ public class FriendProfileActivity extends Activity {
     }
 
     protected void updateButtons() {
-
+	btn1.setVisibility(View.VISIBLE);
 	if (userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) { // If I own this user
 	    // Define the first button
 	    btn1.setText("Chat");
@@ -198,12 +181,13 @@ public class FriendProfileActivity extends Activity {
 	    });
 	}
 
+	btn2.setVisibility(View.VISIBLE);
 	// Define the second button
 	btn2.setText("Achievements");
 	btn2.setOnClickListener(new View.OnClickListener() {
 	    public void onClick(View v) {
 		// Move to the achievements activity
-		Intent intent = new Intent().setClass(FriendProfileActivity.this, AchievmentsFragment.class);
+		Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendAchievementsActivity.class);
 		intent.putExtra("user", userInfo);
 		startActivity(intent);
 	    }
@@ -254,20 +238,55 @@ public class FriendProfileActivity extends Activity {
 		    public void run() {
 			ownerName.setText(ownerNameStr);
 			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
-			ownerPic.setOnClickListener(new OnClickListener() {
-			    @Override
-			    public void onClick(View v) {
-				// Move to the owner's profile
-				Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendProfileActivity.class);
-				intent.putExtra("userID", userInfo.getOwnerID());
-				startActivity(intent);
-			    }
-			});
+			if (userInfo.getOwnerID() != Utility.getInstance().userInfo.getId())
+			    // Add a listener for the owner's pic if he's not me
+			    ownerPic.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+				    // Move to the owner's profile
+				    Intent intent = new Intent()
+					    .setClass(FriendProfileActivity.this, FriendProfileActivity.class);
+				    intent.putExtra("userID", userInfo.getOwnerID());
+				    startActivity(intent);
+				}
+			    });
 		    }
 		});
 	    } catch (Exception e) {
 		Log.e(TAG, "", e);
 	    }
+	}
+    }
+
+    protected class FriendizerRunnable implements Runnable {
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	@Override
+	public void run() {
+	    // Request the user's details from friendizer and update the views accordingly
+	    try {
+		userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
+		if (userInfo.getOwnerID() > 0) {
+		    // Get the owner's name and picture from Facebook
+		    Bundle params = new Bundle();
+		    params.putString("fields", "name, picture");
+		    Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params,
+			    new OwnerRequestListener());
+		}
+	    } catch (Exception e) {
+		Log.w(TAG, "", e);
+	    }
+	    // Update the views from the main thread
+	    handler.post(new Runnable() {
+		@Override
+		public void run() {
+		    updateFriendizerViews();
+		    updateButtons();
+		    showLoadingIcon(false); // Done loading the data (roughly...)
+		}
+	    });
 	}
     }
 

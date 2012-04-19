@@ -34,6 +34,9 @@ public class FacebookUser implements Serializable {
 	picURL = fbUser.picURL;
     }
 
+    public FacebookUser() {
+    }
+
     // Just to make life easier, because most of the queries will be using the Graph API
     public FacebookUser(final JSONObject jsonObject) {
 	this(jsonObject, FBQueryType.GRAPH);

@@ -82,6 +82,9 @@ public class FriendizerUser implements Serializable {
 	return obj;
     }
 
+    public FriendizerUser() {
+    }
+
     /**
      * @return the id
      */

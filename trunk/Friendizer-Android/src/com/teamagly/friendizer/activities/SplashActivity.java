@@ -3,7 +3,6 @@ package com.teamagly.friendizer.activities;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -34,7 +33,7 @@ import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
 public class SplashActivity extends Activity {
     private final String TAG = getClass().getName();
     private Handler mHandler;
-    ProgressDialog dialog;
+    private ImageView loginButton;
     UserRequestListener userRequestListener;
 
     @Override
@@ -44,13 +43,11 @@ public class SplashActivity extends Activity {
 	mHandler = new Handler();
 	Intent intent = getIntent();
 	// Listener for the login button
-	final ImageView loginButton = (ImageView) findViewById(R.id.loginButton);
-
+	loginButton = (ImageView) findViewById(R.id.loginButton);
 	loginButton.setOnClickListener(new View.OnClickListener() {
 	    public void onClick(View v) {
 		if (!Utility.getInstance().facebook.isSessionValid()) {
-		    // Show a loading dialog and authorize
-		    dialog = ProgressDialog.show(SplashActivity.this, "", getString(R.string.please_wait), true, true);
+		    // Authorize
 		    Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities",
 			    "user_checkins", "user_interests", "user_likes", "user_birthday", "friends_online_presence",
 			    "friends_birthday" }, 0, new LoginDialogListener());
@@ -59,17 +56,21 @@ public class SplashActivity extends Activity {
 	});
 
 	if (intent.getBooleanExtra("logout", false)) {
+	    loginButton.setVisibility(View.VISIBLE);
 	    logout();
 	    return;
 	}
 
-	// Restore session if one exists
-	SessionStore.restore(Utility.getInstance().facebook, this);
 	SessionEvents.addAuthListener(new FBLoginListener());
 	SessionEvents.addLogoutListener(new FBLogoutListener());
 
+	// Restore session if one exists
+	SessionStore.restore(Utility.getInstance().facebook, this);
+
 	if (Utility.getInstance().facebook.isSessionValid())
 	    requestUserData();
+	else
+	    loginButton.setVisibility(View.VISIBLE);
     }
 
     /*
@@ -87,17 +88,6 @@ public class SplashActivity extends Activity {
 	if (Utility.getInstance().facebook != null)
 	    if (Utility.getInstance().facebook.isSessionValid())
 		Utility.getInstance().facebook.extendAccessTokenIfNeeded(this, null);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onPause()
-     */
-    @Override
-    protected void onPause() {
-	super.onPause();
-	if ((dialog != null) && (dialog.isShowing()))
-	    dialog.dismiss(); // Dismiss the dialog
     }
 
     /**
@@ -176,8 +166,6 @@ public class SplashActivity extends Activity {
 		// Login and retrieve the user details from Friendizer
 		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
 
-		if ((dialog != null) && (dialog.isShowing()))
-		    dialog.dismiss(); // Dismiss the loading dialog
 		// Continue to the main activity
 		Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
