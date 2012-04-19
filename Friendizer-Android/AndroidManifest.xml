@@ -57,6 +57,7 @@
         <activity android:name=".activities.ConnectionsActivity" />
         <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.MessagesActivity" />
+        <activity android:name=".activities.FriendAchievementsActivity" />
         <activity
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >

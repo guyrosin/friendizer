@@ -39,8 +39,11 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	    mAccel = mAccel * 0.9f + delta; // perform low-cut filter
 
 	    // Check if the device is shaken
-	    if (mAccel > 2)
-		onResume();
+	    if (mAccel > 2.3) {
+		// Reload the data
+		showLoadingIcon(true);
+		requestFriends();
+	    }
 	}
 
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -62,8 +65,6 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 
 	// Shake to reload functionality
 	mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-	mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-		SensorManager.SENSOR_DELAY_NORMAL);
 	mAccel = 0.00f;
 	mAccelCurrent = SensorManager.GRAVITY_EARTH;
 	mAccelLast = SensorManager.GRAVITY_EARTH;
@@ -82,11 +83,11 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 
     /*
      * (non-Javadoc)
-     * @see android.app.Activity#onStop()
+     * @see android.app.Activity#onPause()
      */
     @Override
-    protected void onStop() {
-	super.onStop();
+    protected void onPause() {
+	super.onPause();
 	mSensorManager.unregisterListener(mSensorListener);
     }
 

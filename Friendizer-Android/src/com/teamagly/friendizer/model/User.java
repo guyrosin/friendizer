@@ -25,6 +25,8 @@ public class User implements Serializable {
     }
 
     public User() {
+	fb = new FacebookUser();
+	fz = new FriendizerUser();
     }
 
     /**

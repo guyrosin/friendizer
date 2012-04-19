@@ -3,16 +3,17 @@
  */
 package com.teamagly.friendizer.activities;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -157,7 +158,7 @@ public class MyInfoFragment extends Fragment {
 			updateFacebookViews();
 		    }
 		});
-	    } catch (JSONException e) {
+	    } catch (Exception e) {
 		Log.w(TAG, "", e);
 	    }
 	}
@@ -182,6 +183,15 @@ public class MyInfoFragment extends Fragment {
 		    public void run() {
 			ownerName.setText(ownerNameStr);
 			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+			ownerPic.setOnClickListener(new OnClickListener() {
+			    @Override
+			    public void onClick(View v) {
+				// Move to the owner's profile
+				Intent intent = new Intent().setClass(getActivity(), FriendProfileActivity.class);
+				intent.putExtra("userID", Utility.getInstance().userInfo.getOwnerID());
+				startActivity(intent);
+			    }
+			});
 		    }
 		});
 	    } catch (Exception e) {

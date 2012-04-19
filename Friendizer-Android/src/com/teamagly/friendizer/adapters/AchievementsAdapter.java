@@ -54,11 +54,10 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 	String uri = "drawable/" + achievement.getIconRes();
 	int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
 	Drawable image = getContext().getResources().getDrawable(imageResource);
-	if (!achievement.isEarned())
+	if (!achievement.isEarned()) // If the achievement is earned, display a grayscale icon
 	    image = Utility.convertToGrayscale(image);
 	holder.icon.setImageDrawable(image);
 
-	// holder.icon.setImageResource(Utility.getResId(achievement.getIconRes(), getContext(), Drawable.class));
 	holder.title.setText(achievement.getTitle());
 	holder.description.setText(achievement.getDescription());
 	holder.reward.setText(String.valueOf(achievement.getReward()));
