@@ -28,6 +28,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="8dp"
             android:layout_toRightOf="@+id/user_pic"
+            android:text="Guy R"
             android:textStyle="bold" />
 
         <TextView
@@ -46,18 +47,28 @@
             android:layout_toRightOf="@+id/age" />
 
         <TextView
-            android:id="@+id/value_title"
+            android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/name"
             android:layout_below="@+id/name"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="&quot;lolzzzz&quot;" />
+
+        <TextView
+            android:id="@+id/value_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/name"
+            android:layout_below="@+id/status"
             android:text="Value: " />
 
         <TextView
             android:id="@+id/value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/name"
+            android:layout_below="@+id/status"
             android:layout_toRightOf="@+id/value_title"
             android:text="0" />
 
@@ -124,4 +135,5 @@
             android:layout_alignTop="@+id/owner_title"
             android:layout_toRightOf="@+id/owner_name" />
     </RelativeLayout>
-</LinearLayout>
+
+</LinearLayout>

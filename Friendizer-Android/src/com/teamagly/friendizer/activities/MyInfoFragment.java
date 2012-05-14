@@ -6,14 +6,21 @@ package com.teamagly.friendizer.activities;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,9 +28,9 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ImageLoader.Type;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.utils.ImageLoader.Type;
 
 /**
  * @author Guy
@@ -33,7 +40,8 @@ public class MyInfoFragment extends Fragment {
 
     private final String TAG = getClass().getName();
     private ImageView userPic;
-    private TextView userName;
+    private TextView name;
+    private TextView status;
     private TextView age;
     private TextView gender;
     private TextView value;
@@ -44,6 +52,16 @@ public class MyInfoFragment extends Fragment {
 
     /*
      * (non-Javadoc)
+     * @see android.support.v4.app.Fragment#onCreate(android.os.Bundle)
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	setHasOptionsMenu(true);
+    }
+
+    /*
+     * (non-Javadoc)
      * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
      */
     @Override
@@ -51,7 +69,8 @@ public class MyInfoFragment extends Fragment {
 	// Inflate the layout for this fragment
 	View view = inflater.inflate(R.layout.profile_info_layout, container, false);
 	userPic = (ImageView) view.findViewById(R.id.user_pic);
-	userName = (TextView) view.findViewById(R.id.name);
+	name = (TextView) view.findViewById(R.id.name);
+	status = (TextView) view.findViewById(R.id.status);
 	age = (TextView) view.findViewById(R.id.age);
 	gender = (TextView) view.findViewById(R.id.gender);
 	value = (TextView) view.findViewById(R.id.value);
@@ -60,7 +79,55 @@ public class MyInfoFragment extends Fragment {
 	ownerName = (TextView) view.findViewById(R.id.owner_name);
 	ownerPic = (ImageView) view.findViewById(R.id.owner_pic);
 	updateViews();
+
+	status.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		showStatusDialog();
+	    }
+	});
+
 	return view;
+    }
+
+    /**
+     * 
+     */
+    protected void showStatusDialog() {
+	AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+	alert.setTitle("Enter Your Status");
+
+	// Set an EditText view to get user input
+	final EditText input = new EditText(getActivity());
+	alert.setView(input);
+	alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int whichButton) {
+		final String newStatus = input.getText().toString();
+		// Update the DB
+		try {
+		    ServerFacade.updateStatus(newStatus);
+		} catch (Exception e) {
+		    Log.w(TAG, e.getMessage());
+		}
+		// Update the view
+		new Handler().post(new Runnable() {
+		    @Override
+		    public void run() {
+			if (newStatus.length() > 0) {
+			    status.setText("\"" + newStatus + "\"");
+			    status.setVisibility(View.VISIBLE);
+			} else
+			    status.setVisibility(View.GONE);
+		    }
+		});
+	    }
+	});
+	alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	    public void onClick(DialogInterface dialog, int whichButton) {
+	    }
+	});
+	alert.show();
     }
 
     /*
@@ -112,6 +179,11 @@ public class MyInfoFragment extends Fragment {
 	User userInfo = Utility.getInstance().userInfo;
 	value.setText(String.valueOf(userInfo.getValue()));
 	money.setText(String.valueOf(userInfo.getMoney()));
+	if (userInfo.getStatus().length() > 0) {
+	    status.setText("\"" + userInfo.getStatus() + "\"");
+	    status.setVisibility(View.VISIBLE);
+	} else
+	    status.setVisibility(View.GONE);
 	if (userInfo.getOwnsList() != null)
 	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
 	showLoadingIcon(false);
@@ -120,7 +192,7 @@ public class MyInfoFragment extends Fragment {
     protected void updateFacebookViews() {
 	User userInfo = Utility.getInstance().userInfo;
 	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), userPic, Type.ROUND_CORNERS);
-	userName.setText(userInfo.getName());
+	name.setText(userInfo.getName());
 	age.setText(userInfo.getAge());
 	gender.setText(userInfo.getGender());
     }
@@ -197,6 +269,44 @@ public class MyInfoFragment extends Fragment {
 	    } catch (Exception e) {
 		Log.w(TAG, "", e);
 	    }
+	}
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.support.v4.app.Fragment#onCreateOptionsMenu(android.view.Menu, android.view.MenuInflater)
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	// super.onCreateOptionsMenu(menu, inflater);
+	menu.clear(); // Clear the main activity's menu
+	inflater.inflate(R.menu.my_profile_menu, menu);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.support.v4.app.Fragment#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case R.id.change_status:
+	    showStatusDialog();
+	    return true;
+	    // case R.id.settings: // Move to the settings activity
+	    // startActivity(new Intent(getActivity(), FriendsPrefs.class));
+	    // return true;
+	    // case R.id.invite: // Show the Facebook invitation dialog
+	    // Bundle params = new Bundle();
+	    // params.putString("message", getString(R.string.invitation_msg));
+	    // Utility.getInstance().facebook.dialog(getActivity(), "apprequests", params, new BaseDialogListener());
+	    // return true;
+	    // case R.id.facebook_friends: // Move to my Facebook friends activity
+	    // Intent intent = new Intent().setClass(getActivity(), FBFriendsActivity.class);
+	    // startActivity(intent);
+	    // return true;
+	default:
+	    return super.onOptionsItemSelected(item);
 	}
     }
 }

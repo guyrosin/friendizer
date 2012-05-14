@@ -1,8 +1,5 @@
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -10,6 +7,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
 
 /**
  * @author Guy

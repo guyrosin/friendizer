@@ -3,6 +3,7 @@
  */
 package com.teamagly.friendizer.activities;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,6 +42,7 @@ public class FriendProfileActivity extends Activity {
 
     private ImageView userPic;
     private TextView name;
+    private TextView status;
     private TextView age;
     private TextView ageTitle;
     private TextView gender;
@@ -50,6 +52,7 @@ public class FriendProfileActivity extends Activity {
     // private TextView matching;
     private TextView ownerName;
     private ImageView ownerPic;
+    private TextView mutualFriends;
     private Button btn1;
     private Button btn2;
     final Handler handler = new Handler();
@@ -73,6 +76,7 @@ public class FriendProfileActivity extends Activity {
 
 	userPic = (ImageView) findViewById(R.id.user_pic);
 	name = (TextView) findViewById(R.id.name);
+	status = (TextView) findViewById(R.id.status);
 	age = (TextView) findViewById(R.id.age);
 	ageTitle = (TextView) findViewById(R.id.age_title);
 	gender = (TextView) findViewById(R.id.gender);
@@ -82,6 +86,7 @@ public class FriendProfileActivity extends Activity {
 	// matching = (TextView) findViewById(R.id.matching);
 	ownerName = (TextView) findViewById(R.id.owner_name);
 	ownerPic = (ImageView) findViewById(R.id.owner_pic);
+	mutualFriends = (TextView) findViewById(R.id.mutual_friends);
 	btn1 = (Button) findViewById(R.id.btn1);
 	btn2 = (Button) findViewById(R.id.btn2);
 
@@ -114,6 +119,11 @@ public class FriendProfileActivity extends Activity {
 	params.putString("fields", "name, first_name, picture, birthday, gender");
 	Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getId()), params, new UserRequestListener());
 
+	// Reload the mutual friends number
+	params = new Bundle();
+	Utility.getInstance().mAsyncRunner.request("me/mutualfriends/" + String.valueOf(userInfo.getId()), params,
+		new MutualFriendsListener());
+
 	// Reload the user's details from our servers (in the background)
 	new Thread(new FriendizerRunnable()).start();
 
@@ -136,6 +146,11 @@ public class FriendProfileActivity extends Activity {
 	money.setText(String.valueOf(userInfo.getMoney()));
 	if (userInfo.getOwnsList() != null)
 	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
+	if (userInfo.getStatus().length() > 0) {
+	    status.setText("\"" + userInfo.getStatus() + "\"");
+	    status.setVisibility(View.VISIBLE);
+	} else
+	    status.setVisibility(View.GONE);
 	// matching.setText(userInfo.getMatching());
     }
 
@@ -192,6 +207,30 @@ public class FriendProfileActivity extends Activity {
 		startActivity(intent);
 	    }
 	});
+    }
+
+    /*
+     * Callback for fetching mutual friends from Facebook
+     */
+    public class MutualFriendsListener extends BaseRequestListener {
+
+	@Override
+	public void onComplete(final String response, final Object state) {
+	    JSONObject jsonObject;
+	    try {
+		jsonObject = new JSONObject(response);
+		final JSONArray friends = jsonObject.getJSONArray("data");
+		// Update the view
+		handler.post(new Runnable() {
+		    @Override
+		    public void run() {
+			mutualFriends.setText(String.valueOf(friends.length()));
+		    }
+		});
+	    } catch (JSONException e) {
+		Log.e(TAG, "", e);
+	    }
+	}
     }
 
     /*

@@ -277,4 +277,18 @@ public class User implements Serializable {
     public void setMatching(int matching) {
 	this.fz.matching = matching;
     }
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+	return fz.status;
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(String status) {
+	fz.status = status;
+    }
 }
