@@ -27,8 +27,8 @@
                 android:id="@+id/name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="15dip"
-                android:textSize="18dip" />
+                android:paddingBottom="10dip"
+                android:textSize="19dip" />
 
             <RelativeLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
@@ -44,10 +44,20 @@
                     android:contentDescription="Profile Picture" />
 
                 <TextView
-                    android:id="@+id/gender"
+                    android:id="@+id/status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/user_pic"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="20dp"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/gender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/status"
                     android:layout_marginLeft="20dp"
                     android:layout_marginRight="2dp"
                     android:layout_toRightOf="@+id/user_pic" />
@@ -56,6 +66,7 @@
                     android:id="@+id/age_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/status"
                     android:layout_toRightOf="@+id/gender"
                     android:text=", age: " />
 
@@ -63,7 +74,9 @@
                     android:id="@+id/age"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/age_title" />
+                    android:layout_below="@+id/status"
+                    android:layout_toRightOf="@+id/age_title"
+                    android:text="21" />
 
                 <TextView
                     android:id="@+id/value_title"
@@ -137,12 +150,29 @@
                     android:layout_toRightOf="@+id/owner_title"
                     android:text="none" />
 
+                <TextView
+                    android:id="@+id/mutual_friends"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/gender"
+                    android:layout_below="@+id/owner_title"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/mutual_friends_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/owner_title"
+                    android:layout_toRightOf="@+id/mutual_friends"
+                    android:text=" mutual friends" />
+
                 <ImageView
                     android:id="@+id/owner_pic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@+id/owner_title"
-                    android:layout_toRightOf="@+id/owner_name" />
+                    android:layout_toRightOf="@+id/owner_name"
+                    android:paddingLeft="5dp" />
             </RelativeLayout>
 
             <TableLayout

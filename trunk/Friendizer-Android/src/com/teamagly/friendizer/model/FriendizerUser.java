@@ -20,6 +20,7 @@ public class FriendizerUser implements Serializable {
     Date since;
     long distance = 0;
     int matching = 0;
+    String status = "";
 
     private static final long serialVersionUID = -7874788252593417090L;
 
@@ -38,6 +39,7 @@ public class FriendizerUser implements Serializable {
 	latitude = obj.getDouble("latitude");
 	longitude = obj.getDouble("longitude");
 	matching = obj.optInt("matching");
+	status = obj.optString("status");
 	SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	try {
 	    since = format.parse(obj.getString("since"));
@@ -63,6 +65,7 @@ public class FriendizerUser implements Serializable {
 	since = fzUser.since;
 	distance = fzUser.distance;
 	matching = fzUser.matching;
+	status = fzUser.status;
     }
 
     public JSONObject toJSONObject() {
@@ -75,6 +78,7 @@ public class FriendizerUser implements Serializable {
 	    obj.put("latitude", latitude);
 	    obj.put("longitude", longitude);
 	    obj.put("matching", matching);
+	    obj.put("status", status);
 	    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	    obj.put("since", format.format(since));
 	} catch (JSONException e) {
@@ -233,5 +237,20 @@ public class FriendizerUser implements Serializable {
      */
     public void setMatching(int matching) {
 	this.matching = matching;
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+	return status;
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(String status) {
+	this.status = status;
     }
 }

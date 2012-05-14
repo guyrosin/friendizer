@@ -10,6 +10,7 @@ import com.teamagly.friendizer.adapters.AchievementsAdapter;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.ActionBar;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -39,6 +40,8 @@ public class AchievmentsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 	// Inflate the layout for this fragment
 	View view = inflater.inflate(R.layout.achievements_layout, container, false);
+	ActionBar actionBar = (ActionBar) view.findViewById(R.id.actionbar);
+	actionBar.setVisibility(View.GONE);
 	listView = (ListView) view.findViewById(R.id.achievements_list);
 	return view;
     }

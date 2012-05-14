@@ -139,4 +139,14 @@ public final class ServerFacade {
 	    achvs[i] = new Achievement(userAchvs.getJSONObject(i));
 	return achvs;
     }
+
+    public static void updateStatus(String status) throws Exception {
+	String params = "userID=" + Utility.getInstance().userInfo.getId() + "&status=" + status;
+	// Use URI to escape characters (whitespace and non-ASCII characters)
+	URI uri = new URI(scheme, serverAddress, "/updateStatus", params, null);
+	URL url = new URL(uri.toASCIIString());
+	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+	in.close();
+    }
+
 }

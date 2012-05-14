@@ -88,6 +88,14 @@ public class ImageLoader {
     private Bitmap getBitmap(String url) {
 	File f = fileCache.getFile(url);
 
+	if (f == null) // If the cache is unavailable, just fetch the image and return it
+	    try {
+		URL newurl = new URL(url);
+		return BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+	    } catch (Exception e) {
+		return null;
+	    }
+
 	// from SD cache
 	Bitmap b = decodeFile(f);
 	if (b != null)
