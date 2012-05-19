@@ -59,6 +59,7 @@
   	<url-pattern>/userDetails</url-pattern>
   	<url-pattern>/ownList</url-pattern>
   	<url-pattern>/buy</url-pattern>
+  	<url-pattern>/updateStatus</url-pattern>
   </servlet-mapping>
   
     <servlet>

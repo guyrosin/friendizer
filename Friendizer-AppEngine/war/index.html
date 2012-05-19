@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html
 	xmlns="http://www.w3.org/1999/xhtml"
@@ -7,12 +6,17 @@
 	lang="en">
 
 <head>
+
 <meta
 	http-equiv="Content-Type"
 	content="text/html; charset=utf-8" />
 <script
 	type="text/javascript"
 	src="http://code.jquery.com/jquery.min.js"></script>
+<script src="lightbox/js/lightbox.js"></script>
+<link
+	href="lightbox/css/lightbox.css"
+	rel="stylesheet" />
 <link
 	id="favicon"
 	rel="shortcut icon"
@@ -44,20 +48,20 @@ body {
 
 #pic {
 	float: right;
-	margin: -30px 0 0 0;
+	margin: 20px 0 0 0;
 }
 
 p {
 	margin: 0 0 16px 0;
 }
 
-a {
+.text_link {
 	color: #999;
 	text-decoration: none;
 	border-bottom: 1px dotted #999;
 }
 
-a:hover {
+.text_link:hover {
 	border-bottom-style: solid;
 	color: black;
 }
@@ -71,6 +75,25 @@ a:hover {
 	font-family: Georgia, Serif;
 	font-style: italic;
 	color: #666;
+}
+
+.thumb {
+	height: 100px;
+	width: 100px;
+}
+
+.thumbnails a {
+	display: block;
+	float: left;
+	margin: 4px;
+}
+
+.thumbnails a img {
+	border: solid 1px #aaa;
+}
+
+.thumbnails a:hover img {
+	border: solid 1px Black;
 }
 </style>
 
@@ -95,38 +118,82 @@ a:hover {
 
 	<div id="page-wrap">
 
-		<img
-			src="cthulu.png"
-			alt="Photo of Cthulu"
-			id="pic" />
-
-		<div
-			id="contact-info"
-			class="vcard">
-
-			<!-- Microformats! -->
-
+		<div>
 			<img
 				id="logo"
 				alt="friendizer logo"
 				src="friendizer-black-no-bg.png"></img>
+			<div
+				id="menu"
+				style="position: fixed; top: 1%; right: 1%;">
+				<a
+					class="text_link"
+					href="mailto:friendizer.info@gmail.com">Contact Us</a>
+			</div>
 			<!-- <h1 class="fn">friendizer</h1> -->
+
+			<div
+				id="pic"
+				class="thumbnails">
+				<a
+					href="screenshots/splash.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/splash_thumb.jpg"
+					alt="Splash"
+					class="thumb" /></a><a
+					href="screenshots/profile.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/profile_thumb.jpg"
+					alt="Profile"
+					class="thumb" /></a> <br /> <a
+					href="screenshots/achievements.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/achievements_thumb.jpg"
+					alt="Achievements"
+					class="thumb" /></a><a
+					href="screenshots/connections.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/connections_thumb.jpg"
+					alt="Connections"
+					class="thumb" /></a> <br /> <a
+					href="screenshots/messages.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/messages_thumb.jpg"
+					alt="Messages"
+					class="thumb" /></a><a
+					href="screenshots/radar.jpg"
+					rel="lightbox[ss]"><img
+					src="screenshots/radar_thumb.jpg"
+					alt="People Radar"
+					class="thumb" /></a><br /> <a href="http://friendizer.googlecode.com/svn/trunk/Friendizer-Android/bin/Friendizer-Android.apk"><img
+					style="float: right;"
+					src="http://chart.apis.google.com/chart?cht=qr&chs=210x210&chl=http%3A//friendizer.googlecode.com/svn/trunk/Friendizer-Android/bin/Friendizer-Android.apk&chld=H|0"
+					alt="QR Code"
+					title="Scan to download" /></a>
+			</div>
 			<br /> <br /> <br />
 		</div>
 
 		<div id="objective">
-			<p>friendizer is a social Android app. It's a competitive social game based on location that offers an opportunity to meet
-				new people with common interests.</p>
-			<br />
 			<p>
-				Please go to our <a href="http://code.google.com/p/friendizer/">Google Code project</a> for more info and downloads
+				<i>friendizer</i> is a social Android app. It's a competitive social game based on location that offers an opportunity to meet
+				new people with common interests.
+			</p>
+			<br />
+			<p style="font-size: small;"><i>friendizer</i> is currently under development. You can download the nightly build by scanning the barcode to the right or by clicking <a
+					href="http://friendizer.googlecode.com/svn/trunk/Friendizer-Android/bin/Friendizer-Android.apk" class="text_link">here</a><br /><br />
+			</p>
+			<p>
+				Please check our <a
+					href="http://code.google.com/p/friendizer/"
+					class="text_link">Google Code project</a> for more info and downloads
 			</p>
 			<br />
 			<div
 				class="fb-like"
 				data-href="http://www.facebook.com/friendizer"
 				data-send="true"
-				data-width="450"
+				data-width="500"
 				data-show-faces="true"></div>
 		</div>
 
@@ -136,8 +203,8 @@ a:hover {
 			src="brought-to-you.jpg"
 			style="position: fixed; bottom: 1%; right: 1%; width: 233px; height: 133px;"></img>
 		<div
-			style="position: fixed; bottom: 1%; left: 1%; font-size: x-small; color: gray;"
-			onclick="changeTheme()">switch theme</div>
+			style="position: fixed; bottom: 1%; left: 1%; font-size: small; color: gray;"
+			onclick="changeTheme()"><a href="#" class="text_link">switch theme</a></div>
 	</div>
 
 	<div id="fb-root"></div>
