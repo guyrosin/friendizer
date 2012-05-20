@@ -6,15 +6,6 @@ package com.teamagly.friendizer.activities;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.adapters.FriendsAdapter;
-import com.teamagly.friendizer.adapters.FriendsImageAdapter;
-import com.teamagly.friendizer.adapters.FriendsListAdapter;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseDialogListener;
-import com.teamagly.friendizer.utils.Comparators;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -30,8 +21,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
+
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.adapters.FriendsAdapter;
+import com.teamagly.friendizer.adapters.FriendsImageAdapter;
+import com.teamagly.friendizer.adapters.FriendsListAdapter;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.Comparators;
+import com.teamagly.friendizer.utils.ServerFacade;
 
 /**
  * @author Guy
@@ -118,14 +117,6 @@ public abstract class AbstractFriendsListActivity extends ListActivity implement
 
     public boolean onOptionsItemSelected(MenuItem item) {
 	switch (item.getItemId()) {
-	case R.id.settings: // Move to the settings activity
-	    startActivity(new Intent(this, FriendsPrefs.class));
-	    return true;
-	case R.id.invite: // Show the Facebook invitation dialog
-	    Bundle params = new Bundle();
-	    params.putString("message", getString(R.string.invitation_msg));
-	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
-	    return true;
 	case R.id.facebook_friends: // Move to my Facebook friends activity
 	    Intent intent = new Intent().setClass(this, FBFriendsActivity.class);
 	    startActivity(intent);

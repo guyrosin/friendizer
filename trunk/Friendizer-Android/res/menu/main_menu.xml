@@ -6,7 +6,7 @@
         android:icon="@drawable/ic_menu_refresh"
         android:title="@string/refresh_title"/>
     <item android:id="@+id/invite" android:icon="@android:drawable/ic_menu_share" android:title="@string/invite_title"></item><item
-        android:id="@+id/settings_title"
+        android:id="@+id/settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/settings_title"/>
 

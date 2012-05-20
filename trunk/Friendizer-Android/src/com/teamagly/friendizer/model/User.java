@@ -3,6 +3,8 @@ package com.teamagly.friendizer.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.google.android.maps.GeoPoint;
+
 public class User implements Serializable {
 
     FacebookUser fb; // Data from Facebook
@@ -234,6 +236,13 @@ public class User implements Serializable {
     }
 
     /**
+     * @return the user's location as a GeoPoint
+     */
+    public GeoPoint getGeoPoint() {
+	return fz.getGeoPoint();
+    }
+
+    /**
      * @return the since
      */
     public Date getSince() {
@@ -277,6 +286,7 @@ public class User implements Serializable {
     public void setMatching(int matching) {
 	this.fz.matching = matching;
     }
+
     /**
      * @return the status
      */

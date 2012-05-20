@@ -1,5 +1,6 @@
 package com.teamagly.friendizer.activities;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -35,6 +37,7 @@ public class SplashActivity extends Activity {
     private Handler mHandler;
     private ImageView loginButton;
     UserRequestListener userRequestListener;
+    private String requestID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,17 @@ public class SplashActivity extends Activity {
 	setContentView(R.layout.splash);
 	mHandler = new Handler();
 	Intent intent = getIntent();
+
+	// Parse any incoming notifications and save
+	Uri intentUri = getIntent().getData();
+	if (intentUri != null) {
+	    String requestIdParam = intentUri.getQueryParameter("request_ids");
+	    if (requestIdParam != null) {
+		String array[] = requestIdParam.split(",");
+		requestID = array[0];
+	    }
+	}
+
 	// Listener for the login button
 	loginButton = (ImageView) findViewById(R.id.loginButton);
 	loginButton.setOnClickListener(new View.OnClickListener() {
@@ -213,6 +227,15 @@ public class SplashActivity extends Activity {
     private final class LoginDialogListener implements DialogListener {
 	@Override
 	public void onComplete(Bundle values) {
+	    // Process any available request
+	    if (requestID != null) {
+		// Just delete the request
+		// Toast.makeText(getApplicationContext(), "Incoming request", Toast.LENGTH_SHORT).show();
+		Bundle params = new Bundle();
+		params.putString("method", "delete");
+		Utility.getInstance().mAsyncRunner.request(requestID, params, new RequestIDDeleteRequestListener());
+	    }
+
 	    SessionEvents.onLoginSuccess();
 	}
 
@@ -245,5 +268,11 @@ public class SplashActivity extends Activity {
 		}
 	    });
 	}
+    }
+
+    public class RequestIDDeleteRequestListener extends BaseRequestListener {
+	@Override
+	public void onComplete(final String response, Object state) {
+	};
     }
 }

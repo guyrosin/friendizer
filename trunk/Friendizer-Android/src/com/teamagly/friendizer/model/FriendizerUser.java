@@ -8,6 +8,8 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.android.maps.GeoPoint;
+
 public class FriendizerUser implements Serializable {
 
     long id = 0;
@@ -87,6 +89,15 @@ public class FriendizerUser implements Serializable {
     }
 
     public FriendizerUser() {
+    }
+
+    /**
+     * @return the user's location as a GeoPoint
+     */
+    public GeoPoint getGeoPoint() {
+	int lat = (int) (latitude * 1E6);
+	int lng = (int) (longitude * 1E6);
+	return new GeoPoint(lat, lng);
     }
 
     /**
