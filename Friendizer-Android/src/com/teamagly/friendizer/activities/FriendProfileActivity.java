@@ -277,18 +277,23 @@ public class FriendProfileActivity extends Activity {
 		    public void run() {
 			ownerName.setText(ownerNameStr);
 			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
-			if (userInfo.getOwnerID() != Utility.getInstance().userInfo.getId())
-			    // Add a listener for the owner's pic if he's not me
-			    ownerPic.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-				    // Move to the owner's profile
-				    Intent intent = new Intent()
-					    .setClass(FriendProfileActivity.this, FriendProfileActivity.class);
+			// Add a listener for the owner's pic
+			ownerPic.setOnClickListener(new OnClickListener() {
+			    @Override
+			    public void onClick(View v) {
+				Intent intent = null;
+				// Move to the owner's profile
+				if (userInfo.getOwnerID() != Utility.getInstance().userInfo.getId()) {
+				    intent = new Intent().setClass(FriendProfileActivity.this, FriendProfileActivity.class);
 				    intent.putExtra("userID", userInfo.getOwnerID());
-				    startActivity(intent);
+				} else {
+				    // Move to my profile
+				    intent = new Intent().setClass(v.getContext(), FriendizerActivity.class);
+				    intent.putExtra("to", R.string.my_profile);
 				}
-			    });
+				startActivity(intent);
+			    }
+			});
 		    }
 		});
 	    } catch (Exception e) {

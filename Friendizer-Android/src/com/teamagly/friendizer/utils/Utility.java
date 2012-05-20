@@ -22,6 +22,7 @@ import android.graphics.RectF;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -31,6 +32,7 @@ public class Utility extends Application {
     public AsyncFacebookRunner mAsyncRunner;
     public User userInfo;
     public ImageLoader imageLoader;
+    public Location location;
 
     // private static int MAX_IMAGE_DIMENSION = 720;
     public static final String PREFS_NAME = "FriendizerPreferences";

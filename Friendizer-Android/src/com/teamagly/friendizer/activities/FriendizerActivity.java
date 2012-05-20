@@ -1,18 +1,15 @@
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.utils.BaseDialogListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.widgets.ActionBar;
-
+import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +20,12 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
+
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.utils.BaseDialogListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.ActionBar;
 
 public class FriendizerActivity extends TabActivity {
     private final String TAG = getClass().getName();
@@ -35,6 +38,7 @@ public class FriendizerActivity extends TabActivity {
     private LocationListener networkLocationListener;
     // Listener for GPS location updates
     private LocationListener gpsLocationListener;
+    private static final int ONE_MINUTE = 1000 * 60;
 
     /** Called when the activity is first created. */
     @Override
@@ -43,7 +47,15 @@ public class FriendizerActivity extends TabActivity {
 	setContentView(R.layout.main);
 
 	// Acquire a reference to the system Location Manager
-	locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+	if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+	    buildAlertMessageNoGps();
+	Location gpsLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	Location networkLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+	if (isBetterLocation(gpsLastLocation, networkLastLocation))
+	    updateLocation(gpsLastLocation);
+	else
+	    updateLocation(networkLastLocation);
 
 	// Create a location listener that get updated by the network provider
 	networkLocationListener = new ProviderLocationListener("Network");
@@ -69,9 +81,9 @@ public class FriendizerActivity extends TabActivity {
     protected void onStart() {
 	super.onStart();
 	// Register the listener with the Location Manager to receive location updates from the network provider
-	locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 0, networkLocationListener);
+	locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ONE_MINUTE, 20, networkLocationListener);
 	// Register the listener with the Location Manager to receive location updates from the GPS provider
-	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 0, gpsLocationListener);
+	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ONE_MINUTE, 20, gpsLocationListener);
 
     }
 
@@ -96,11 +108,8 @@ public class FriendizerActivity extends TabActivity {
 	super.onResume();
 
 	int to = getIntent().getIntExtra("to", 0);
-	if (to != 0) {
-	    Intent i = new Intent().setClass(FriendizerActivity.this, getClass(to));
-	    i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	    getLocalActivityManager().startActivity(getString(to), i);
-	}
+	if (to != 0) // Move to the given tab
+	    tabHost.setCurrentTabByTag(getString(to));
 
 	// TODO use in the background (and not here)
 	// if (!Utility.getInstance().facebook.isSessionValid()) {
@@ -122,16 +131,6 @@ public class FriendizerActivity extends TabActivity {
 	    else
 		actionBar.setProgressBarVisibility(View.GONE);
 	}
-    }
-
-    private Class<?> getClass(int tag) {
-	if (tag == R.string.people_radar)
-	    return PeopleRadarActivity.class;
-	if (tag == R.string.connections)
-	    return ConnectionsActivity.class;
-	if (tag == R.string.my_profile)
-	    return MyProfileActivity.class;
-	return null;
     }
 
     private void setTabs() {
@@ -188,10 +187,10 @@ public class FriendizerActivity extends TabActivity {
 	case R.id.refresh:
 	    refreshCurrentTab();
 	    return true;
-	case R.id.settings_title:
+	case R.id.settings: // Move to the settings activity
 	    startActivity(new Intent(this, FriendsPrefs.class));
 	    return true;
-	case R.id.invite:
+	case R.id.invite: // Show the Facebook invitation dialog
 	    Bundle params = new Bundle();
 	    params.putString("message", getString(R.string.invitation_msg));
 	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
@@ -227,29 +226,8 @@ public class FriendizerActivity extends TabActivity {
 	}
 
 	@Override
-	public void onLocationChanged(Location location) {
-
-	    final Location curLocation = location;
-	    /*
-	     * If there is a new location, update in the background
-	     */
-	    if (location != null) {
-		new Thread(new Runnable() {
-		    public void run() {
-			try {
-			    // Update the server with the new location
-			    ServerFacade.changeLocation(Utility.getInstance().userInfo.getId(), curLocation.getLatitude(),
-				    curLocation.getLongitude());
-			} catch (Exception e) {
-			    Log.e(TAG, "Can't update the server with the new location", e);
-			}
-
-			// Display the new location information on the screen
-			// Toast.makeText(getBaseContext(),"Location changed : (" + curLocation.getLatitude() + "," +
-			// curLocation.getLongitude()+ ")	Provided by " + provider, Toast.LENGTH_SHORT).show();
-		    }
-		}).start();
-	    }
+	public void onLocationChanged(final Location newLocation) {
+	    updateLocation(newLocation);
 	}
 
 	@Override
@@ -265,4 +243,100 @@ public class FriendizerActivity extends TabActivity {
 	}
     }
 
+    /**
+     * Determines whether one Location reading is better than the current Location fix
+     * 
+     * @param location
+     *            The new Location that you want to evaluate
+     * @param currentBestLocation
+     *            The current Location fix, to which you want to compare the new one
+     */
+    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+	if (currentBestLocation == null)
+	    // A new location is always better than no location
+	    return true;
+	if (location == null)
+	    return false;
+
+	// Check whether the new location fix is newer or older
+	long timeDelta = location.getTime() - currentBestLocation.getTime();
+	boolean isSignificantlyNewer = timeDelta > ONE_MINUTE;
+	boolean isSignificantlyOlder = timeDelta < -ONE_MINUTE;
+	boolean isNewer = timeDelta > 0;
+
+	// If it's been more than two minutes since the current location, use the new location
+	// because the user has likely moved
+	if (isSignificantlyNewer) {
+	    return true;
+	    // If the new location is more than two minutes older, it must be worse
+	} else if (isSignificantlyOlder) {
+	    return false;
+	}
+
+	// Check whether the new location fix is more or less accurate
+	int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+	boolean isLessAccurate = accuracyDelta > 0;
+	boolean isMoreAccurate = accuracyDelta < 0;
+	boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+	// Check if the old and new location are from the same provider
+	boolean isFromSameProvider = isSameProvider(location.getProvider(), currentBestLocation.getProvider());
+
+	// Determine location quality using a combination of timeliness and accuracy
+	if (isMoreAccurate) {
+	    return true;
+	} else if (isNewer && !isLessAccurate) {
+	    return true;
+	} else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+	    return true;
+	}
+	return false;
+    }
+
+    public void updateLocation(final Location newLocation) {
+	// If the new location is better than the current one, update in the background
+	if ((newLocation != null) && (isBetterLocation(newLocation, Utility.getInstance().location))) {
+	    new Thread(new Runnable() {
+		public void run() {
+		    try {
+			// Update the server with the new location
+			ServerFacade.changeLocation(Utility.getInstance().userInfo.getId(), newLocation.getLatitude(),
+				newLocation.getLongitude());
+		    } catch (Exception e) {
+			Log.e(TAG, "Can't update the server with the new location", e);
+		    }
+
+		    // Display the new location information on the screen
+		    // Toast.makeText(getBaseContext(),"Location changed : (" + curLocation.getLatitude() + "," +
+		    // curLocation.getLongitude()+ ")	Provided by " + provider, Toast.LENGTH_SHORT).show();
+		}
+	    }).start();
+	    // Save the new location
+	    Utility.getInstance().location = newLocation;
+	}
+    }
+
+    /** Checks whether two providers are the same */
+    private boolean isSameProvider(String provider1, String provider2) {
+	if (provider1 == null) {
+	    return provider2 == null;
+	}
+	return provider1.equals(provider2);
+    }
+
+    private void buildAlertMessageNoGps() {
+	final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
+		.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		    public void onClick(final DialogInterface dialog, final int id) {
+			startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+		    }
+		}).setNegativeButton("Skip", new DialogInterface.OnClickListener() {
+		    public void onClick(final DialogInterface dialog, final int id) {
+			dialog.cancel();
+		    }
+		});
+	final AlertDialog alert = builder.create();
+	alert.show();
+    }
 }

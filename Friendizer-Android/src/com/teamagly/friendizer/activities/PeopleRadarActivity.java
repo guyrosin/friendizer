@@ -1,6 +1,23 @@
 package com.teamagly.friendizer.activities;
 
 import org.json.JSONArray;
+
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.FriendizerUser;
@@ -9,20 +26,9 @@ import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 public class PeopleRadarActivity extends AbstractFriendsListActivity {
     private final String TAG = getClass().getName();
+
     // Variables for the "shake to reload" feature
     private SensorManager mSensorManager;
     private float mAccel; // acceleration apart from gravity
@@ -115,7 +121,7 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 			IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
 			Bundle params = new Bundle();
 			try {
-			    // Request the details of each user I own
+			    // Request the details of each nearby user
 			    String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
 				    + IDsBuilder.toString() + ") order by name";
 			    params.putString("method", "fql.query");
@@ -146,4 +152,23 @@ public class PeopleRadarActivity extends AbstractFriendsListActivity {
 	    showLoadingIcon(false);
 	}
     }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+	super.onCreateOptionsMenu(menu);
+	menu.clear(); // Clear the main activity's menu
+	MenuInflater inflater = getMenuInflater();
+	inflater.inflate(R.menu.people_radar_menu, menu);
+	return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case R.id.map: // Move to the map activity
+	    startActivity(new Intent(this, MapLocationActivity.class));
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
+	}
+    }
+
 }
