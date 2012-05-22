@@ -49,7 +49,7 @@ public abstract class BalloonItemizedOverlay<Item extends OverlayItem> extends I
 	private View closeRegion;
 	private int viewOffset;
 	final MapController mc;
-	private Item currentFocusedItem;
+	protected Item currentFocusedItem;
 	private int currentFocusedIndex;
 	
 	private boolean showClose = true;
@@ -254,7 +254,7 @@ public abstract class BalloonItemizedOverlay<Item extends OverlayItem> extends I
 	 * balloon or by inflating it from xml. 
 	 * @return true if the balloon was recycled false otherwise 
 	 */
-	private boolean createAndDisplayBalloonOverlay(){
+	protected boolean createAndDisplayBalloonOverlay(){
 		boolean isRecycled;
 		if (balloonView == null) {
 			balloonView = createBalloonOverlayView();
