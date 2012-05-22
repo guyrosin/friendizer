@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.maps.MapView;
-import com.google.android.maps.OverlayItem;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
 import com.teamagly.friendizer.R;
@@ -26,7 +25,7 @@ import com.teamagly.friendizer.activities.FriendProfileActivity;
 import com.teamagly.friendizer.activities.FriendizerActivity;
 import com.teamagly.friendizer.utils.Utility;
 
-public class CustomItemizedOverlay<Item extends OverlayItem> extends BalloonItemizedOverlay<CustomOverlayItem> {
+public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayItem> {
 
     private ArrayList<CustomOverlayItem> mOverlays = new ArrayList<CustomOverlayItem>();
     private Context c;
@@ -72,9 +71,31 @@ public class CustomItemizedOverlay<Item extends OverlayItem> extends BalloonItem
 	return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#hideBalloon()
+     */
+    @Override
+    public void hideBalloon() {
+	if (currentFocusedItem != null)
+	    currentFocusedItem.showMarker(); // Restore the marker
+	super.hideBalloon();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#createAndDisplayBalloonOverlay()
+     */
+    @Override
+    protected boolean createAndDisplayBalloonOverlay() {
+	boolean result = super.createAndDisplayBalloonOverlay();
+	if (currentFocusedItem != null)
+	    currentFocusedItem.setMarker(getMapView().getResources().getDrawable(R.drawable.stub)); // Remove the marker
+	return result;
+    }
+
     @Override
     protected BalloonOverlayView<CustomOverlayItem> createBalloonOverlayView() {
 	return new CustomBalloonOverlayView<CustomOverlayItem>(getMapView().getContext(), getBalloonBottomOffset());
     }
-
 }

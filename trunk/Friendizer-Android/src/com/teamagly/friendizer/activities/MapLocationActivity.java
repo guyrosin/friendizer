@@ -17,6 +17,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -30,6 +34,7 @@ import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.ActionBar;
 import com.teamagly.friendizer.widgets.CustomItemizedOverlay;
 import com.teamagly.friendizer.widgets.CustomOverlayItem;
 
@@ -41,10 +46,11 @@ public class MapLocationActivity extends MapActivity {
 
     protected TapControlledMapView mapView;
     protected List<Overlay> mapOverlays;
-    protected Drawable myDrawable;
-    protected Drawable usersDrawable;
-    protected CustomItemizedOverlay<CustomOverlayItem> myItemizedOverlay;
-    protected CustomItemizedOverlay<CustomOverlayItem> nearbyUsersItemizedOverlay;
+    protected Drawable stub;
+    protected CustomItemizedOverlay myItemizedOverlay;
+    protected CustomItemizedOverlay nearbyUsersItemizedOverlay;
+    LinearLayout markerLayout;
+    GeoPoint myLocationPoint;
 
     // Variables for the "shake to reload" feature
     private SensorManager mSensorManager;
@@ -77,10 +83,22 @@ public class MapLocationActivity extends MapActivity {
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
-	// main.xml contains a MapView
 	setContentView(R.layout.map_layout);
-	myDrawable = this.getResources().getDrawable(R.drawable.map_marker);
-	usersDrawable = this.getResources().getDrawable(R.drawable.map_marker2);
+	ActionBar actionBar = (ActionBar) findViewById(R.id.actionbar);
+	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		onResume();
+	    }
+	});
+	stub = getResources().getDrawable(R.drawable.agly_meme);
+	ImageView meButton = (ImageView) findViewById(R.id.meButton);
+	meButton.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		zoomMyLoation();
+	    }
+	});
 
 	// extract MapView from layout
 	mapView = (TapControlledMapView) findViewById(R.id.mapview);
@@ -97,15 +115,16 @@ public class MapLocationActivity extends MapActivity {
 	});
 
 	mapOverlays = mapView.getOverlays();
+	markerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.map_marker_layout, null);
 	// Create an overlay for my location
-	myItemizedOverlay = new CustomItemizedOverlay<CustomOverlayItem>(myDrawable, mapView);
+	myItemizedOverlay = new CustomItemizedOverlay(stub, mapView);
 	// set iOS behavior attributes for overlay
 	myItemizedOverlay.setShowClose(false);
 	myItemizedOverlay.setShowDisclosure(true);
 	myItemizedOverlay.setSnapToCenter(false);
 
 	// Create overlays for nearby users
-	nearbyUsersItemizedOverlay = new CustomItemizedOverlay<CustomOverlayItem>(usersDrawable, mapView);
+	nearbyUsersItemizedOverlay = new CustomItemizedOverlay(stub, mapView);
 	// set iOS behavior attributes for overlay
 	nearbyUsersItemizedOverlay.setShowClose(false);
 	nearbyUsersItemizedOverlay.setShowDisclosure(true);
@@ -113,12 +132,25 @@ public class MapLocationActivity extends MapActivity {
 
 	mapOverlays.add(nearbyUsersItemizedOverlay);
 	mapOverlays.add(myItemizedOverlay);
-	
+
 	// Shake to reload functionality
 	mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 	mAccel = 0.00f;
 	mAccelCurrent = SensorManager.GRAVITY_EARTH;
 	mAccelLast = SensorManager.GRAVITY_EARTH;
+
+	if (Utility.getInstance().location != null) {
+	    myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
+	    zoomMyLoation();
+	}
+
+    }
+
+    protected void zoomMyLoation() {
+	if (Utility.getInstance().location != null) {
+	    mapView.getController().animateTo(myLocationPoint);
+	    mapView.getController().setZoom(17);
+	}
     }
 
     /*
@@ -134,14 +166,12 @@ public class MapLocationActivity extends MapActivity {
 	myItemizedOverlay.clear();
 
 	if (Utility.getInstance().location != null) {
-	    GeoPoint myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
-	    mapView.getController().setCenter(myLocationPoint);
-	    mapView.getController().setZoom(17);
-	    CustomOverlayItem overlayitem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo);
+	    myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
+	    CustomOverlayItem overlayitem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo, markerLayout);
 	    myItemizedOverlay.addOverlay(overlayitem);
 	}
 
-//	mapView.postInvalidate();
+	// mapView.postInvalidate();
 
 	mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 		SensorManager.SENSOR_DELAY_NORMAL);
@@ -191,7 +221,8 @@ public class MapLocationActivity extends MapActivity {
 				User userInfo = new User(nearbyUsers[i], new FacebookUser(jsonArray.getJSONObject(i),
 					FBQueryType.FQL));
 				usersList.add(userInfo);
-				CustomOverlayItem overlayitem = new CustomOverlayItem(userInfo.getGeoPoint(), userInfo);
+				CustomOverlayItem overlayitem = new CustomOverlayItem(userInfo.getGeoPoint(), userInfo,
+					markerLayout);
 				nearbyUsersItemizedOverlay.addOverlay(overlayitem);
 			    }
 			} catch (Exception e) {

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -94,14 +96,24 @@ public class MyInfoFragment extends Fragment {
      * 
      */
     protected void showStatusDialog() {
-	AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+	AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
 
-	alert.setTitle("Enter Your Status");
+	dialogBuilder.setTitle("Enter Your Status");
 
 	// Set an EditText view to get user input
 	final EditText input = new EditText(getActivity());
-	alert.setView(input);
-	alert.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+	input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+	    @Override
+	    public void onFocusChange(View v, boolean hasFocus) {
+		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (hasFocus)
+		    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+		else
+		    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+	    }
+	});
+	dialogBuilder.setView(input);
+	dialogBuilder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
 	    public void onClick(DialogInterface dialog, int whichButton) {
 		final String newStatus = input.getText().toString();
 		// Update the DB
@@ -123,11 +135,13 @@ public class MyInfoFragment extends Fragment {
 		});
 	    }
 	});
-	alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	    public void onClick(DialogInterface dialog, int whichButton) {
+		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
 	    }
 	});
-	alert.show();
+	dialogBuilder.show();
     }
 
     /*
