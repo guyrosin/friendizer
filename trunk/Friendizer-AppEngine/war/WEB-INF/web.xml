@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2011 Google Inc. All Rights Reserved. All rights reserved. 
+	This program and the accompanying materials are made available under the 
+	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
+	and is available at http://www.eclipse.org/legal/epl-v10.html Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+<web-app
+	xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemalocation="http://java.sun.com/xml/ns/javaee
+                        http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<!-- Other servlets -->
+
+	<servlet>
+		<servlet-name>LocationManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.LocationManager</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>LocationManager</servlet-name>
+		<url-pattern>/changeLocation</url-pattern>
+		<url-pattern>/nearbyUsers</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>MarketManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.MarketManager</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>MarketManager</servlet-name>
+		<url-pattern>/userDetails</url-pattern>
+		<url-pattern>/ownList</url-pattern>
+		<url-pattern>/buy</url-pattern>
+		<url-pattern>/updateStatus</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>InboxManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.InboxManager</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>InboxManager</servlet-name>
+		<url-pattern>/send</url-pattern>
+		<url-pattern>/getConversation</url-pattern>
+		<url-pattern>/getUnread</url-pattern>
+		<url-pattern>/getInbox</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AchievementsManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.AchievementsManager
+		</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>AchievementsManager</servlet-name>
+		<url-pattern>/achievements</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>dataMessagingServlet</servlet-name>
+		<servlet-class>
+			com.google.android.c2dm.server.C2DMRetryServlet
+		</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>dataMessagingServlet</servlet-name>
+		<url-pattern>/tasks/c2dm</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>RegisterServlet</servlet-name>
+		<servlet-class>
+			com.teamagly.friendizer.RegisterServlet
+		</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>UnregisterServlet</servlet-name>
+		<servlet-class>
+			com.teamagly.friendizer.UnregisterServlet
+		</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>RegisterServlet</servlet-name>
+		<url-pattern>/register</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>UnregisterServlet</servlet-name>
+		<url-pattern>/unregister</url-pattern>
+	</servlet-mapping>
+
+	<!-- Security -->
+
+	<!-- Require user login for the .html message page -->
+	<security-constraint>
+		<web-resource-collection>
+			<url-pattern>/Friendizer.html</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>*</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<!-- Require admin role for the tasks servlet -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>tasks</web-resource-name>
+			<url-pattern>/tasks/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+</web-app>
