@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2010 Johan Nilsson <http://markupartist.com>
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/actionbar_height"
+    android:orientation="horizontal"
+        android:background="@drawable/actionbar_background" >
+
+    <ImageButton
+        android:id="@+id/actionbar_home_btn"
+        style="@style/ActionBarHomeItem"
+        android:adjustViewBounds="true"
+        android:background="@drawable/actionbar_btn"
+        android:scaleType="fitStart"
+        android:src="@drawable/friendizer_white" />
+
+    <LinearLayout
+        android:id="@+id/actionbar_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/actionbar_height"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="0dp"
+        android:background="@color/actionbar_separator"
+        android:padding="0dp" >
+
+        <ImageButton
+            android:id="@+id/actionbar_refresh_btn"
+            style="@style/ActionBarHomeItem"
+            android:background="@drawable/actionbar_btn"
+            android:src="@drawable/ic_action_refresh" />
+        
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/actionbar_actions"
+        android:layout_toRightOf="@+id/actionbar_home_btn" >
+
+        <ProgressBar
+            android:id="@+id/actionbar_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:indeterminateOnly="true"
+            android:paddingRight="7dip"
+            android:visibility="gone" />
+
+        <com.teamagly.friendizer.widgets.ScrollingTextView
+            android:id="@+id/actionbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/actionbar_progress"
+            android:ellipsize="marquee"
+            android:lines="1"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
+            android:scrollHorizontally="true"
+            android:textColor="@color/actionbar_title"
+            android:textSize="16dip" />
+    </RelativeLayout>
+
+</RelativeLayout>
