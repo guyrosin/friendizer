@@ -76,7 +76,6 @@ public class AppEngineClient {
 	DefaultHttpClient client = new DefaultHttpClient();
 	String continueURL = BASE_URL;
 	URI uri = new URI(AUTH_URL + "?continue=" + URLEncoder.encode(continueURL, "UTF-8") + "&auth=" + authToken);
-	// URI uri = new URI(AUTH_URL + "?continue=http://localhost/&auth=" + authToken);
 	HttpGet method = new HttpGet(uri);
 	final HttpParams getParams = new BasicHttpParams();
 	HttpClientParams.setRedirecting(getParams, false); // continue is not used
@@ -85,14 +84,13 @@ public class AppEngineClient {
 	HttpResponse res = client.execute(method);
 	Header[] headers = res.getHeaders("Set-Cookie");
 	// Response should be a redirect (302)
-	if (res.getStatusLine().getStatusCode() != 302 || headers.length == 0) {
+	if (res.getStatusLine().getStatusCode() != 302 || headers.length == 0)
 	    return null;
-	}
 
 	String ascidCookie = null;
 	for (Header header : headers) {
 	    if (header.getValue().indexOf("ACSID=") >= 0) {
-		// let's parse it
+		// Parse it
 		String value = header.getValue();
 		String[] pairs = value.split(";");
 		ascidCookie = pairs[0];
