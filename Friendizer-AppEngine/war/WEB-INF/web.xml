@@ -20,8 +20,6 @@
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
-	<!-- Other servlets -->
-
 	<servlet>
 		<servlet-name>LocationManager</servlet-name>
 		<servlet-class>com.teamagly.friendizer.LocationManager</servlet-class>
@@ -105,28 +103,5 @@
 		<servlet-name>UnregisterServlet</servlet-name>
 		<url-pattern>/unregister</url-pattern>
 	</servlet-mapping>
-
-	<!-- Security -->
-
-	<!-- Require user login for the .html message page -->
-	<security-constraint>
-		<web-resource-collection>
-			<url-pattern>/Friendizer.html</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>*</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<!-- Require admin role for the tasks servlet -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>tasks</web-resource-name>
-			<url-pattern>/tasks/*</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>admin</role-name>
-		</auth-constraint>
-	</security-constraint>
 
 </web-app>
