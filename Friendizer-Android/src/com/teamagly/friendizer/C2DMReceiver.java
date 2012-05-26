@@ -10,18 +10,18 @@
  *******************************************************************************/
 package com.teamagly.friendizer;
 
-import com.google.android.c2dm.C2DMBaseReceiver;
-import com.teamagly.friendizer.utils.DeviceRegistrar;
-import com.teamagly.friendizer.utils.MessageDisplay;
-import com.teamagly.friendizer.utils.Setup;
-import com.teamagly.friendizer.utils.Util;
-
 import java.io.IOException;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import com.google.android.c2dm.C2DMBaseReceiver;
+import com.teamagly.friendizer.utils.DeviceRegistrar;
+import com.teamagly.friendizer.utils.MessageDisplay;
+import com.teamagly.friendizer.utils.Setup;
+import com.teamagly.friendizer.utils.Util;
 
 /**
  * Receive a push message from the Cloud to Device Messaging (C2DM) service. This class should be modified to include
@@ -90,22 +90,4 @@ public class C2DMReceiver extends C2DMBaseReceiver {
 	 */
 	MessageDisplay.displayMessage(context, intent);
     }
-    // CTP onMessage
-    /*
-     * @Override public void onMessage(Context context, Intent intent) { Bundle extras = intent.getExtras(); if (extras != null) {
-     * String url = (String) extras.get("url"); String title = (String) extras.get("title"); String sel = (String)
-     * extras.get("sel"); String debug = (String) extras.get("debug"); if (debug != null) { // server-controlled debug - the
-     * server wants to know // we received the message, and when. This is not user-controllable, // we don't want extra traffic on
-     * the server or phone. Server may // turn this on for a small percentage of requests or for users // who report issues.
-     * DefaultHttpClient client = new DefaultHttpClient(); HttpGet get = new HttpGet(AppEngineClient.BASE_URL + "/debug?id=" +
-     * extras.get("collapse_key")); // No auth - the purpose is only to generate a log/confirm delivery // (to avoid overhead of
-     * getting the token) try { client.execute(get); } catch (ClientProtocolException e) { // ignore } catch (IOException e) { //
-     * ignore } } if (title != null && url != null && url.startsWith("http")) { SharedPreferences settings = Prefs.get(context);
-     * Intent launchIntent = LauncherUtils.getLaunchIntent(context, title, url, sel); // Notify and optionally start activity if
-     * (settings.getBoolean("launchBrowserOrMaps", true) && launchIntent != null) { try { context.startActivity(launchIntent);
-     * LauncherUtils.playNotificationSound(context); } catch (ActivityNotFoundException e) { return; } } else {
-     * LauncherUtils.generateNotification(context, url, title, launchIntent); } // Record history (for link/maps only) if
-     * (launchIntent != null && launchIntent.getAction().equals(Intent.ACTION_VIEW)) {
-     * HistoryDatabase.get(context).insertHistory(title, url); } } } }
-     */
 }
