@@ -15,11 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-/**
- * @author Guy
- * 
- */
-
 public class FBFriendsAdapter extends FriendsAdapter {
 
     /**

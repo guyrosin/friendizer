@@ -3,6 +3,7 @@
  */
 package com.teamagly.friendizer.activities;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.teamagly.friendizer.R;
 
 import android.os.Bundle;
@@ -11,11 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * @author Guy
- * 
- */
-public class ActionHistoryFragment extends Fragment {
+public class ActionHistoryFragment extends SherlockFragment {
 
     private final String TAG = getClass().getName();
 

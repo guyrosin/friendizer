@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
@@ -15,7 +15,7 @@ import com.teamagly.friendizer.utils.Utility;
 
 public class CustomOverlayItem extends OverlayItem {
 
-    private LinearLayout markerLayout;
+    private ViewGroup markerLayout;
     protected String title;
     protected String snippet;
     protected String imageURL;
@@ -43,7 +43,7 @@ public class CustomOverlayItem extends OverlayItem {
      * @param userInfo
      * @param markerLayout
      */
-    public CustomOverlayItem(GeoPoint point, User userInfo, LinearLayout markerLayout) {
+    public CustomOverlayItem(GeoPoint point, User userInfo, ViewGroup markerLayout) {
 	super(point, "", "");
 	title = userInfo.getName();
 	snippet = "";

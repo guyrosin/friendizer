@@ -15,10 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-/**
- * @author Guy
- * 
- */
 public class FriendsListAdapter extends FriendsAdapter {
 
     public FriendsListAdapter(Context context, int textViewResourceId, List<User> objects) {

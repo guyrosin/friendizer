@@ -11,6 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.Message;
@@ -24,6 +26,7 @@ public final class ServerFacade {
     }
 
     public static FriendizerUser userDetails(long userID) throws Exception {
+	Log.d("ServerFacade", "userDetails?userID=" + userID);
 	URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	FriendizerUser user = new FriendizerUser(new JSONObject(in.readLine()));

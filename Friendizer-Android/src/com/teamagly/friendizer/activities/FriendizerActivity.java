@@ -1,7 +1,8 @@
 package com.teamagly.friendizer.activities;
 
+import java.util.ArrayList;
+
 import android.app.AlertDialog;
-import android.app.TabActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,27 +11,26 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageView;
-import android.widget.TabHost;
-import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.widgets.ActionBar;
 
-public class FriendizerActivity extends TabActivity {
+public class FriendizerActivity extends SherlockFragmentActivity {
     private final String TAG = getClass().getName();
-    private TabHost tabHost;
     ActionBar actionBar;
+    ArrayList<Integer> tabs;
 
     // Provides access to the system location services
     private LocationManager locationManager;
@@ -44,7 +44,10 @@ public class FriendizerActivity extends TabActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 	setContentView(R.layout.main);
+	actionBar = getSupportActionBar();
+	actionBar.setDisplayShowTitleEnabled(false);
 
 	// Acquire a reference to the system Location Manager
 	locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -62,15 +65,10 @@ public class FriendizerActivity extends TabActivity {
 	// Create a location listener that get updated by the GPS provider
 	gpsLocationListener = new ProviderLocationListener("GPS");
 
-	actionBar = (ActionBar) findViewById(R.id.actionbar);
-	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
-	    @Override
-	    public void onClick(View v) {
-		refreshCurrentTab();
-	    }
-	});
-
 	setTabs();
+	if (savedInstanceState != null) {
+	    actionBar.setSelectedNavigationItem(savedInstanceState.getInt("tab"));
+	}
     }
 
     /*
@@ -107,9 +105,12 @@ public class FriendizerActivity extends TabActivity {
     protected void onResume() {
 	super.onResume();
 
-	int to = getIntent().getIntExtra("to", 0);
-	if (to != 0) // Move to the given tab
-	    tabHost.setCurrentTabByTag(getString(to));
+	int tab = getIntent().getIntExtra("tab", 0);
+	if (tab > 0) { // Move to the given tab
+	    for (int i = 0; i < tabs.size(); i++)
+		if (tabs.get(i) == tab)
+		    actionBar.setSelectedNavigationItem(i);
+	}
 
 	// TODO use in the background (and not here)
 	// if (!Utility.getInstance().facebook.isSessionValid()) {
@@ -119,84 +120,113 @@ public class FriendizerActivity extends TabActivity {
 
     /*
      * (non-Javadoc)
-     * @see android.app.Activity#onNewIntent(android.content.Intent)
+     * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
      */
     @Override
-    protected void onNewIntent(Intent intent) {
-	super.onNewIntent(intent);
-	// Check for a loading message
-	if (intent.hasExtra("loading")) {
-	    if (intent.getBooleanExtra("loading", false))
-		actionBar.setProgressBarVisibility(View.VISIBLE);
-	    else
-		actionBar.setProgressBarVisibility(View.GONE);
-	}
+    protected void onSaveInstanceState(Bundle outState) {
+	super.onSaveInstanceState(outState);
+	outState.putInt("tab", actionBar.getSelectedNavigationIndex());
     }
 
     private void setTabs() {
-	tabHost = getTabHost();
-
-	addTab(R.string.people_radar, R.drawable.icon_peopleradar_tab, PeopleRadarActivity.class);
-	addTab(R.string.connections, R.drawable.icon_friends_tab, ConnectionsActivity.class);
-	addTab(R.string.my_profile, R.drawable.icon_myprofile_tab, MyProfileActivity.class);
-    }
-
-    private void addTab(int labelId, int drawableId, Class<?> target) {
-	Intent intent = new Intent(this, target);
-	TabHost.TabSpec spec = tabHost.newTabSpec(getString(labelId));
-
-	View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator, getTabWidget(), false);
-
-	TextView title = (TextView) tabIndicator.findViewById(R.id.title);
-	title.setText(labelId);
-	ImageView icon = (ImageView) tabIndicator.findViewById(R.id.icon);
-	icon.setImageResource(drawableId);
-
-	spec.setIndicator(tabIndicator);
-	spec.setContent(intent);
-	tabHost.addTab(spec);
-    }
-
-    protected void refreshCurrentTab() {
-	// Tell the current child activity to refresh
-	Intent i = new Intent().setClass(FriendizerActivity.this, getCurrentActivity().getClass());
-	i.putExtra("refresh", true);
-	i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-	getLocalActivityManager().startActivity(tabHost.getCurrentTabTag(), i);
+	tabs = new ArrayList<Integer>();
+	tabs.add(R.string.nearby);
+	tabs.add(R.string.friends);
+	tabs.add(R.string.my_profile);
+	actionBar.addTab(actionBar
+		.newTab()
+		.setText(R.string.nearby)
+		.setTabListener(
+			new TabListener<PeopleRadarFragment>(this, getResources().getString(R.string.nearby),
+				PeopleRadarFragment.class)));
+	actionBar.addTab(actionBar
+		.newTab()
+		.setText(R.string.friends)
+		.setTabListener(
+			new TabListener<ConnectionsFragment>(this, getResources().getString(R.string.friends),
+				ConnectionsFragment.class)));
+	actionBar.addTab(actionBar
+		.newTab()
+		.setText(R.string.my_profile)
+		.setTabListener(
+			new TabListener<MyProfileFragment>(this, getResources().getString(R.string.my_profile),
+				MyProfileFragment.class)));
+	actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
     }
 
     /*
      * (non-Javadoc)
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     * @see com.actionbarsherlock.app.SherlockFragmentActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);
-	MenuInflater inflater = getMenuInflater();
+	MenuInflater inflater = getSupportMenuInflater();
 	inflater.inflate(R.menu.main_menu, menu);
 	return true;
-    }
+    }/*
+      * (non-Javadoc)
+      * @see com.actionbarsherlock.app.SherlockFragmentActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+      */
 
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 	switch (item.getItemId()) {
-	case R.id.refresh:
-	    refreshCurrentTab();
-	    return true;
-	case R.id.settings: // Move to the settings activity
+	case R.id.menu_settings: // Move to the settings activity
 	    startActivity(new Intent(this, FriendsPrefs.class));
 	    return true;
-	case R.id.invite: // Show the Facebook invitation dialog
+	case R.id.menu_invite: // Show the Facebook invitation dialog
 	    Bundle params = new Bundle();
 	    params.putString("message", getString(R.string.invitation_msg));
 	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
 	    return true;
 	default:
 	    return super.onOptionsItemSelected(item);
+	}
+    }
+
+    public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
+	private final SherlockFragmentActivity mActivity;
+	private final String mTag;
+	private final Class<T> mClass;
+	private final Bundle mArgs;
+	private Fragment mFragment;
+
+	public TabListener(SherlockFragmentActivity activity, String tag, Class<T> clz) {
+	    this(activity, tag, clz, null);
+	}
+
+	public TabListener(SherlockFragmentActivity activity, String tag, Class<T> clz, Bundle args) {
+	    mActivity = activity;
+	    mTag = tag;
+	    mClass = clz;
+	    mArgs = args;
+
+	    // Check to see if we already have a fragment for this tab, probably
+	    // from a previously saved state. If so, deactivate it, because our
+	    // initial state is that a tab isn't shown.
+	    mFragment = mActivity.getSupportFragmentManager().findFragmentByTag(mTag);
+	    if (mFragment != null && !mFragment.isDetached()) {
+		FragmentTransaction ft = mActivity.getSupportFragmentManager().beginTransaction();
+		ft.detach(mFragment);
+		ft.commit();
+	    }
+	}
+
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+	    if (mFragment == null) {
+		mFragment = Fragment.instantiate(mActivity, mClass.getName(), mArgs);
+		ft.add(android.R.id.content, mFragment, mTag);
+	    } else
+		ft.attach(mFragment);
+	}
+
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	    if (mFragment != null)
+		ft.detach(mFragment);
+	}
+
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
     }
 

@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="@string/accounts"
-          android:icon="@drawable/ic_mailboxes_accounts" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- Note the category is "container" (lowest priority) -->
+    <item
+        android:id="@+id/menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
+        android:menuCategory="container"
+        android:showAsAction="ifRoom"
+        android:title="@string/refresh_title"/>
+    <item
+        android:id="@+id/menu_invite"
+        android:icon="@android:drawable/ic_menu_share"
+        android:menuCategory="container"
+        android:title="@string/invite_title">
+    </item>
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:menuCategory="container"
+        android:title="@string/settings_title"/>
+
 </menu>

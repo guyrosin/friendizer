@@ -3,45 +3,43 @@
  */
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.R.xml;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
-/**
- * @author Guy
- * 
- */
-public class FriendsPrefs extends PreferenceActivity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
+import com.teamagly.friendizer.R;
+
+public class FriendsPrefs extends SherlockPreferenceActivity {
     SharedPreferences prefs;
-    //OnSharedPreferenceChangeListener listener;
+    ActionBar actionBar;
+    // OnSharedPreferenceChangeListener listener;
     ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	addPreferencesFromResource(R.xml.settings);
+	actionBar = getSupportActionBar();
+	actionBar.setDisplayHomeAsUpEnabled(true);
 	prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-//	listener = new OnSharedPreferenceChangeListener() {
-//	    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-//		SharedPreferences.Editor editor = prefs.edit();
-//		if (key.equals("friends_list_type")) {
-//		    CheckBoxPreference friendsListType = (CheckBoxPreference) getPreferenceScreen().findPreference(key);
-//		    editor.putBoolean(key, friendsListType.isChecked());
-//		    editor.commit();
-//		}
-//	    }
-//	};
+	// listener = new OnSharedPreferenceChangeListener() {
+	// public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+	// SharedPreferences.Editor editor = prefs.edit();
+	// if (key.equals("friends_list_type")) {
+	// CheckBoxPreference friendsListType = (CheckBoxPreference) getPreferenceScreen().findPreference(key);
+	// editor.putBoolean(key, friendsListType.isChecked());
+	// editor.commit();
+	// }
+	// }
+	// };
 	Preference logoutBtn = (Preference) findPreference("logout");
 	logoutBtn.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference preference) {
@@ -57,4 +55,18 @@ public class FriendsPrefs extends PreferenceActivity {
 	});
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.actionbarsherlock.app.SherlockPreferenceActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case android.R.id.home:
+	    finish(); // Just go back
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
+	}
+    }
 }

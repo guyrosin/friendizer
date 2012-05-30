@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- Note the category is "alternative" (highest priority) -->
+    <item
+        android:id="@+id/menu_list"
+        android:icon="@drawable/ic_action_list"
+        android:menuCategory="alternative"
+        android:showAsAction="ifRoom"
+        android:title="Map"
+        android:visible="true">
+    </item>
+
+</menu>

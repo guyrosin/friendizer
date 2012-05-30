@@ -40,8 +40,9 @@
         android:name=".FriendizerApp"
         android:icon="@drawable/radar_icon"
         android:label="@string/app_name"
+        android:logo="@drawable/friendizer_white"
         android:screenOrientation="portrait"
-        android:theme="@style/app_theme" >
+        android:theme="@style/Theme.friendizer" >
         <uses-library android:name="com.google.android.maps" />
 
         <activity
@@ -55,14 +56,11 @@
         </activity>
         <activity android:name=".activities.DashboardActivity" />
         <activity android:name=".activities.FriendizerActivity" />
-        <activity android:name=".activities.PeopleRadarActivity" />
-        <activity android:name=".activities.MyProfileActivity" />
         <activity android:name=".activities.FriendProfileActivity" />
-        <activity android:name=".activities.ConnectionsActivity" />
         <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.MessagesActivity" />
         <activity android:name=".activities.FriendAchievementsActivity" />
-        <activity android:name=".activities.MapLocationActivity" />
+        <activity android:name=".activities.NearbyMapActivity" />
         <activity
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >
