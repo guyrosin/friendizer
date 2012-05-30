@@ -4,10 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <com.teamagly.friendizer.widgets.ActionBar
-        android:id="@+id/actionbar"
-        style="@style/ActionBar" />
-
     <ListView
         android:id="@+id/log"
         android:layout_width="fill_parent"

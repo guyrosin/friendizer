@@ -5,19 +5,14 @@ package com.teamagly.friendizer.activities;
 
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -26,6 +21,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.User;
@@ -34,13 +34,10 @@ import com.teamagly.friendizer.utils.ImageLoader.Type;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-/**
- * @author Guy
- * 
- */
-public class MyInfoFragment extends Fragment {
+public class MyInfoFragment extends SherlockFragment {
 
     private final String TAG = getClass().getName();
+    protected SherlockFragmentActivity activity;
     private ImageView userPic;
     private TextView name;
     private TextView status;
@@ -64,6 +61,17 @@ public class MyInfoFragment extends Fragment {
 
     /*
      * (non-Javadoc)
+     * @see android.support.v4.app.Fragment#onActivityCreated(android.os.Bundle)
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+	super.onActivityCreated(savedInstanceState);
+	activity = getSherlockActivity();
+	updateViews();
+    }
+
+    /*
+     * (non-Javadoc)
      * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
      */
     @Override
@@ -80,7 +88,6 @@ public class MyInfoFragment extends Fragment {
 	owns = (TextView) view.findViewById(R.id.owns);
 	ownerName = (TextView) view.findViewById(R.id.owner_name);
 	ownerPic = (ImageView) view.findViewById(R.id.owner_pic);
-	updateViews();
 
 	status.setOnClickListener(new OnClickListener() {
 	    @Override
@@ -96,16 +103,16 @@ public class MyInfoFragment extends Fragment {
      * 
      */
     protected void showStatusDialog() {
-	AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+	AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
 
 	dialogBuilder.setTitle("Enter Your Status");
 
 	// Set an EditText view to get user input
-	final EditText input = new EditText(getActivity());
+	final EditText input = new EditText(activity);
 	input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 	    @Override
 	    public void onFocusChange(View v, boolean hasFocus) {
-		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
 		if (hasFocus)
 		    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 		else
@@ -137,7 +144,7 @@ public class MyInfoFragment extends Fragment {
 	});
 	dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	    public void onClick(DialogInterface dialog, int whichButton) {
-		InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
 	    }
 	});
@@ -151,7 +158,7 @@ public class MyInfoFragment extends Fragment {
     @Override
     public void onResume() {
 	super.onResume();
-	showLoadingIcon(true);
+	activity.setSupportProgressBarIndeterminateVisibility(true);
 	// Reload the user's details from Facebook
 	Bundle params = new Bundle();
 	params.putString("fields", "name, first_name, picture, birthday, gender");
@@ -163,7 +170,7 @@ public class MyInfoFragment extends Fragment {
 		    Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo
 			    .getId()));
 		    // Update the view from the main thread
-		    getActivity().runOnUiThread(new Runnable() {
+		    activity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 			    updateFriendizerViews();
@@ -200,7 +207,7 @@ public class MyInfoFragment extends Fragment {
 	    status.setVisibility(View.GONE);
 	if (userInfo.getOwnsList() != null)
 	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
-	showLoadingIcon(false);
+	activity.setSupportProgressBarIndeterminateVisibility(false);
     }
 
     protected void updateFacebookViews() {
@@ -209,19 +216,6 @@ public class MyInfoFragment extends Fragment {
 	name.setText(userInfo.getName());
 	age.setText(userInfo.getAge());
 	gender.setText(userInfo.getGender());
-    }
-
-    /**
-     * @param show
-     *            whether to show or hide the loading icon (in the parent activity)
-     */
-    protected void showLoadingIcon(boolean show) {
-	try {
-	    Activity parent = getActivity().getParent();
-	    if (parent != null)
-		((FriendizerActivity) parent).actionBar.showProgressBar(show);
-	} catch (Exception e) {
-	}
     }
 
     /*
@@ -238,7 +232,7 @@ public class MyInfoFragment extends Fragment {
 		// Update the user's details from Facebook
 		Utility.getInstance().userInfo.updateFacebookData(fbUserInfo);
 		// Update the views (has to be done from the main thread)
-		getActivity().runOnUiThread(new Runnable() {
+		activity.runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			updateFacebookViews();
@@ -264,7 +258,7 @@ public class MyInfoFragment extends Fragment {
 		final String ownerNameStr = jsonObject.getString("name");
 		final String picURL = jsonObject.getString("picture");
 
-		getActivity().runOnUiThread(new Runnable() {
+		activity.runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			ownerName.setText(ownerNameStr);
@@ -273,7 +267,7 @@ public class MyInfoFragment extends Fragment {
 			    @Override
 			    public void onClick(View v) {
 				// Move to the owner's profile
-				Intent intent = new Intent().setClass(getActivity(), FriendProfileActivity.class);
+				Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
 				intent.putExtra("userID", Utility.getInstance().userInfo.getOwnerID());
 				startActivity(intent);
 			    }
@@ -292,8 +286,7 @@ public class MyInfoFragment extends Fragment {
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-	// super.onCreateOptionsMenu(menu, inflater);
-	menu.clear(); // Clear the main activity's menu
+	super.onCreateOptionsMenu(menu, inflater);
 	inflater.inflate(R.menu.my_profile_menu, menu);
     }
 
@@ -304,21 +297,12 @@ public class MyInfoFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 	switch (item.getItemId()) {
-	case R.id.change_status:
+	case R.id.menu_refresh:
+	    onResume();
+	    return true;
+	case R.id.menu_change_status:
 	    showStatusDialog();
 	    return true;
-	    // case R.id.settings: // Move to the settings activity
-	    // startActivity(new Intent(getActivity(), FriendsPrefs.class));
-	    // return true;
-	    // case R.id.invite: // Show the Facebook invitation dialog
-	    // Bundle params = new Bundle();
-	    // params.putString("message", getString(R.string.invitation_msg));
-	    // Utility.getInstance().facebook.dialog(getActivity(), "apprequests", params, new BaseDialogListener());
-	    // return true;
-	    // case R.id.facebook_friends: // Move to my Facebook friends activity
-	    // Intent intent = new Intent().setClass(getActivity(), FBFriendsActivity.class);
-	    // startActivity(intent);
-	    // return true;
 	default:
 	    return super.onOptionsItemSelected(item);
 	}

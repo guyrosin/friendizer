@@ -2,7 +2,6 @@ package com.teamagly.friendizer.activities;
 
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockActivity;
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
@@ -37,7 +37,7 @@ import com.teamagly.friendizer.utils.SessionStore;
 import com.teamagly.friendizer.utils.Util;
 import com.teamagly.friendizer.utils.Utility;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends SherlockActivity {
     private final String TAG = getClass().getName();
     private Handler handler;
     private ImageView loginButton;
@@ -79,6 +79,7 @@ public class SplashActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	getSupportActionBar().hide(); // Hide the action bar
 	setContentView(R.layout.splash);
 	handler = new Handler();
 
@@ -163,8 +164,7 @@ public class SplashActivity extends Activity {
 	    if (!Utility.getInstance().facebook.isSessionValid()) {
 		// Authorize
 		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_checkins",
-			"user_interests", "user_likes", "user_birthday", "friends_online_presence", "friends_birthday" }, 0,
-			new LoginDialogListener());
+			"user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
 	    }
     }
 

@@ -4,7 +4,7 @@
     <string name="app_name">Friendizer</string>
     <string name="my_profile">My Profile</string>
     <string name="friends">Friends</string>
-    <string name="people_radar">People Radar</string>
+    <string name="nearby">Nearby</string>
     <string name="connections">Connections</string>
     <string name="refresh_title">Refresh</string>
     <string name="logout_title">Logout</string>
@@ -25,16 +25,18 @@
     <string name="facebook_login">Login with Facebook</string>
     <string name="actionbar_activity_not_found">Failed to open intent</string>
     <string name="send">Send</string>
-    
+    <string name="mapAPIKey">0R54sIbhKTeZ9hTY5ntHtWV1qgbbPY1g_UI3K8A</string>
+
     <!-- C2DM -->
-    
+
+
     <!-- Menu item text [CHAR LIMIT=NONE] -->
     <string name="accounts">Accounts</string>
 
     <!-- Dialog button [CHAR LIMIT=NONE] -->
     <string name="add_account">Add account...</string>
 
-    <!--  Name of the application in the launcher [CHAR LIMIT=NONE] -->
+    <!-- Name of the application in the launcher [CHAR LIMIT=NONE] -->
     <string name="app_name">Friendizer</string>
 
     <!-- Dialog title text [CHAR LIMIT=NONE] -->

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <!-- Note the category is "secondary" (low priority) -->
+    <item
+        android:id="@+id/menu_view_by"
+        android:icon="@drawable/ic_menu_friendslist"
+        android:menuCategory="secondary"
+        android:title="@string/view_by"/>
+    <item
+        android:id="@+id/menu_sort"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:menuCategory="secondary"
+        android:title="@string/sort_by">
+    </item>
+    <item
+        android:id="@+id/menu_facebook_friends"
+        android:icon="@drawable/facebook_icon"
+        android:menuCategory="secondary"
+        android:title="@string/facebook_friends">
+    </item>
+
+</menu>

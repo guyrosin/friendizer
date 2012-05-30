@@ -5,7 +5,7 @@ package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,18 +13,22 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.MessagesAdapter;
 import com.teamagly.friendizer.model.Message;
 import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.widgets.ActionBar;
+import com.teamagly.friendizer.utils.Utility;
 
-/**
- * @author Guy
- * 
- */
-public class MessagesActivity extends Activity {
+public class MessagesActivity extends SherlockActivity {
 
     private final String TAG = getClass().getName();
     ActionBar actionBar;
@@ -57,16 +61,12 @@ public class MessagesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 	setContentView(R.layout.messages_layout);
-	actionBar = (ActionBar) findViewById(R.id.actionbar);
-	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
-	    @Override
-	    public void onClick(View v) {
-		onResume();
-	    }
-	});
 
 	destUser = (User) getIntent().getSerializableExtra("user");
+	actionBar = getSupportActionBar();
+	actionBar.setDisplayHomeAsUpEnabled(true);
 	actionBar.setTitle(destUser.getName());
 
 	// Initialize the compose field with a listener for the return key
@@ -90,7 +90,7 @@ public class MessagesActivity extends Activity {
     @Override
     protected void onResume() {
 	super.onResume();
-	showLoadingIcon(true);
+	setSupportProgressBarIndeterminateVisibility(true);
 	new Thread(new Runnable() {
 	    public void run() {
 		try {
@@ -100,7 +100,7 @@ public class MessagesActivity extends Activity {
 		    runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-			    showLoadingIcon(false);
+			    setSupportProgressBarIndeterminateVisibility(false);
 			}
 		    });
 		}
@@ -111,7 +111,7 @@ public class MessagesActivity extends Activity {
 		    @Override
 		    public void run() {
 			messagesView.setAdapter(messagesAdapter);
-			showLoadingIcon(false);
+			setSupportProgressBarIndeterminateVisibility(false);
 		    }
 		});
 	    }
@@ -142,39 +142,71 @@ public class MessagesActivity extends Activity {
 
     // TODO: Usage with C2DM
     // Use an AsyncTask to avoid blocking the UI thread
-//    new AsyncTask<Void, Void, String>() {
-//        private String message;
-//
-//        @Override
-//        protected String doInBackground(Void... arg0) {
-//            MyRequestFactory requestFactory = Util.getRequestFactory(mContext,
-//                    MyRequestFactory.class);
-//            final HelloWorldRequest request = requestFactory.helloWorldRequest();
-//            Log.i(TAG, "Sending request to server");
-//            request.getMessage().fire(new Receiver<String>() {
-//                @Override
-//                public void onFailure(ServerFailure error) {
-//                    message = "Failure: " + error.getMessage();
-//                }
-//
-//                @Override
-//                public void onSuccess(String result) {
-//                    message = result;
-//                }
-//            });
-//            return message;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String result) {
-//            helloWorld.setText(result);
-//            sayHelloButton.setEnabled(true);
-//        }
-//    }.execute();
-    protected void showLoadingIcon(boolean show) {
-	try {
-	    actionBar.showProgressBar(show);
-	} catch (Exception e) {
+    // new AsyncTask<Void, Void, String>() {
+    // private String message;
+    //
+    // @Override
+    // protected String doInBackground(Void... arg0) {
+    // MyRequestFactory requestFactory = Util.getRequestFactory(mContext,
+    // MyRequestFactory.class);
+    // final HelloWorldRequest request = requestFactory.helloWorldRequest();
+    // Log.i(TAG, "Sending request to server");
+    // request.getMessage().fire(new Receiver<String>() {
+    // @Override
+    // public void onFailure(ServerFailure error) {
+    // message = "Failure: " + error.getMessage();
+    // }
+    //
+    // @Override
+    // public void onSuccess(String result) {
+    // message = result;
+    // }
+    // });
+    // return message;
+    // }
+    //
+    // @Override
+    // protected void onPostExecute(String result) {
+    // helloWorld.setText(result);
+    // sayHelloButton.setEnabled(true);
+    // }
+    // }.execute();}
+
+    /*
+     * (non-Javadoc)
+     * @see com.actionbarsherlock.app.SherlockActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+	super.onCreateOptionsMenu(menu);
+	MenuInflater inflater = getSupportMenuInflater();
+	inflater.inflate(R.menu.main_menu, menu);
+	return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.actionbarsherlock.app.SherlockActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case android.R.id.home:
+	    finish(); // Just go back
+	    return true;
+	case R.id.menu_refresh:
+	    onResume();
+	    return true;
+	case R.id.menu_settings: // Move to the settings activity
+	    startActivity(new Intent(this, FriendsPrefs.class));
+	    return true;
+	case R.id.menu_invite: // Show the Facebook invitation dialog
+	    Bundle params = new Bundle();
+	    params.putString("message", getString(R.string.invitation_msg));
+	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
 	}
     }
 

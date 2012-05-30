@@ -7,18 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.utils.ImageLoader.Type;
-import com.teamagly.friendizer.widgets.ActionBar;
-import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
-
-import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,11 +19,24 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * @author Guy
- * 
- */
-public class FriendProfileActivity extends Activity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.FriendizerUser;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ImageLoader.Type;
+import com.teamagly.friendizer.utils.BaseDialogListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
+
+public class FriendProfileActivity extends SherlockActivity {
 
     private final String TAG = getClass().getName();
     ActionBar actionBar;
@@ -64,15 +67,11 @@ public class FriendProfileActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 	Intent intent = getIntent();
 	setContentView(R.layout.friend_profile_layout);
-	actionBar = (ActionBar) findViewById(R.id.actionbar);
-	actionBar.mRefreshBtn.setOnClickListener(new OnClickListener() {
-	    @Override
-	    public void onClick(View v) {
-		onResume();
-	    }
-	});
+	actionBar = getSupportActionBar();
+	actionBar.setDisplayHomeAsUpEnabled(true);
 
 	userPic = (ImageView) findViewById(R.id.user_pic);
 	name = (TextView) findViewById(R.id.name);
@@ -100,6 +99,7 @@ public class FriendProfileActivity extends Activity {
 		Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT);
 		finish();
 	    }
+	    actionBar.setTitle(userInfo.getName());
 	} else {
 	    updateViews();
 	    updateButtons();
@@ -113,7 +113,7 @@ public class FriendProfileActivity extends Activity {
     @Override
     protected void onResume() {
 	super.onResume();
-	showLoadingIcon(true);
+	setSupportProgressBarIndeterminateVisibility(true);
 	// Reload the user's details from Facebook
 	Bundle params = new Bundle();
 	params.putString("fields", "name, first_name, picture, birthday, gender");
@@ -125,14 +125,44 @@ public class FriendProfileActivity extends Activity {
 		new MutualFriendsListener());
 
 	// Reload the user's details from our servers (in the background)
-	new Thread(new FriendizerRunnable()).start();
-
+	new FriendizerTask().execute(userInfo.getId());
     }
 
-    protected void showLoadingIcon(boolean show) {
-	try {
-	    actionBar.showProgressBar(show);
-	} catch (Exception e) {
+    /*
+     * (non-Javadoc)
+     * @see com.actionbarsherlock.app.SherlockActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+	super.onCreateOptionsMenu(menu);
+	MenuInflater inflater = getSupportMenuInflater();
+	inflater.inflate(R.menu.main_menu, menu);
+	return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.actionbarsherlock.app.SherlockActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+	switch (item.getItemId()) {
+	case android.R.id.home:
+	    finish(); // Just go back
+	    return true;
+	case R.id.menu_refresh:
+	    onResume();
+	    return true;
+	case R.id.menu_settings: // Move to the settings activity
+	    startActivity(new Intent(this, FriendsPrefs.class));
+	    return true;
+	case R.id.menu_invite: // Show the Facebook invitation dialog
+	    Bundle params = new Bundle();
+	    params.putString("message", getString(R.string.invitation_msg));
+	    Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
+	    return true;
+	default:
+	    return super.onOptionsItemSelected(item);
 	}
     }
 
@@ -302,16 +332,21 @@ public class FriendProfileActivity extends Activity {
 	}
     }
 
-    protected class FriendizerRunnable implements Runnable {
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	@Override
-	public void run() {
+    class FriendizerTask extends AsyncTask<Long, Void, FriendizerUser> {
+
+	protected FriendizerUser doInBackground(Long... userIDs) {
+	    try {
+		return ServerFacade.userDetails(userIDs[0]);
+	    } catch (Exception e) {
+		Log.e(TAG, e.getMessage());
+		return null;
+	    }
+	}
+
+	protected void onPostExecute(final FriendizerUser newUserInfo) {
 	    // Request the user's details from friendizer and update the views accordingly
 	    try {
-		userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
+		userInfo.updateFriendizerData(newUserInfo);
 		if (userInfo.getOwnerID() > 0) {
 		    // Get the owner's name and picture from Facebook
 		    Bundle params = new Bundle();
@@ -322,15 +357,10 @@ public class FriendProfileActivity extends Activity {
 	    } catch (Exception e) {
 		Log.w(TAG, "", e);
 	    }
-	    // Update the views from the main thread
-	    handler.post(new Runnable() {
-		@Override
-		public void run() {
-		    updateFriendizerViews();
-		    updateButtons();
-		    showLoadingIcon(false); // Done loading the data (roughly...)
-		}
-	    });
+	    // Update the views
+	    updateFriendizerViews();
+	    updateButtons();
+	    setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 	}
     }
 

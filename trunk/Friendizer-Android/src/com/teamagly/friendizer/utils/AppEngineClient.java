@@ -54,6 +54,7 @@ public class AppEngineClient {
     }
 
     public HttpResponse makeRequest(String urlPath, List<NameValuePair> params) throws Exception {
+	Log.d(TAG, "Requesting: " + urlPath);
 	HttpResponse res = makeRequestNoRetry(urlPath, params, false);
 	if (res.getStatusLine().getStatusCode() == 500) {
 	    res = makeRequestNoRetry(urlPath, params, true);

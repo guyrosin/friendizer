@@ -18,10 +18,6 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.utils.Utility;
 
-/**
- * @author Guy
- * 
- */
 public class AchievementsAdapter extends ArrayAdapter<Achievement> {
     protected static LayoutInflater inflater = null;
 
