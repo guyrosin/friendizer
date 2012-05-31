@@ -25,11 +25,12 @@ public class UserMatching {
 	long money = obj.getLong("money");
 	double latitude = obj.getDouble("latitude");
 	double longitude = obj.getDouble("longitude");
+	String token = obj.getString("token");
 	String status = obj.optString("status");
 	SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	try {
 	    Date since = format.parse(obj.getString("since"));
-	    user = new User(id, owner, value, money, latitude, longitude, since, status);
+	    user = new User(id, owner, value, money, latitude, longitude, since, token, status);
 	    matching = obj.getInt("matching");
 	} catch (ParseException e) {
 	    throw new JSONException("JSONObject[\"since\"] is not a date.");
@@ -61,6 +62,7 @@ public class UserMatching {
 	    obj.put("money", user.getMoney());
 	    obj.put("latitude", user.getLatitude());
 	    obj.put("longitude", user.getLongitude());
+	    obj.put("token", user.getToken());
 	    obj.put("status", user.getStatus());
 	    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	    obj.put("since", format.format(user.getSince()));
