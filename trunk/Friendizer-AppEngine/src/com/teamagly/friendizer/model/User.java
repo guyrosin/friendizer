@@ -30,11 +30,14 @@ public class User {
 
     @Persistent
     private Date since;
+    
+    @Persistent
+    private String token;
 
     @Persistent
     private String status;
 
-    public User(long id, long owner, long value, long money, double latitude, double longitude, Date since, String status) {
+    public User(long id, long owner, long value, long money, double latitude, double longitude, Date since, String token, String status) {
 	this.id = id;
 	this.owner = owner;
 	this.value = value;
@@ -42,6 +45,7 @@ public class User {
 	this.latitude = latitude;
 	this.longitude = longitude;
 	this.since = since;
+	this.token = token;
 	this.status = status;
     }
 
@@ -56,6 +60,7 @@ public class User {
 	this.latitude = -1;
 	this.longitude = -1;
 	this.since = new Date();
+	this.token = "";
 	this.status = "";
     }
 
@@ -66,6 +71,7 @@ public class User {
 	money = obj.getLong("money");
 	latitude = obj.getDouble("latitude");
 	longitude = obj.getDouble("longitude");
+	token = obj.getString("token");
 	status = obj.getString("status");
 	SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	try {
@@ -130,6 +136,14 @@ public class User {
     public void setSince(Date since) {
 	this.since = since;
     }
+    
+    public String getToken() {
+		return token;
+	}
+    
+    public void setToken(String token) {
+		this.token = token;
+	}
 
     public String getStatus() {
 	return status;
@@ -148,6 +162,7 @@ public class User {
 	    obj.put("money", money);
 	    obj.put("latitude", latitude);
 	    obj.put("longitude", longitude);
+	    obj.put("token", token);
 	    obj.put("status", status);
 	    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	    obj.put("since", format.format(since));
