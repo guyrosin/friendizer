@@ -18,130 +18,131 @@ import com.google.android.c2dm.server.PMF;
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	if (request.getRequestURI().endsWith("/send"))
-	    send(request, response);
-	else if (request.getRequestURI().endsWith("/getConversation"))
-	    getConversation(request, response);
-	else if (request.getRequestURI().endsWith("/getUnread"))
-	    getUnread(request, response);
-	else if (request.getRequestURI().endsWith("/getInbox"))
-	    getInbox(request, response);
-    }
-
-    private void send(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	response.setCharacterEncoding("UTF-8");
-	PrintWriter out = response.getWriter();
-
-	long source = Long.parseLong(request.getParameter("src"));
-	long destination = Long.parseLong(request.getParameter("dest"));
-	String text = request.getParameter("text");
-
-	PersistenceManager pm = PMF.get().getPersistenceManager();
-
-	Message message = new Message(source, destination, text);
-
-	try {
-	    pm.makePersistent(message);
-	} finally {
-	    pm.close();
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (request.getRequestURI().endsWith("/send"))
+			send(request, response);
+		else if (request.getRequestURI().endsWith("/getConversation"))
+			getConversation(request, response);
+		else if (request.getRequestURI().endsWith("/getUnread"))
+			getUnread(request, response);
+		else if (request.getRequestURI().endsWith("/getInbox"))
+			getInbox(request, response);
 	}
-	out.println(message);
 
-    }
+	private void send(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
 
-    private void getConversation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	response.setCharacterEncoding("UTF-8");
-	PrintWriter out = response.getWriter();
+		long source = Long.parseLong(request.getParameter("src"));
+		long destination = Long.parseLong(request.getParameter("dest"));
+		String text = request.getParameter("text");
 
-	long user1 = Long.parseLong(request.getParameter("user1"));
-	long user2 = Long.parseLong(request.getParameter("user2"));
+		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-	long from = Long.parseLong(request.getParameter("from"));
-	int to = Integer.parseInt(request.getParameter("to"));
+		Message message = new Message(source, destination, text);
 
-	PersistenceManager pm = PMF.get().getPersistenceManager();
-
-	Query query = pm.newQuery(Message.class);
-	query.setFilter("(source == user1 || source == user2)" + " && (destination == user2 || destination == user1)");
-	query.setOrdering("time desc");
-	query.setRange(from, to);
-	query.declareParameters("long user1, long user2");
-
-	try {
-	    @SuppressWarnings("unchecked")
-	    List<Message> results = (List<Message>) query.execute(user1, user2);
-	    if (!results.isEmpty()) {
-		JSONArray messages = new JSONArray();
-		for (Message m : results) {
-		    messages.put(m.toJSONObject());
+		try {
+			pm.makePersistent(message);
+		} finally {
+			pm.close();
 		}
-		out.println(messages);
-	    }
-	} finally {
-	    query.closeAll();
+		out.println(message);
+
 	}
-    }
 
-    private void getUnread(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	response.setCharacterEncoding("UTF-8");
-	PrintWriter out = response.getWriter();
+	private void getConversation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
 
-	long destination = Long.parseLong(request.getParameter("userID"));
+		long user1 = Long.parseLong(request.getParameter("user1"));
+		long user2 = Long.parseLong(request.getParameter("user2"));
 
-	PersistenceManager pm = PMF.get().getPersistenceManager();
+		long from = Long.parseLong(request.getParameter("from"));
+		int to = Integer.parseInt(request.getParameter("to"));
 
-	Query query = pm.newQuery(Message.class);
-	query.setFilter("destination == dest && unread == true");
-	query.setOrdering("id time");
-	query.declareParameters("long dest");
+		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-	try {
-	    @SuppressWarnings("unchecked")
-	    List<Message> results = (List<Message>) query.execute(destination);
-	    if (!results.isEmpty()) {
-		JSONArray messages = new JSONArray();
-		for (Message m : results) {
-		    m.setUnread(false);
-		    pm.makePersistent(m);
-		    messages.put(m);
+		Query query = pm.newQuery(Message.class);
+		query.setFilter("(source == user1 || source == user2)"
+				+ " && (destination == user2 || destination == user1)");
+		query.setOrdering("time desc");
+		query.setRange(from, to);
+		query.declareParameters("long user1, long user2");
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<Message> results = (List<Message>) query.execute(user1, user2);
+			if (!results.isEmpty()) {
+				JSONArray messages = new JSONArray();
+				for (Message m : results) {
+					messages.put(m.toJSONObject());
+				}
+				out.println(messages);
+			}
+		} finally {
+			query.closeAll();
 		}
-		out.println(messages);
-	    }
-	} finally {
-	    query.closeAll();
-	    pm.close();
 	}
-    }
 
-    private void getInbox(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	response.setCharacterEncoding("UTF-8");
-	PrintWriter out = response.getWriter();
+	private void getUnread(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
 
-	long userId = Long.parseLong(request.getParameter("userID"));
+		long destination = Long.parseLong(request.getParameter("userID"));
 
-	PersistenceManager pm = PMF.get().getPersistenceManager();
+		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-	Query query = pm.newQuery(Message.class);
-	query.setFilter("source == src && unread == true");
-	query.setOrdering("id desc");
-	query.declareParameters("long src");
+		Query query = pm.newQuery(Message.class);
+		query.setFilter("destination == dest && unread == true");
+		query.setOrdering("id time");
+		query.declareParameters("long dest");
 
-	try {
-	    @SuppressWarnings("unchecked")
-	    List<Message> results = (List<Message>) query.execute(userId);
-	    if (!results.isEmpty()) {
-		for (Message m : results) {
-		    out.println(m);
-		    m.setUnread(false);
-		    pm.makePersistent(m);
+		try {
+			@SuppressWarnings("unchecked")
+			List<Message> results = (List<Message>) query.execute(destination);
+			if (!results.isEmpty()) {
+				JSONArray messages = new JSONArray();
+				for (Message m : results) {
+					m.setUnread(false);
+					pm.makePersistent(m);
+					messages.put(m);
+				}
+				out.println(messages);
+			}
+		} finally {
+			query.closeAll();
+			pm.close();
 		}
-	    }
-	} finally {
-	    query.closeAll();
-	    pm.close();
 	}
-    }
+
+	private void getInbox(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out = response.getWriter();
+
+		long userId = Long.parseLong(request.getParameter("userID"));
+
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+
+		Query query = pm.newQuery(Message.class);
+		query.setFilter("source == src && unread == true");
+		query.setOrdering("id desc");
+		query.declareParameters("long src");
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<Message> results = (List<Message>) query.execute(userId);
+			if (!results.isEmpty()) {
+				for (Message m : results) {
+					out.println(m);
+					m.setUnread(false);
+					pm.makePersistent(m);
+				}
+			}
+		} finally {
+			query.closeAll();
+			pm.close();
+		}
+	}
 
 }
