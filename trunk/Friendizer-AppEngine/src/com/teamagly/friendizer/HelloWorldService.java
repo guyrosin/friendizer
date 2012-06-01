@@ -23,21 +23,21 @@ import java.util.logging.Logger;
 
 public class HelloWorldService {
 
-  private static final Logger log = Logger.getLogger(HelloWorldService.class.getName());
+	private static final Logger log = Logger.getLogger(HelloWorldService.class.getName());
 
-  public HelloWorldService() {
-  }
+	public HelloWorldService() {
+	}
 
-  public static String getMessage() {
-    UserService userService = UserServiceFactory.getUserService();
-    User user = userService.getCurrentUser();
-    String message;
-    if (user == null) {
-      message = "No one is logged in!\nSent from App Engine at " + new Date();
-    } else {
-      message = "Hello, " + user.getEmail() + "!\nSent from App Engine at " + new Date();
-    }
-    log.info("Returning message \"" + message + "\"");
-    return message;
-  }
+	public static String getMessage() {
+		UserService userService = UserServiceFactory.getUserService();
+		User user = userService.getCurrentUser();
+		String message;
+		if (user == null) {
+			message = "No one is logged in!\nSent from App Engine at " + new Date();
+		} else {
+			message = "Hello, " + user.getEmail() + "!\nSent from App Engine at " + new Date();
+		}
+		log.info("Returning message \"" + message + "\"");
+		return message;
+	}
 }

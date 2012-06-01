@@ -38,6 +38,7 @@
 
 	<servlet-mapping>
 		<servlet-name>MarketManager</servlet-name>
+		<url-pattern>/login</url-pattern>
 		<url-pattern>/userDetails</url-pattern>
 		<url-pattern>/ownList</url-pattern>
 		<url-pattern>/buy</url-pattern>
