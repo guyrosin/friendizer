@@ -248,7 +248,7 @@ public class SplashActivity extends SherlockActivity {
 		});
 
 		// Login and retrieve the user details from Friendizer
-		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(userInfo.getId()));
+		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(userInfo.getId(), ""));
 
 		// Continue to the main activity
 		Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
