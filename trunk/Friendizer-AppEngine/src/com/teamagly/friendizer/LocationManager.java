@@ -65,25 +65,24 @@ public class LocationManager extends HttpServlet {
 		query = pm.newQuery(User.class);
 		query.setFilter("since > updatedDate");
 		query.declareParameters("java.util.Date updatedDate");
+		// Get all the online users from the database
 		result = (List<User>) query.execute(updated);
 		query.closeAll();
-		int matching = 15;
+		
 		JSONArray nearbyUsers = new JSONArray();
+		
+		/*
+		 * The loop goes over the users and adds only the nearby users to a list
+		 */
 		for (User nearbyUser : result) {
 			if ((nearbyUser.getId() != userID) && (user.getLatitude() - nearbyUser.getLatitude()) * (user.getLatitude() - nearbyUser.getLatitude()) + 
 					(user.getLongitude() - nearbyUser.getLongitude()) * (user.getLongitude() - nearbyUser.getLongitude()) <= 1000) {
-				if (nearbyUser.getId() == 1168735399)
-					matching = 63;
-				if (nearbyUser.getId() == 1279556721)
-					matching = 27;
-				if (nearbyUser.getId() == 1402452015)
-					matching = 44;
-				if (nearbyUser.getId() == 1658254543)
-					matching = 81;
-				UserMatching userMatching = new UserMatching(nearbyUser,matching);
+				
+				UserMatching userMatching = new UserMatching(nearbyUser,0);
 				nearbyUsers.put(userMatching.toJSONObject());
 			}
 		}
+
 		pm.close();
 		response.getWriter().println(nearbyUsers);
 	}
