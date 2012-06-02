@@ -81,6 +81,14 @@ public final class ServerFacade {
 		}
 		return fzUsers;
 	}
+	
+	public static int matching(long userID1, long userID2) throws Exception {
+		URL url = new URL(fullServerAddress + "login?userID1=" + userID1 + "&userID2=" + userID2);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		int matching = Integer.parseInt(in.readLine());
+		in.close();
+		return matching;
+	}
 
 	public static void sendMessage(Message msg) throws Exception {
 		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text=" + msg.getText();
