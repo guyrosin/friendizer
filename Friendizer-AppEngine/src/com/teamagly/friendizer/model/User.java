@@ -52,7 +52,7 @@ public class User {
     /**
      * Constructor for a new user
      */
-    public User(long id) {
+    public User(long id, String token) {
 	this.id = id;
 	this.owner = 0;
 	this.value = 100;
@@ -60,7 +60,7 @@ public class User {
 	this.latitude = -1;
 	this.longitude = -1;
 	this.since = new Date();
-	this.token = "";
+	this.token = token;
 	this.status = "";
     }
 
