@@ -18,6 +18,7 @@ import com.google.android.c2dm.server.PMF;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.teamagly.friendizer.model.DeviceInfo;
 import com.teamagly.friendizer.model.Like;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.UserMatching;
@@ -70,6 +71,30 @@ public class UserManager extends HttpServlet{
 		
 		pm.close();
 		response.getWriter().println(new UserMatching(user, 0));
+		
+		// registering the user for notifications
+		String deviceID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
+
+		if (deviceID != null) {
+			pm = PMF.get().getPersistenceManager();
+			query = pm.newQuery(DeviceInfo.class);
+			//query.addFilter(Util.DEVICE_REGISTRATION_ID, Query., deviceID);
+			///query.addFilter(Util.DEVICE_REGISTRATION_ID, Query.JDOQL, deviceID);
+			//query.setUnique(true);
+			
+			query.setFilter(Util.DEVICE_REGISTRATION_ID + " == deviceID");
+			query.declareParameters("String deviceID");
+			List<DeviceInfo> devices = (List<DeviceInfo>) query.execute(deviceID);
+			 
+			
+			//List<DeviceInfo> devices = (List<DeviceInfo>) query.execute();
+			DeviceInfo device = devices.get(0);
+			if (device.getUserID() == null || device.getUserID() != userID) {
+				device.setUserID(userID);
+				pm.makePersistent(device);
+			}
+			pm.close();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
