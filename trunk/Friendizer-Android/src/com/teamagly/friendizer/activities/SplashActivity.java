@@ -64,13 +64,7 @@ public class SplashActivity extends SherlockActivity {
 	    if (status == DeviceRegistrar.REGISTERED_STATUS) {
 		message = getResources().getString(R.string.registration_succeeded);
 		connectionStatus = Util.CONNECTED;
-		handler.post(new Runnable() {
-		    @Override
-		    public void run() {
-			dialogFriendizer.show(); // Show a progress dialog
-		    }
-		});
-		new EnterFriendizerTask().execute();
+		enterFriendizer();
 	    } else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
 		message = getResources().getString(R.string.unregistration_succeeded);
 	    } else {
@@ -176,7 +170,7 @@ public class SplashActivity extends SherlockActivity {
 	    AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(Utility.getInstance().facebook);
 	    asyncRunner.logout(getBaseContext(), new LogoutRequestListener());
 	} catch (Exception e) {
-	    Log.e(TAG, "", e);
+	    Log.e(TAG, e.getMessage());
 	}
     }
 
@@ -266,31 +260,42 @@ public class SplashActivity extends SherlockActivity {
 			    dialogFriendizer.show(); // Show a progress dialog
 			}
 		    });
-		    new EnterFriendizerTask().execute();
+		    enterFriendizer();
 		}
 	    } catch (Exception e) {
-		Log.e(TAG, "", e);
-		Log.d(TAG, "The response from Facebook: " + response);
+		Log.w(TAG, "The response from Facebook: " + response);
+		Log.e(TAG, e.getMessage());
 	    } finally {
 		completed = true;
 	    }
 	}
     }
 
-    // Login and retrieve the user details from Friendizer
-    class EnterFriendizerTask extends AsyncTask<Void, Void, Boolean> {
+    protected void enterFriendizer() {
+	handler.post(new Runnable() {
+	    @Override
+	    public void run() {
+		dialogFriendizer.show(); // Show a progress dialog
+		new EnterFriendizerTask().execute();
+	    }
+	});
+    }
+
+    /*
+     * Login and retrieve the user details from Friendizer Note: Don't use this task directly! use the method enterFriendizer()!
+     */
+    protected class EnterFriendizerTask extends AsyncTask<Void, Void, Boolean> {
 
 	protected Boolean doInBackground(Void... v) {
 	    // Get the deviceRegistrationID
 	    SharedPreferences prefs = Util.getSharedPreferences(context);
 	    String deviceRegistrationID = prefs.getString(Util.DEVICE_REGISTRATION_ID, "");
-
 	    try {
 		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(Utility.getInstance().userInfo.getId(),
 			Utility.getInstance().facebook.getAccessToken(), deviceRegistrationID, context));
 	    } catch (Exception e) {
 		Log.e(TAG, e.getMessage());
-		handler.post(new Runnable() {
+		runOnUiThread(new Runnable() {
 		    @Override
 		    public void run() {
 			Toast.makeText(context, "Couldn't login to friendizer!", Toast.LENGTH_LONG).show();
@@ -302,20 +307,17 @@ public class SplashActivity extends SherlockActivity {
 	    return true;
 	}
 
-	protected void onPostExecute(Boolean flag) {
-	    handler.post(new Runnable() {
-		@Override
-		public void run() {
-		    Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
-			    Toast.LENGTH_LONG).show();
-		    dialogFriendizer.dismiss(); // Dismiss the progress dialog
-		}
-	    });
-	    // Continue to the main activity
-	    Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
-	    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
-	    startActivity(intent);
-	    finish();
+	protected void onPostExecute(Boolean result) {
+	    if (result) {
+		Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
+			Toast.LENGTH_LONG).show();
+		dialogFriendizer.dismiss(); // Dismiss the progress dialog
+		// Continue to the main activity
+		Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
+		startActivity(intent);
+		finish();
+	    }
 	}
     }
 
