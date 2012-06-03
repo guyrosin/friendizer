@@ -45,7 +45,7 @@ public class RegisterServlet extends HttpServlet {
 
 		// Because the deviceRegistrationId isn't static, we use a static
 		// identifier for the device. (Can be null in older clients)
-		String deviceId = reqInfo.getParameter(Util.DEVICE_REGISTRATION_ID);
+		String deviceRegId = reqInfo.getParameter(Util.DEVICE_REGISTRATION_ID);
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
@@ -74,7 +74,7 @@ public class RegisterServlet extends HttpServlet {
 			}
 
 			// Get device if it already exists, else create
-			String suffix = (deviceId != null ? "#" + Long.toHexString(Math.abs(deviceId.hashCode())) : "");
+			String suffix = (deviceRegId != null ? "#" + Long.toHexString(Math.abs(deviceRegId.hashCode())) : "");
 			Key key = KeyFactory.createKey(DeviceInfo.class.getSimpleName(), reqInfo.userName + suffix);
 
 			DeviceInfo device = null;

@@ -32,7 +32,7 @@ public class User {
     private Date since;
     
     @Persistent
-    private String token;
+    private String token; // Facebook access token
 
     @Persistent
     private String status;

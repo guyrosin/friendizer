@@ -15,17 +15,17 @@ package com.teamagly.friendizer;
  */
 public class Util {
 
-    /**
-     * Tag for logging.
-     */
-    private static final String TAG = "Util";
-
     // Shared constants
 
     /**
      * Key for account name in shared preferences.
      */
     public static final String ACCOUNT_NAME = "accountName";
+
+    /**
+     * Key for user ID (from Facebook) in shared preferences.
+     */
+    public static final String USER_ID = "userID";
 
     /**
      * Key for auth cookie name in shared preferences.
