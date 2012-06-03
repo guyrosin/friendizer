@@ -184,6 +184,7 @@ public class UserManager extends HttpServlet{
 		if (result2.isEmpty())
 			throw new ServletException("This user doesn't exist");
 		User user2 = result2.get(0);
+		
 		try{
 		// Get the access token of user1
 		FacebookClient facebookClient1 = new DefaultFacebookClient(user1.getToken());
@@ -202,6 +203,7 @@ public class UserManager extends HttpServlet{
 		{
 			pm.close();
 			response.getWriter().println(0);
+			return;
 		}
 		
 		// Get the number of likes of the first user
@@ -216,6 +218,7 @@ public class UserManager extends HttpServlet{
 		{
 			pm.close();
 			response.getWriter().println(0);
+			return;
 		}
 		
 		double commonLikes = 0;
@@ -226,15 +229,15 @@ public class UserManager extends HttpServlet{
 		for (int index1 = 0; index1 < likesNumber1; index1++)
 		{
 			for (int index2 = 0; index2 < likesNumber2; index2++)
-			{
+			{	
 				// If both users have the same like - increase the counter
-				if (user1_likes.getData().get(index1).getId() == user2_likes.getData().get(index2).getId())
+				if (user1_likes.getData().get(index1).getId().equals(user2_likes.getData().get(index2).getId()))
 					commonLikes++;
 			}
 		}
 		
 		// Determine the factor of the formula
-		double factor = 100;
+		double factor = 150;
 		
 		// Calculate the matching according to the formula
 		double formula =  Math.sqrt(commonLikes / likesNumber1);
