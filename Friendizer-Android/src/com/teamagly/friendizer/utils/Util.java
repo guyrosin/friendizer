@@ -36,6 +36,11 @@ public class Util {
     public static final String ACCOUNT_NAME = "accountName";
 
     /**
+     * Key for user ID in shared preferences.
+     */
+    public static final String USER_ID = "userID";
+
+    /**
      * Key for auth cookie name in shared preferences.
      */
     public static final String AUTH_COOKIE = "authCookie";
@@ -84,6 +89,8 @@ public class Util {
 	int icon = R.drawable.status_icon;
 	long when = System.currentTimeMillis();
 
+	// Notification.Builder builder=new Notification.Builder(context);
+	// builder.
 	Notification notification = new Notification(icon, message, when);
 	notification.setLatestEventInfo(context, "friendizer", message,
 		PendingIntent.getActivity(context, 0, null, PendingIntent.FLAG_CANCEL_CURRENT));

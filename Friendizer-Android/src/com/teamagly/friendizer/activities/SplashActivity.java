@@ -59,13 +59,20 @@ public class SplashActivity extends SherlockActivity {
 	    if (status == DeviceRegistrar.REGISTERED_STATUS) {
 		message = getResources().getString(R.string.registration_succeeded);
 		connectionStatus = Util.CONNECTED;
-		loginToFacebook();
+		enterFriendizer();
 	    } else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
 		message = getResources().getString(R.string.unregistration_succeeded);
 	    } else {
 		message = getResources().getString(R.string.registration_error);
 	    }
-	    dialogC2DM.dismiss();
+	    handler.post(new Runnable() {
+		@Override
+		public void run() {
+		    Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
+			    Toast.LENGTH_LONG).show();
+		    dialogC2DM.dismiss();
+		}
+	    });
 
 	    // Set connection status
 	    SharedPreferences prefs = Util.getSharedPreferences(context);
@@ -97,10 +104,6 @@ public class SplashActivity extends SherlockActivity {
 	    }
 	}
 
-	dialogC2DM = new ProgressDialog(context);
-	dialogC2DM.setMessage("Connecting to Google, please wait...");
-	dialogC2DM.setCancelable(false);
-
 	// Listener for the login button
 	loginButton = (ImageView) findViewById(R.id.loginButton);
 	loginButton.setOnClickListener(new View.OnClickListener() {
@@ -118,13 +121,9 @@ public class SplashActivity extends SherlockActivity {
 	SessionEvents.addAuthListener(new FBLoginListener());
 	SessionEvents.addLogoutListener(new FBLogoutListener());
 
-	// Restore session if one exists
-	SessionStore.restore(Utility.getInstance().facebook, this);
-
-	if (Utility.getInstance().facebook.isSessionValid())
-	    requestUserData();
-	else
-	    loginButton.setVisibility(View.VISIBLE);
+	dialogC2DM = new ProgressDialog(context);
+	dialogC2DM.setMessage("Connecting to Google, please wait...");
+	dialogC2DM.setCancelable(false);
     }
 
     /*
@@ -140,32 +139,20 @@ public class SplashActivity extends SherlockActivity {
 	    return;
 	}
 
-	SharedPreferences prefs = Util.getSharedPreferences(context);
-	String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
-	// Disconnected -> register to C2DM
-	if (Util.DISCONNECTED.equals(connectionStatus))
-	    startActivity(new Intent(context, AccountsActivity.class));
-	// Connecting -> show progress dialog
-	else if (Util.CONNECTING.equals(connectionStatus))
-	    dialogC2DM.show();
-	// Connected -> login to Facebook to proceed
-	else if (Util.CONNECTED.equals(connectionStatus))
-	    loginToFacebook();
-
-	if (Utility.getInstance().facebook != null)
-	    if (Utility.getInstance().facebook.isSessionValid())
-		Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
+	// Restore session if one exists
+	if (SessionStore.restore(Utility.getInstance().facebook, this)) {
+	    Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
+	    requestUserData();
+	} else
+	    loginButton.setVisibility(View.VISIBLE);
     }
 
     protected void loginToFacebook() {
-	SharedPreferences prefs = Util.getSharedPreferences(context);
-	String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
-	if (Util.CONNECTED.equals(connectionStatus)) // NOTE: if not connected to Google, do nothing!
-	    if (!Utility.getInstance().facebook.isSessionValid()) {
-		// Authorize
-		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_checkins",
-			"user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
-	    }
+	if (!Utility.getInstance().facebook.isSessionValid()) {
+	    // Authorize
+	    Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_checkins",
+		    "user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
+	}
     }
 
     @Override
@@ -240,27 +227,45 @@ public class SplashActivity extends SherlockActivity {
 		jsonObject = new JSONObject(response);
 		final User userInfo = new User(new FacebookUser(jsonObject));
 		Utility.getInstance().userInfo = userInfo;
-		handler.post(new Runnable() {
-		    @Override
-		    public void run() {
-			Toast.makeText(SplashActivity.this, "Welcome " + userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
-		    }
-		});
+
+		/*
+		 * Login/Register to Google Accounts
+		 */
+		SharedPreferences prefs = Util.getSharedPreferences(context);
+		String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
+		// Disconnected -> register to C2DM
+		if (Util.DISCONNECTED.equals(connectionStatus))
+		    startActivity(new Intent(context, AccountsActivity.class));
+		// Connecting -> show progress dialog
+		else if (Util.CONNECTING.equals(connectionStatus))
+		    handler.post(new Runnable() {
+			@Override
+			public void run() {
+			    dialogC2DM.show();
+			}
+		    });
+
+		// Connected -> login to Facebook to proceed
+		else if (Util.CONNECTED.equals(connectionStatus))
+		    enterFriendizer();
 
 		// Login and retrieve the user details from Friendizer
-		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(userInfo.getId(), ""));
-
-		// Continue to the main activity
-		Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
-		startActivity(intent);
+		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(userInfo.getId(),
+			Utility.getInstance().facebook.getAccessToken(), context));
 		completed = true;
-		finish();
 
 	    } catch (Exception e) {
 		Log.e(TAG, "", e);
 	    }
 	}
+    }
+
+    protected void enterFriendizer() {
+	// Continue to the main activity
+	Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
+	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
+	startActivity(intent);
+	finish();
     }
 
     /*

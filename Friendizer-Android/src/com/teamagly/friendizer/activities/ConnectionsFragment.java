@@ -20,15 +20,6 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 
     /*
      * (non-Javadoc)
-     * @see com.teamagly.friendizer.activities.AbstractFriendsListFragment#onCreate(android.os.Bundle)
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.teamagly.friendizer.activities.AbstractFriendsListFragment#onActivityCreated(android.os.Bundle)
      */
     @Override

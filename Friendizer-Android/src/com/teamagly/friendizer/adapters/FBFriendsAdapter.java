@@ -5,17 +5,19 @@ package com.teamagly.friendizer.adapters;
 
 import java.util.List;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.Utility;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ImageLoader.Type;
+import com.teamagly.friendizer.utils.Utility;
+
 public class FBFriendsAdapter extends FriendsAdapter {
+    private final String TAG = getClass().getName();
 
     /**
      * @param context
@@ -43,7 +45,7 @@ public class FBFriendsAdapter extends FriendsAdapter {
 
 	User userInfo = getItem(position);
 	ViewHolder holder = (ViewHolder) hView.getTag();
-	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), holder.profile_pic);
+	holder.profile_pic.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
 	holder.name.setText(userInfo.getName());
 	return hView;
     }
