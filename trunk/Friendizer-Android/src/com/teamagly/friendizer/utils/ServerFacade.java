@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -12,7 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.FriendizerUser;
@@ -26,9 +26,8 @@ public final class ServerFacade {
     private ServerFacade() {
     }
 
-    public static FriendizerUser login(long userID, String accessToken, Context context) throws Exception {
-	SharedPreferences prefs = Util.getSharedPreferences(context);
-	String deviceRegistrationID = prefs.getString(Util.DEVICE_REGISTRATION_ID, "");
+    public static FriendizerUser login(long userID, String accessToken, String deviceRegistrationID, Context context)
+	    throws JSONException, IOException {
 	URL url = new URL(fullServerAddress + "login?userID=" + userID + "&accessToken=" + accessToken + "&"
 		+ Util.DEVICE_REGISTRATION_ID + "=" + deviceRegistrationID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -38,7 +37,7 @@ public final class ServerFacade {
 	return user;
     }
 
-    public static FriendizerUser userDetails(long userID) throws Exception {
+    public static FriendizerUser userDetails(long userID) throws IOException, JSONException {
 	URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	FriendizerUser user = new FriendizerUser(new JSONObject(in.readLine()));
@@ -47,7 +46,7 @@ public final class ServerFacade {
 	return user;
     }
 
-    public static FriendizerUser[] ownList(long userID) throws Exception {
+    public static FriendizerUser[] ownList(long userID) throws JSONException, IOException {
 	URL url = new URL(fullServerAddress + "ownList?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	JSONArray users = new JSONArray(in.readLine());
@@ -60,20 +59,20 @@ public final class ServerFacade {
 	return fzUsers;
     }
 
-    public static void buy(long userID, long buyID) throws Exception {
+    public static void buy(long userID, long buyID) throws IOException {
 	URL url = new URL(fullServerAddress + "buy?userID=" + userID + "&buyID=" + buyID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	in.close();
     }
 
-    public static void changeLocation(long userID, double latitude, double longitude) throws Exception {
+    public static void changeLocation(long userID, double latitude, double longitude) throws IOException {
 	URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude="
 		+ longitude);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	in.close();
     }
 
-    public static int matching(long userID1, long userID2) throws Exception {
+    public static int matching(long userID1, long userID2) throws IOException {
 	URL url = new URL(fullServerAddress + "matching?userID1=" + userID1 + "&userID2=" + userID2);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	int matching = Integer.parseInt(in.readLine());
@@ -94,7 +93,7 @@ public final class ServerFacade {
 	return fzUsers;
     }
 
-    public static void sendMessage(Message msg) throws Exception {
+    public static void sendMessage(Message msg) throws IOException, URISyntaxException {
 	String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text="
 		+ msg.getText();
 	// Use URI to escape characters (whitespace and non-ASCII characters)
@@ -106,9 +105,11 @@ public final class ServerFacade {
 
     /**
      * @return all the unread messages sent to the current user
+     * @throws IOException
+     * @throws JSONException
      * @throws Exception
      */
-    public static Message[] getUnread() throws Exception {
+    public static Message[] getUnread() throws IOException, JSONException {
 	URL url = new URL(fullServerAddress + "getUnread?userID=" + Utility.getInstance().userInfo.getId());
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 
@@ -131,9 +132,11 @@ public final class ServerFacade {
      * @param from
      * @param to
      * @return all the messages between the current user and the given one
+     * @throws IOException
+     * @throws JSONException
      * @throws Exception
      */
-    public static ArrayList<Message> getConversation(long userID, long from, long to) throws Exception {
+    public static ArrayList<Message> getConversation(long userID, long from, long to) throws IOException, JSONException {
 	URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2="
 		+ userID + "&from=" + from + "&to=" + to);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -152,7 +155,7 @@ public final class ServerFacade {
 
     }
 
-    public static Achievement[] getAchievements(long userID) throws Exception {
+    public static Achievement[] getAchievements(long userID) throws IOException, JSONException {
 	URL url = new URL(fullServerAddress + "achievements?userID=" + userID);
 	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 	JSONArray userAchvs = new JSONArray(in.readLine());
@@ -163,7 +166,7 @@ public final class ServerFacade {
 	return achvs;
     }
 
-    public static void updateStatus(String status) throws Exception {
+    public static void updateStatus(String status) throws IOException, URISyntaxException {
 	String params = "userID=" + Utility.getInstance().userInfo.getId() + "&status=" + status;
 	// Use URI to escape characters (whitespace and non-ASCII characters)
 	URI uri = new URI(scheme, serverAddress, "/updateStatus", params, null);

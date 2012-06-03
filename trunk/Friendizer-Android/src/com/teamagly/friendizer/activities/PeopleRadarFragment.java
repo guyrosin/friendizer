@@ -75,9 +75,9 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
 	super.onActivityCreated(savedInstanceState);
 	activity.setContentView(R.layout.connections_layout);
-	gridView = (GridView) activity.findViewById(R.id.gridview);
 	TextView empty = (TextView) activity.findViewById(R.id.empty);
 	empty.setText("Forever Alone! (no people nearby)");
+	gridView = (GridView) activity.findViewById(R.id.gridview);
 	updateListType(list_type);
 
 	// Shake to reload functionality

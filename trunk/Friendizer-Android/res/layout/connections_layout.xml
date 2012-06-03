@@ -10,9 +10,9 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/gridview"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:columnWidth="90dp"
-        android:gravity="center"
+        android:gravity="top"
         android:horizontalSpacing="5dp"
         android:numColumns="auto_fit"
         android:paddingTop="10dp"
@@ -22,7 +22,7 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:drawSelectorOnTop="false" />
 
     <TextView

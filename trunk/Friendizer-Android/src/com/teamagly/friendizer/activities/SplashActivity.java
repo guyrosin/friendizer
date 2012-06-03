@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -37,6 +38,9 @@ import com.teamagly.friendizer.utils.SessionStore;
 import com.teamagly.friendizer.utils.Util;
 import com.teamagly.friendizer.utils.Utility;
 
+/**
+ * The login flow is as follows: Facebook login -> C2DM registration -> friendizer login
+ */
 public class SplashActivity extends SherlockActivity {
     private final String TAG = getClass().getName();
     private Handler handler;
@@ -45,6 +49,7 @@ public class SplashActivity extends SherlockActivity {
     private String requestID;
     private Context context = this;
     private ProgressDialog dialogC2DM;
+    private ProgressDialog dialogFriendizer;
 
     /**
      * A {@link BroadcastReceiver} to receive the response from a register or unregister request, and to update the UI.
@@ -59,7 +64,13 @@ public class SplashActivity extends SherlockActivity {
 	    if (status == DeviceRegistrar.REGISTERED_STATUS) {
 		message = getResources().getString(R.string.registration_succeeded);
 		connectionStatus = Util.CONNECTED;
-		enterFriendizer();
+		handler.post(new Runnable() {
+		    @Override
+		    public void run() {
+			dialogFriendizer.show(); // Show a progress dialog
+		    }
+		});
+		new EnterFriendizerTask().execute();
 	    } else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
 		message = getResources().getString(R.string.unregistration_succeeded);
 	    } else {
@@ -68,8 +79,6 @@ public class SplashActivity extends SherlockActivity {
 	    handler.post(new Runnable() {
 		@Override
 		public void run() {
-		    Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
-			    Toast.LENGTH_LONG).show();
 		    dialogC2DM.dismiss();
 		}
 	    });
@@ -89,6 +98,11 @@ public class SplashActivity extends SherlockActivity {
 	getSupportActionBar().hide(); // Hide the action bar
 	setContentView(R.layout.splash);
 	handler = new Handler();
+
+	if (!isOnline()) {
+	    ((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
+	    return;
+	}
 
 	// Register a receiver to provide register/unregister notifications
 	registerReceiver(mUpdateUIReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
@@ -124,26 +138,18 @@ public class SplashActivity extends SherlockActivity {
 	dialogC2DM = new ProgressDialog(context);
 	dialogC2DM.setMessage("Connecting to Google, please wait...");
 	dialogC2DM.setCancelable(false);
-    }
 
-    /*
-     * (non-Javadoc)
-     * @see android.app.Activity#onResume()
-     */
-    @Override
-    protected void onResume() {
-	super.onResume();
+	dialogFriendizer = new ProgressDialog(context);
+	dialogFriendizer.setMessage("Logging in, please wait...");
+	dialogFriendizer.setCancelable(false);
 
-	if (!isOnline()) {
-	    ((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
-	    return;
-	}
-
-	// Restore session if one exists
+	// Restore the Facebook session if one exists
 	if (SessionStore.restore(Utility.getInstance().facebook, this)) {
+	    // Already logged in to Facebook -> extend access token and request Facebook data to proceed
 	    Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
-	    requestUserData();
+	    requestFacebookUserData();
 	} else
+	    // Not logged in to Facebook -> wait for user action
 	    loginButton.setVisibility(View.VISIBLE);
     }
 
@@ -205,7 +211,7 @@ public class SplashActivity extends SherlockActivity {
     /*
      * Request user details from Facebook
      */
-    public void requestUserData() {
+    public void requestFacebookUserData() {
 	Bundle params = new Bundle();
 	params.putString("fields", "name, first_name, picture, birthday, gender");
 	// Send a new request only if there are none currently
@@ -234,8 +240,16 @@ public class SplashActivity extends SherlockActivity {
 		SharedPreferences prefs = Util.getSharedPreferences(context);
 		String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
 		// Disconnected -> register to C2DM
-		if (Util.DISCONNECTED.equals(connectionStatus))
+		if (Util.DISCONNECTED.equals(connectionStatus)) {
+		    // Move to the Accounts activity and show a progress dialog
 		    startActivity(new Intent(context, AccountsActivity.class));
+		    handler.post(new Runnable() {
+			@Override
+			public void run() {
+			    dialogC2DM.show();
+			}
+		    });
+		}
 		// Connecting -> show progress dialog
 		else if (Util.CONNECTING.equals(connectionStatus))
 		    handler.post(new Runnable() {
@@ -244,28 +258,65 @@ public class SplashActivity extends SherlockActivity {
 			    dialogC2DM.show();
 			}
 		    });
-
-		// Connected -> login to Facebook to proceed
-		else if (Util.CONNECTED.equals(connectionStatus))
-		    enterFriendizer();
-
-		// Login and retrieve the user details from Friendizer
-		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(userInfo.getId(),
-			Utility.getInstance().facebook.getAccessToken(), context));
-		completed = true;
-
+		// Connected -> login to friendizer to proceed
+		else if (Util.CONNECTED.equals(connectionStatus)) {
+		    handler.post(new Runnable() {
+			@Override
+			public void run() {
+			    dialogFriendizer.show(); // Show a progress dialog
+			}
+		    });
+		    new EnterFriendizerTask().execute();
+		}
 	    } catch (Exception e) {
 		Log.e(TAG, "", e);
+		Log.d(TAG, "The response from Facebook: " + response);
+	    } finally {
+		completed = true;
 	    }
 	}
     }
 
-    protected void enterFriendizer() {
-	// Continue to the main activity
-	Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
-	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
-	startActivity(intent);
-	finish();
+    // Login and retrieve the user details from Friendizer
+    class EnterFriendizerTask extends AsyncTask<Void, Void, Boolean> {
+
+	protected Boolean doInBackground(Void... v) {
+	    // Get the deviceRegistrationID
+	    SharedPreferences prefs = Util.getSharedPreferences(context);
+	    String deviceRegistrationID = prefs.getString(Util.DEVICE_REGISTRATION_ID, "");
+
+	    try {
+		Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(Utility.getInstance().userInfo.getId(),
+			Utility.getInstance().facebook.getAccessToken(), deviceRegistrationID, context));
+	    } catch (Exception e) {
+		Log.e(TAG, e.getMessage());
+		handler.post(new Runnable() {
+		    @Override
+		    public void run() {
+			Toast.makeText(context, "Couldn't login to friendizer!", Toast.LENGTH_LONG).show();
+			dialogFriendizer.dismiss(); // Dismiss the progress dialog
+		    }
+		});
+		return false;
+	    }
+	    return true;
+	}
+
+	protected void onPostExecute(Boolean flag) {
+	    handler.post(new Runnable() {
+		@Override
+		public void run() {
+		    Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
+			    Toast.LENGTH_LONG).show();
+		    dialogFriendizer.dismiss(); // Dismiss the progress dialog
+		}
+	    });
+	    // Continue to the main activity
+	    Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
+	    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
+	    startActivity(intent);
+	    finish();
+	}
     }
 
     /*
@@ -277,7 +328,7 @@ public class SplashActivity extends SherlockActivity {
 	@Override
 	public void onAuthSucceed() {
 	    SessionStore.save(Utility.getInstance().facebook, SplashActivity.this);
-	    requestUserData();
+	    requestFacebookUserData();
 	}
 
 	@Override
