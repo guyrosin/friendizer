@@ -6,6 +6,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/c2dm-server.jar" sourcepath="war/WEB-INF/lib/c2dm-server-src.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/restfb-1.6.9.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

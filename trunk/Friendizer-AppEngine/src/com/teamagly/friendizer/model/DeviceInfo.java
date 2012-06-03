@@ -59,6 +59,12 @@ public class DeviceInfo {
      */
     @Persistent
     private Date registrationTimestamp;
+    
+    /**
+     * For biding the device user and application user
+     */
+    @Persistent
+    private Long userID;
 
     public DeviceInfo(Key key, String deviceRegistrationID) {
 	log.info("new DeviceInfo: key=" + key + ", deviceRegistrationId=" + deviceRegistrationID);
@@ -127,4 +133,14 @@ public class DeviceInfo {
 	return "DeviceInfo[key=" + key + ", deviceRegistrationID=" + deviceRegistrationID + ", registrationTimestamp="
 		+ registrationTimestamp + "]";
     }
+
+	public Long getUserID() {
+		return userID;
+	}
+
+	public void setUserID(Long userID) {
+		this.userID = userID;
+	}
+
+
 }

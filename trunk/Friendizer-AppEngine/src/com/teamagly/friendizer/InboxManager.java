@@ -48,6 +48,17 @@ public class InboxManager extends HttpServlet {
 			pm.close();
 		}
 		out.println(message);
+		
+		pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(DeviceInfo.class);
+		
+		query.setFilter("userID == " + destination);
+		query.setUnique(true);
+		
+		DeviceInfo device = (DeviceInfo) query.execute();
+		
+		String recipient = device.getDeviceRegistrationID();
+		SendMessage.sendMessage(getServletContext(), recipient, message.toString());
 
 	}
 
