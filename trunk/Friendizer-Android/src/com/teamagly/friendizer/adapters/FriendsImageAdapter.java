@@ -5,26 +5,22 @@ package com.teamagly.friendizer.adapters;
 
 import java.util.List;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.utils.ImageLoader.Type;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class FriendsImageAdapter extends FriendsAdapter {
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ImageLoader.Type;
+import com.teamagly.friendizer.utils.Utility;
 
-    /**
-     * @param context
-     * @param textViewResourceId
-     * @param objects
-     */
+public class FriendsImageAdapter extends FriendsAdapter {
+    private final String TAG = getClass().getName();
+
     public FriendsImageAdapter(Context context, int textViewResourceId, List<User> objects) {
-	super(context, textViewResourceId, objects);
+        super(context, textViewResourceId, objects);
     }
 
     /*
@@ -44,7 +40,7 @@ public class FriendsImageAdapter extends FriendsAdapter {
 	    imageView = (ImageView) convertView;
 
 	User userInfo = getItem(position);
-	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), imageView, Type.ROUND_CORNERS);
+	imageView.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
 	return imageView;
     }
 

@@ -40,6 +40,6 @@ public class CustomBalloonOverlayView<Item extends OverlayItem> extends BalloonO
     protected void setBalloonData(CustomOverlayItem item, ViewGroup parent) {
 	title.setText(item.getTitle());
 	snippet.setText(item.getSnippet());
-	Utility.getInstance().imageLoader.displayImage(item.getImageURL(), image);
+	image.setImageBitmap(Utility.getInstance().imageLoader.getImage(item.getImageURL()));
     }
 }

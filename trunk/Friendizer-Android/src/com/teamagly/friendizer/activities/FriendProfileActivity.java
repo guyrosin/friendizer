@@ -44,18 +44,17 @@ public class FriendProfileActivity extends SherlockActivity {
     User userInfo;
 
     private ImageView userPic;
-    private TextView name;
-    private TextView status;
-    private TextView age;
-    private TextView ageTitle;
-    private TextView gender;
-    private TextView value;
-    private TextView money;
-    private TextView owns;
-    // private TextView matching;
-    private TextView ownerName;
-    private ImageView ownerPic;
-    private TextView mutualFriends;
+    private TextView txtName;
+    private TextView txtStatus;
+    private TextView txtAge;
+    private TextView txtAgeTitle;
+    private TextView txtGender;
+    private TextView txtValue;
+    private TextView txtMatching;
+    private TextView txtOwns;
+    private TextView txtOwnerName;
+    private ImageView txtOwnerPic;
+    private TextView txtMutualFriends;
     private Button btn1;
     private Button btn2;
     final Handler handler = new Handler();
@@ -74,18 +73,17 @@ public class FriendProfileActivity extends SherlockActivity {
 	actionBar.setDisplayHomeAsUpEnabled(true);
 
 	userPic = (ImageView) findViewById(R.id.user_pic);
-	name = (TextView) findViewById(R.id.name);
-	status = (TextView) findViewById(R.id.status);
-	age = (TextView) findViewById(R.id.age);
-	ageTitle = (TextView) findViewById(R.id.age_title);
-	gender = (TextView) findViewById(R.id.gender);
-	value = (TextView) findViewById(R.id.value);
-	money = (TextView) findViewById(R.id.money);
-	owns = (TextView) findViewById(R.id.owns);
-	// matching = (TextView) findViewById(R.id.matching);
-	ownerName = (TextView) findViewById(R.id.owner_name);
-	ownerPic = (ImageView) findViewById(R.id.owner_pic);
-	mutualFriends = (TextView) findViewById(R.id.mutual_friends);
+	txtName = (TextView) findViewById(R.id.name);
+	txtStatus = (TextView) findViewById(R.id.status);
+	txtAge = (TextView) findViewById(R.id.age);
+	txtAgeTitle = (TextView) findViewById(R.id.age_title);
+	txtGender = (TextView) findViewById(R.id.gender);
+	txtValue = (TextView) findViewById(R.id.value);
+	txtMatching = (TextView) findViewById(R.id.matching);
+	txtOwns = (TextView) findViewById(R.id.owns);
+	txtOwnerName = (TextView) findViewById(R.id.owner_name);
+	txtOwnerPic = (ImageView) findViewById(R.id.owner_pic);
+	txtMutualFriends = (TextView) findViewById(R.id.mutual_friends);
 	btn1 = (Button) findViewById(R.id.btn1);
 	btn2 = (Button) findViewById(R.id.btn2);
 
@@ -99,8 +97,8 @@ public class FriendProfileActivity extends SherlockActivity {
 		Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT);
 		finish();
 	    }
-	    actionBar.setTitle(userInfo.getName());
 	} else {
+	    actionBar.setTitle(userInfo.getName());
 	    updateViews();
 	    updateButtons();
 	}
@@ -126,6 +124,8 @@ public class FriendProfileActivity extends SherlockActivity {
 
 	// Reload the user's details from our servers (in the background)
 	new FriendizerTask().execute(userInfo.getId());
+	// Get the matching with this user (in the background)
+	new MatchingTask().execute(userInfo.getId(), Utility.getInstance().userInfo.getId());
     }
 
     /*
@@ -172,29 +172,27 @@ public class FriendProfileActivity extends SherlockActivity {
     }
 
     protected void updateFriendizerViews() {
-	value.setText(String.valueOf(userInfo.getValue()));
-	money.setText(String.valueOf(userInfo.getMoney()));
+	txtValue.setText(String.valueOf(userInfo.getValue()));
 	if (userInfo.getOwnsList() != null)
-	    owns.setText(String.valueOf(userInfo.getOwnsList().length));
+	    txtOwns.setText(String.valueOf(userInfo.getOwnsList().length));
 	if (userInfo.getStatus().length() > 0) {
-	    status.setText("\"" + userInfo.getStatus() + "\"");
-	    status.setVisibility(View.VISIBLE);
+	    txtStatus.setText("\"" + userInfo.getStatus() + "\"");
+	    txtStatus.setVisibility(View.VISIBLE);
 	} else
-	    status.setVisibility(View.GONE);
-	// matching.setText(userInfo.getMatching());
+	    txtStatus.setVisibility(View.GONE);
     }
 
     protected void updateFacebookViews() {
-	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), userPic, Type.ROUND_CORNERS);
-	name.setText(userInfo.getName());
-	age.setText(userInfo.getAge());
+	userPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
+	txtName.setText(userInfo.getName());
+	txtAge.setText(userInfo.getAge());
 	if (userInfo.getAge().length() == 0)
-	    ageTitle.setVisibility(View.GONE);
+	    txtAgeTitle.setVisibility(View.GONE);
 	else
-	    ageTitle.setVisibility(View.VISIBLE);
+	    txtAgeTitle.setVisibility(View.VISIBLE);
 	String genderStr = userInfo.getGender();
 	// Capitalize the first letter
-	gender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
+	txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
     }
 
     protected void updateButtons() {
@@ -219,7 +217,7 @@ public class FriendProfileActivity extends SherlockActivity {
 			ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
 		    } catch (Exception e) {
 			Log.w(TAG, "", e);
-			Toast.makeText(getBaseContext(), "Couldn't buy " + name, Toast.LENGTH_SHORT).show();
+			Toast.makeText(getBaseContext(), "Couldn't buy " + txtName, Toast.LENGTH_SHORT).show();
 		    }
 		    onResume(); // Refresh
 		}
@@ -254,7 +252,7 @@ public class FriendProfileActivity extends SherlockActivity {
 		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
-			mutualFriends.setText(String.valueOf(friends.length()));
+			txtMutualFriends.setText(String.valueOf(friends.length()));
 		    }
 		});
 	    } catch (JSONException e) {
@@ -280,6 +278,7 @@ public class FriendProfileActivity extends SherlockActivity {
 		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
+			actionBar.setTitle(userInfo.getName());
 			updateFacebookViews();
 		    }
 		});
@@ -305,10 +304,10 @@ public class FriendProfileActivity extends SherlockActivity {
 		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
-			ownerName.setText(ownerNameStr);
-			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+			txtOwnerName.setText(ownerNameStr);
+			txtOwnerPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(picURL, Type.ROUND_CORNERS));
 			// Add a listener for the owner's pic
-			ownerPic.setOnClickListener(new OnClickListener() {
+			txtOwnerPic.setOnClickListener(new OnClickListener() {
 			    @Override
 			    public void onClick(View v) {
 				Intent intent = null;
@@ -360,6 +359,24 @@ public class FriendProfileActivity extends SherlockActivity {
 	    // Update the views
 	    updateFriendizerViews();
 	    updateButtons();
+	}
+    }
+
+    class MatchingTask extends AsyncTask<Long, Void, Integer> {
+
+	protected Integer doInBackground(Long... userIDs) {
+	    try {
+		return ServerFacade.matching(userIDs[0], userIDs[1]);
+	    } catch (Exception e) {
+		Log.e(TAG, e.getMessage());
+		return 0;
+	    }
+	}
+
+	protected void onPostExecute(Integer matching) {
+	    userInfo.setMatching(matching);
+	    // Update the view
+	    txtMatching.setText(String.valueOf(matching));
 	    setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 	}
     }

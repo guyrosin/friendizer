@@ -13,7 +13,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -31,7 +30,6 @@ import com.teamagly.friendizer.adapters.FriendsListAdapter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Comparators;
-import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
@@ -94,11 +92,15 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
     protected void updateListType(boolean type) {
 	if (list_type) { // => show in a list
 	    gridView.setAdapter(null);
-	    friendsAdapter = new FriendsListAdapter(activity, R.layout.connection_list_item, usersList);
+	    gridView.setVisibility(View.GONE);
+	    getListView().setVisibility(View.VISIBLE);
+	    friendsAdapter = new FriendsListAdapter(activity, 0, usersList);
 	    getListView().setAdapter(friendsAdapter);
 	    getListView().setOnItemClickListener(this);
 	} else { // => show in a GridView
 	    getListView().setAdapter(null);
+	    gridView.setVisibility(View.VISIBLE);
+	    getListView().setVisibility(View.GONE);
 	    friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
 	    gridView.setAdapter(friendsAdapter);
 	    gridView.setOnItemClickListener(this);
@@ -208,26 +210,5 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
 	Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
 	intent.putExtra("user", userInfo);
 	startActivity(intent);
-    }
-
-    protected void updateUsersFromFriendizer() {
-	// Load each user's details from our servers in the background
-	new Thread(new Runnable() {
-	    public void run() {
-		for (int i = 0; i < usersList.size(); i++) {
-		    try {
-			usersList.get(i).updateFriendizerData(ServerFacade.userDetails(usersList.get(i).getId()));
-		    } catch (Exception e) {
-			Log.e(TAG, "", e);
-		    }
-		}
-		handler.post(new Runnable() {
-		    @Override
-		    public void run() {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-		    }
-		});
-	    }
-	}).start();
     }
 }

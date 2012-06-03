@@ -5,17 +5,19 @@ package com.teamagly.friendizer.adapters;
 
 import java.util.List;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.Utility;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ImageLoader.Type;
+import com.teamagly.friendizer.utils.Utility;
+
 public class FriendsListAdapter extends FriendsAdapter {
+    private final String TAG = getClass().getName();
 
     public FriendsListAdapter(Context context, int textViewResourceId, List<User> objects) {
 	super(context, textViewResourceId, objects);
@@ -43,9 +45,9 @@ public class FriendsListAdapter extends FriendsAdapter {
 	    hView.setTag(holder);
 	}
 
-	User userInfo = getItem(position);
+	User userInfo = usersList.get(position);
 	ViewHolder holder = (ViewHolder) hView.getTag();
-	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), holder.profile_pic);
+	holder.profile_pic.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
 	holder.name.setText(userInfo.getName());
 	holder.gender.setText(userInfo.getGender());
 	holder.age.setText(userInfo.getAge());
@@ -53,7 +55,8 @@ public class FriendsListAdapter extends FriendsAdapter {
 	    holder.ageTitle.setText("");
 	if (userInfo.getValue() > 0) // If value==0 don't show it (it means the user object still isn't loaded)
 	    holder.value.setText(String.valueOf(userInfo.getValue()));
-	holder.matching.setText(String.valueOf(userInfo.getMatching()));
+	if (userInfo.getValue() > 0) // If matching==0 don't show it
+	    holder.matching.setText(String.valueOf(userInfo.getMatching()));
 	return hView;
     }
 

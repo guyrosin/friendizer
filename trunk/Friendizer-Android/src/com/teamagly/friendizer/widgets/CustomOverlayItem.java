@@ -61,7 +61,7 @@ public class CustomOverlayItem extends OverlayItem {
 	if (markerLayout != null) {
 
 	    ImageView imageView = (ImageView) markerLayout.findViewById(R.id.pic);
-	    Utility.getInstance().imageLoader.displayImage(imageURL, imageView);
+	    imageView.setImageBitmap(Utility.getInstance().imageLoader.getImage(imageURL));
 
 	    // we need to enable the drawing cache
 	    markerLayout.setDrawingCacheEnabled(true);

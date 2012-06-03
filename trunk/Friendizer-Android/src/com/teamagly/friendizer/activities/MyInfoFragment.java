@@ -212,7 +212,7 @@ public class MyInfoFragment extends SherlockFragment {
 
     protected void updateFacebookViews() {
 	User userInfo = Utility.getInstance().userInfo;
-	Utility.getInstance().imageLoader.displayImage(userInfo.getPicURL(), userPic, Type.ROUND_CORNERS);
+	userPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
 	name.setText(userInfo.getName());
 	age.setText(userInfo.getAge());
 	gender.setText(userInfo.getGender());
@@ -262,7 +262,7 @@ public class MyInfoFragment extends SherlockFragment {
 		    @Override
 		    public void run() {
 			ownerName.setText(ownerNameStr);
-			Utility.getInstance().imageLoader.displayImage(picURL, ownerPic, Type.ROUND_CORNERS);
+			ownerPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(picURL, Type.ROUND_CORNERS));
 			ownerPic.setOnClickListener(new OnClickListener() {
 			    @Override
 			    public void onClick(View v) {

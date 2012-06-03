@@ -78,11 +78,14 @@ public class FriendizerActivity extends SherlockFragmentActivity {
     @Override
     protected void onStart() {
 	super.onStart();
-	// Register the listener with the Location Manager to receive location updates from the network provider
-	locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ONE_MINUTE, 20, networkLocationListener);
-	// Register the listener with the Location Manager to receive location updates from the GPS provider
-	locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ONE_MINUTE, 20, gpsLocationListener);
-
+	try {
+	    // Register the listener with the Location Manager to receive location updates from the network provider
+	    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, ONE_MINUTE, 20, networkLocationListener);
+	    // Register the listener with the Location Manager to receive location updates from the GPS provider
+	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, ONE_MINUTE, 20, gpsLocationListener);
+	} catch (Exception e) {
+	    Log.e(TAG, e.getMessage());
+	}
     }
 
     /*
@@ -92,9 +95,13 @@ public class FriendizerActivity extends SherlockFragmentActivity {
     @Override
     protected void onStop() {
 	super.onStop();
-	// Unregister the location listeners
-	locationManager.removeUpdates(networkLocationListener);
-	locationManager.removeUpdates(gpsLocationListener);
+	try {
+	    // Unregister the location listeners
+	    locationManager.removeUpdates(networkLocationListener);
+	    locationManager.removeUpdates(gpsLocationListener);
+	} catch (Exception e) {
+	    Log.e(TAG, e.getMessage());
+	}
     }
 
     /*

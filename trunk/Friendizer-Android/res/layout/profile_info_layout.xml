@@ -14,8 +14,8 @@
 
         <ImageView
             android:id="@+id/user_pic"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="70dp"
+            android:layout_height="700dp"
             android:layout_alignParentLeft="true"
             android:adjustViewBounds="true"
             android:contentDescription="Profile Picture" />
@@ -130,8 +130,8 @@
 
         <ImageView
             android:id="@+id/owner_pic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignTop="@+id/owner_title"
             android:layout_toRightOf="@+id/owner_name" />
     </RelativeLayout>

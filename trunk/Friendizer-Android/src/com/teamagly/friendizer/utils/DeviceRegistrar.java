@@ -21,7 +21,6 @@ import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.provider.Settings.Secure;
 import android.util.Log;
 
 /**
@@ -106,13 +105,13 @@ public class DeviceRegistrar {
 	SharedPreferences settings = Util.getSharedPreferences(context);
 	String accountName = settings.getString(Util.ACCOUNT_NAME, null);
 
+	// Send the device registration ID
 	List<NameValuePair> params = new ArrayList<NameValuePair>();
 	params.add(new BasicNameValuePair(Util.DEVICE_REGISTRATION_ID, deviceRegistrationID));
 
-	String deviceID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-	if (deviceID != null) {
-	    params.add(new BasicNameValuePair("deviceID", deviceID));
-	}
+	// Send the user ID (from Facebook)
+	if (Utility.getInstance().userInfo != null)
+	    params.add(new BasicNameValuePair(Util.USER_ID, String.valueOf(Utility.getInstance().userInfo.getId())));
 
 	AppEngineClient client = new AppEngineClient(context, accountName);
 	return client.makeRequest(urlPath, params);

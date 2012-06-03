@@ -8,26 +8,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Stack;
 
-import com.teamagly.friendizer.R;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ImageView;
+import android.widget.BaseAdapter;
 
 public class ImageLoader {
 
     MemoryCache memoryCache = new MemoryCache();
     FileCache fileCache;
-    private Map<ImageView, String> imageViews = Collections.synchronizedMap(new WeakHashMap<ImageView, String>());
-    ExecutorService executorService;
+
+    BaseAdapter listener;
+    int runningCount = 0;
+    Stack<PhotoToLoad> queue;
+    /*
+     * 15 max async tasks at any given time.
+     */
+    final static int MAX_ALLOWED_TASKS = 15;
 
     public enum Type {
 	REGULAR, ROUND_CORNERS
@@ -35,27 +36,25 @@ public class ImageLoader {
 
     public ImageLoader(Context context) {
 	fileCache = new FileCache(context);
-	executorService = Executors.newFixedThreadPool(5);
+	queue = new Stack<PhotoToLoad>();
     }
 
-    final int stub_id = R.drawable.stub;
+    /*
+     * Inform the listener when the image has been downloaded.
+     */
+    public void setListener(BaseAdapter listener) {
+	this.listener = listener;
+	reset();
+    }
 
     /**
      * Fetches the image, from the cache if possible
      * 
      * @param url
      *            URL of an image
-     * @param imageView
      */
-    public void displayImage(String url, ImageView imageView) {
-	imageViews.put(imageView, url);
-	Bitmap bitmap = memoryCache.get(url);
-	if (bitmap != null)
-	    imageView.setImageBitmap(bitmap);
-	else {
-	    queuePhoto(url, imageView, Type.REGULAR);
-	    imageView.setImageResource(stub_id);
-	}
+    public Bitmap getImage(String url) {
+	return getImage(url, Type.REGULAR);
     }
 
     /**
@@ -67,22 +66,22 @@ public class ImageLoader {
      * @param type
      *            whether to show the original image or not
      */
-    public void displayImage(String url, ImageView imageView, Type type) {
-	imageViews.put(imageView, url);
+    public Bitmap getImage(String url, Type type) {
+	// Check if it exists in the cache
 	Bitmap bitmap = memoryCache.get(url);
 	if (bitmap != null) {
 	    if (type == Type.ROUND_CORNERS)
 		bitmap = Utility.getRoundedCornerBitmap(bitmap);
-	    imageView.setImageBitmap(bitmap);
+	    return bitmap;
 	} else {
-	    queuePhoto(url, imageView, type);
-	    imageView.setImageResource(stub_id);
+	    if (runningCount >= MAX_ALLOWED_TASKS) {
+		queue.push(new PhotoToLoad(url, type));
+	    } else {
+		runningCount++;
+		new GetProfilePicAsyncTask().execute(url, type);
+	    }
 	}
-    }
-
-    private void queuePhoto(String url, ImageView imageView, Type type) {
-	PhotoToLoad p = new PhotoToLoad(url, imageView, type);
-	executorService.submit(new PhotosLoader(p));
+	return null;
     }
 
     private Bitmap getBitmap(String url) {
@@ -151,72 +150,59 @@ public class ImageLoader {
 	return null;
     }
 
+    public void getNextImage() {
+	if (!queue.isEmpty()) {
+	    PhotoToLoad item = queue.pop();
+	    new GetProfilePicAsyncTask().execute(item.url, item.type);
+	}
+    }
+
+    /*
+     * Start a AsyncTask to fetch the request
+     */
+    private class GetProfilePicAsyncTask extends AsyncTask<Object, Void, Bitmap> {
+	String url;
+	Type type;
+
+	@Override
+	protected Bitmap doInBackground(Object... params) {
+	    url = (String) params[0];
+	    type = (Type) params[1];
+	    Bitmap bitmap = getBitmap(url);
+	    return bitmap;
+	}
+
+	@Override
+	protected void onPostExecute(Bitmap result) {
+	    runningCount--;
+	    if (result != null) {
+		memoryCache.put(url, result); // Note we put the original version in the cache
+		if (type == Type.ROUND_CORNERS)
+		    result = Utility.getRoundedCornerBitmap(result);
+		listener.notifyDataSetChanged();
+		getNextImage();
+	    }
+	}
+    }
+
     // Task for the queue
     private class PhotoToLoad {
 	public String url;
-	public ImageView imageView;
 	public Type type;
 
-	public PhotoToLoad(String u, ImageView i, Type t) {
+	public PhotoToLoad(String u, Type t) {
 	    url = u;
-	    imageView = i;
 	    type = t;
 	}
     }
 
-    class PhotosLoader implements Runnable {
-	PhotoToLoad photoToLoad;
-
-	PhotosLoader(PhotoToLoad photoToLoad) {
-	    this.photoToLoad = photoToLoad;
-	}
-
-	@Override
-	public void run() {
-	    if (imageViewReused(photoToLoad))
-		return;
-	    Bitmap bmp = getBitmap(photoToLoad.url);
-	    memoryCache.put(photoToLoad.url, bmp);
-	    if (imageViewReused(photoToLoad))
-		return;
-	    if (photoToLoad.type == Type.ROUND_CORNERS)
-		bmp = Utility.getRoundedCornerBitmap(bmp);
-	    BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad);
-	    Activity a = (Activity) photoToLoad.imageView.getContext();
-	    a.runOnUiThread(bd);
-	}
-    }
-
-    boolean imageViewReused(PhotoToLoad photoToLoad) {
-	String tag = imageViews.get(photoToLoad.imageView);
-	if (tag == null || !tag.equals(photoToLoad.url))
-	    return true;
-	return false;
-    }
-
-    // Used to display bitmap in the UI thread
-    class BitmapDisplayer implements Runnable {
-	Bitmap bitmap;
-	PhotoToLoad photoToLoad;
-
-	public BitmapDisplayer(Bitmap b, PhotoToLoad p) {
-	    bitmap = b;
-	    photoToLoad = p;
-	}
-
-	public void run() {
-	    if (imageViewReused(photoToLoad))
-		return;
-	    if (bitmap != null)
-		photoToLoad.imageView.setImageBitmap(bitmap);
-	    else
-		photoToLoad.imageView.setImageResource(stub_id);
-	}
+    public void reset() {
+	runningCount = 0;
+	queue.clear();
     }
 
     public void clearCache() {
 	memoryCache.clear();
 	fileCache.clear();
     }
-
 }

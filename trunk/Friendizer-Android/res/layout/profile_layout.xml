@@ -43,6 +43,7 @@
                 android:minHeight="33dip"
                 android:minWidth="40dip"
                 android:text="Achievements"
+                android:maxLines="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/radio_colors"
                 android:width="0dp" />
