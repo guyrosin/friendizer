@@ -46,6 +46,7 @@ public class UserManager extends HttpServlet{
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		String accesToken = request.getParameter("accessToken");
+		String deviceRegistrationID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
@@ -158,7 +159,7 @@ public class UserManager extends HttpServlet{
 		if (result2.isEmpty())
 			throw new ServletException("This user doesn't exist");
 		User user2 = result2.get(0);
-		
+		try{
 		// Get the access token of user1
 		FacebookClient facebookClient1 = new DefaultFacebookClient(user1.getToken());
 		// Get the access token of user2
@@ -217,6 +218,6 @@ public class UserManager extends HttpServlet{
 		int result = new Double(formula).intValue();
 		
 		pm.close();
-		response.getWriter().println(result);
+		response.getWriter().println(result);}catch(Exception e){response.getWriter().println(e.getMessage());}
 	}
 }
