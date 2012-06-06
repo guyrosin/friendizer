@@ -80,19 +80,25 @@ public class UserManager extends HttpServlet{
 			query = pm.newQuery(DeviceInfo.class);
 			//query.addFilter(Util.DEVICE_REGISTRATION_ID, Query., deviceID);
 			///query.addFilter(Util.DEVICE_REGISTRATION_ID, Query.JDOQL, deviceID);
-			//query.setUnique(true);
+			query.setUnique(true);
 			
 			query.setFilter(Util.DEVICE_REGISTRATION_ID + " == deviceID");
 			query.declareParameters("String deviceID");
-			List<DeviceInfo> devices = (List<DeviceInfo>) query.execute(deviceID);
+			//List<DeviceInfo> devices = (List<DeviceInfo>) query.execute(deviceID);
 			 
 			
-			//List<DeviceInfo> devices = (List<DeviceInfo>) query.execute();
-			DeviceInfo device = devices.get(0);
+			DeviceInfo device = (DeviceInfo) query.execute(deviceID);
+			device.setUserID(userID);
+			device.setRegistrationTimestamp(new Date());
+			pm.makePersistent(device);
+			//DeviceInfo device = devices.get(0);
+			/*
 			if (device.getUserID() == null || device.getUserID() != userID) {
 				device.setUserID(userID);
+				device.setRegistrationTimestamp(new Date());
 				pm.makePersistent(device);
 			}
+			*/
 			pm.close();
 		}
 	}

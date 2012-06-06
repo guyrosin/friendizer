@@ -36,4 +36,9 @@ public class Util {
      * Key for device registration id in shared preferences.
      */
     public static final String DEVICE_REGISTRATION_ID = "deviceRegistrationID";
+    
+    /**
+     * Date of the device field update
+     */
+    public static final String REGISTRATION_TIMESTAMP = "registrationTimestamp";
 }
