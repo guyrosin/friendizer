@@ -31,8 +31,9 @@ public class SendMessage {
 
 	private static final Logger log = Logger.getLogger(SendMessage.class.getName());
 
-	public static String sendMessage(ServletContext context, String recipient, String message) {
+	public static String sendMessage(ServletContext context, DeviceInfo deviceInfo, String message) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		String recipient = deviceInfo.getDeviceRegistrationID();
 		try {
 			UserService userService = UserServiceFactory.getUserService();
 			User user = userService.getCurrentUser();
@@ -55,7 +56,7 @@ public class SendMessage {
 
 			// delete will fail if the pm is different than the one used to
 			// load the object - we must close the object when we're done
-
+			/*
 			List<DeviceInfo> registrations = null;
 			registrations = DeviceInfo.getDeviceInfoForUser(recipient);
 			log.info("sendMessage: got " + registrations.size() + " registrations");
@@ -74,18 +75,13 @@ public class SendMessage {
 					pm.deletePersistent(first);
 				}
 			}
-
+			 */
 			int numSendAttempts = 0;
-			for (DeviceInfo deviceInfo : registrations) {
-				res = doSendViaC2dm(message, sender, push, collapseKey, deviceInfo);
-				numSendAttempts++;
 
-				if (res) {
-					ok = true;
-				}
-			}
+			res = doSendViaC2dm(message, sender, push, collapseKey, deviceInfo);
 
-			if (ok) {
+
+			if (res) {
 				return "Success: Message sent";
 			} else if (numSendAttempts == 0) {
 				return "Failure: User " + recipient + " not registered";

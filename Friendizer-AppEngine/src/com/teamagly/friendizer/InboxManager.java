@@ -2,6 +2,7 @@ package com.teamagly.friendizer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
@@ -12,8 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
-import com.teamagly.friendizer.model.*;
+import org.json.JSONException;
+
 import com.google.android.c2dm.server.PMF;
+import com.teamagly.friendizer.model.DeviceInfo;
+import com.teamagly.friendizer.model.Message;
 
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
@@ -53,12 +57,26 @@ public class InboxManager extends HttpServlet {
 		Query query = pm.newQuery(DeviceInfo.class);
 		
 		query.setFilter("userID == " + destination);
-		query.setUnique(true);
+		//query.setOrdering(Util.REGISTRATION_TIMESTAMP + " desc");
+		//query.setUnique(true);
 		
-		DeviceInfo device = (DeviceInfo) query.execute();
+		//DeviceInfo device = (DeviceInfo) query.execute();
+		List<DeviceInfo> devices = (List<DeviceInfo>) query.execute();
+		DeviceInfo device = devices.get(0);
 		
-		String recipient = device.getDeviceRegistrationID();
-		SendMessage.sendMessage(getServletContext(), recipient, message.toString());
+		for (int i=1; i < devices.size(); i++) {
+			Date newest = device.getRegistrationTimestamp();
+			Date cur = devices.get(i).getRegistrationTimestamp();
+			if (cur.compareTo(newest) > 0)
+				device = devices.get(i);
+		}
+		//String recipient = device.getDeviceRegistrationID();
+		try {
+			SendMessage.sendMessage(getServletContext(), device, message.toC2DMMessage());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
