@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.content.Context;
 
 import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.Message;
 
@@ -175,4 +176,14 @@ public final class ServerFacade {
 	in.close();
     }
 
+    public static Action[] actionHistory(long userID) throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "actionHistory?userID=" + userID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	JSONArray actions = new JSONArray(in.readLine());
+    	in.close();
+    	Action[] actionsArray = new Action[actions.length()];
+    	for (int i = 0; i < actions.length(); i++)
+    	    actionsArray[i] = new Action(actions.getJSONObject(i));
+    	return actionsArray;
+    }
 }
