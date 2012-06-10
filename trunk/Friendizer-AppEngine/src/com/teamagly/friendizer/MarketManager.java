@@ -47,6 +47,7 @@ public class MarketManager extends HttpServlet {
 			throw new ServletException("You don't have enough money to buy this user");
 		buyer.setMoney(buyer.getMoney() - buy.getValue());
 		pm.makePersistent(buyer);
+		ActionsManager.madeBuy(userID, buyID);
 		AchievementsManager.userBoughtSomeone(buyer);
 		if (buy.getOwner() > 0) {
 			query = pm.newQuery(User.class);

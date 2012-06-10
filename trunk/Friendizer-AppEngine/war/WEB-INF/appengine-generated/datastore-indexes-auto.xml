@@ -1,4 +1,17 @@
-<!-- Indices written at Sun, 3 Jun 2012 09:25:14 UTC -->
+<!-- Indices written at Sun, 10 Jun 2012 12:51:36 UTC -->
 
-<datastore-indexes/>
+<datastore-indexes>
 
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="Action" ancestor="false" source="auto">
+        <property name="buyerID" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="Action" ancestor="false" source="auto">
+        <property name="boughtID" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+</datastore-indexes>

@@ -70,8 +70,7 @@
 
 	<servlet>
 		<servlet-name>AchievementsManager</servlet-name>
-		<servlet-class>com.teamagly.friendizer.AchievementsManager
-		</servlet-class>
+		<servlet-class>com.teamagly.friendizer.AchievementsManager</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -81,9 +80,7 @@
 
 	<servlet>
 		<servlet-name>dataMessagingServlet</servlet-name>
-		<servlet-class>
-			com.google.android.c2dm.server.C2DMRetryServlet
-		</servlet-class>
+		<servlet-class>com.google.android.c2dm.server.C2DMRetryServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -93,16 +90,12 @@
 
 	<servlet>
 		<servlet-name>RegisterServlet</servlet-name>
-		<servlet-class>
-			com.teamagly.friendizer.RegisterServlet
-		</servlet-class>
+		<servlet-class>com.teamagly.friendizer.RegisterServlet</servlet-class>
 	</servlet>
 
 	<servlet>
 		<servlet-name>UnregisterServlet</servlet-name>
-		<servlet-class>
-			com.teamagly.friendizer.UnregisterServlet
-		</servlet-class>
+		<servlet-class>com.teamagly.friendizer.UnregisterServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -113,6 +106,16 @@
 	<servlet-mapping>
 		<servlet-name>UnregisterServlet</servlet-name>
 		<url-pattern>/unregister</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ActionsManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.ActionsManager</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ActionsManager</servlet-name>
+		<url-pattern>/actionHistory</url-pattern>
 	</servlet-mapping>
 
 </web-app>
