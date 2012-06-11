@@ -86,7 +86,7 @@ public class Util {
     /**
      * Display a notification containing the given string.
      */
-    public static void generateNotification(Context context, String message) {
+    public static void generateNotification(Context context, String message, Intent intent) {
 	int icon = R.drawable.status_icon;
 	long when = System.currentTimeMillis();
 
@@ -94,7 +94,7 @@ public class Util {
 	// builder.
 	Notification notification = new Notification(icon, message, when);
 	notification.setLatestEventInfo(context, "friendizer", message,
-		PendingIntent.getActivity(context, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT));
+		PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
 	notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 	SharedPreferences settings = Util.getSharedPreferences(context);
