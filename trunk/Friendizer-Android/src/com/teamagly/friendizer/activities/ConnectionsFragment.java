@@ -56,8 +56,9 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 		    Bundle params = new Bundle();
 		    try {
 			// Request the details of each user I own
+			// Note: must order by uid (same as ownList servlet) so the next for loop will work!
 			String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
-				+ IDsBuilder.toString() + ") order by name";
+				+ IDsBuilder.toString() + ") order by uid";
 			params.putString("method", "fql.query");
 			params.putString("query", query);
 			String response = Utility.getInstance().facebook.request(params);

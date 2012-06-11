@@ -19,7 +19,7 @@ import android.util.Log;
 
 import com.google.android.c2dm.C2DMBaseReceiver;
 import com.teamagly.friendizer.utils.DeviceRegistrar;
-import com.teamagly.friendizer.utils.MessageDisplay;
+import com.teamagly.friendizer.utils.MessageHandler;
 import com.teamagly.friendizer.utils.Setup;
 import com.teamagly.friendizer.utils.Util;
 
@@ -88,6 +88,6 @@ public class C2DMReceiver extends C2DMBaseReceiver {
 	/*
 	 * Replace this with your application-specific code
 	 */
-	MessageDisplay.displayMessage(context, intent);
+	new MessageHandler().displayMessage(context, intent);
     }
 }
