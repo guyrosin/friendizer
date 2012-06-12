@@ -15,6 +15,7 @@ import org.json.JSONArray;
 
 import com.google.android.c2dm.server.PMF;
 import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class ActionsManager extends HttpServlet {
@@ -23,7 +24,13 @@ public class ActionsManager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(Action.class);
+		Query query = pm.newQuery(User.class);
+		query.setFilter("id == " + userID);
+		List<User> result = (List<User>) query.execute();
+		query.closeAll();
+		if (result.isEmpty())
+			throw new ServletException("This user doesn't exist");
+		query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
 		query.setOrdering("date desc");
 		List<Action> result1 = (List<Action>) query.execute();

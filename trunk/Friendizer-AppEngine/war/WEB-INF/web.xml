@@ -117,5 +117,17 @@
 		<servlet-name>ActionsManager</servlet-name>
 		<url-pattern>/actionHistory</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+	    <servlet-name>GiftsManager</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.GiftsManager</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>GiftsManager</servlet-name>
+	    <url-pattern>/allGifts</url-pattern>
+	    <url-pattern>/userGifts</url-pattern>
+	    <url-pattern>/sendGift</url-pattern>
+	</servlet-mapping>
 
 </web-app>

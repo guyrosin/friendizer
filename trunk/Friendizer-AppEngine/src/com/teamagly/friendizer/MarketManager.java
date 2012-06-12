@@ -15,11 +15,7 @@ import com.teamagly.friendizer.model.User;
 public class MarketManager extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String address = request.getRequestURI();
-		String servlet = address.substring(address.lastIndexOf("/") + 1);
-		System.err.println(servlet.intern());
-		if (servlet.intern() == "buy")
-			buy(request, response);
+		buy(request, response);
 	}
 
 	@SuppressWarnings("unchecked")
