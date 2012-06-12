@@ -9,7 +9,7 @@ public class Gift {
     private String iconRes;
 	private int value;
 
-	public Gift(Long id, String name, String iconRes, int value) {
+	public Gift(long id, String name, String iconRes, int value) {
 		this.id = id;
 		this.name = name;
 		this.iconRes = iconRes;
