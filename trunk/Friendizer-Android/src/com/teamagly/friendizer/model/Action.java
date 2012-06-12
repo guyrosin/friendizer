@@ -31,14 +31,6 @@ public class Action {
 		}
 	}
 
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
 	public long getBuyerID() {
 		return buyerID;
 	}
