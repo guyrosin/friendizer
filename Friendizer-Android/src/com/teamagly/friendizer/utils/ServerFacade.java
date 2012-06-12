@@ -17,6 +17,7 @@ import android.content.Context;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.FriendizerUser;
+import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.Message;
 
 public final class ServerFacade {
@@ -185,5 +186,33 @@ public final class ServerFacade {
     	for (int i = 0; i < actions.length(); i++)
     	    actionsArray[i] = new Action(actions.getJSONObject(i));
     	return actionsArray;
+    }
+    
+    public static Gift[] getAllGifts() throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "allGifts");
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	JSONArray gifts = new JSONArray(in.readLine());
+    	in.close();
+    	Gift[] giftsArray = new Gift[gifts.length()];
+    	for (int i = 0; i < gifts.length(); i++)
+    	    giftsArray[i] = new Gift(gifts.getJSONObject(i));
+    	return giftsArray;
+    }
+    
+    public static Gift[] getUserGifts(long userID) throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "userGifts?userID=" + userID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	JSONArray gifts = new JSONArray(in.readLine());
+    	in.close();
+    	Gift[] giftsArray = new Gift[gifts.length()];
+    	for (int i = 0; i < gifts.length(); i++)
+    	    giftsArray[i] = new Gift(gifts.getJSONObject(i));
+    	return giftsArray;
+    }
+    
+    public static void sendGift(long senderID, long receiverID, long giftID) throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "sendGift?senderID=" + senderID + "&receiverID=" + receiverID + "&giftID=" + giftID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	in.close();
     }
 }
