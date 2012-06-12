@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import com.google.android.c2dm.server.PMF;
+import com.teamagly.friendizer.model.DeviceInfo;
 import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
@@ -67,6 +68,10 @@ public class MarketManager extends HttpServlet {
 		AchievementsManager.someoneBoughtUser(buy);
 		pm.close();
 		response.getWriter().println("Purchase Done");
+		
+		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(buyID);
+		
+		SendMessage.sendMessage(getServletContext(), device, Notifications.BEEN_BOUGHT_MSG);
 	}
 
 }

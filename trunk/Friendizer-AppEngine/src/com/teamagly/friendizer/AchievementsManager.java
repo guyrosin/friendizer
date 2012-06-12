@@ -49,7 +49,7 @@ public class AchievementsManager extends HttpServlet {
 		pm.close();
 		response.getWriter().println(achvsArray);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void userBoughtSomeone(User user) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -61,7 +61,7 @@ public class AchievementsManager extends HttpServlet {
 			pm.makePersistent(new UserAchievement(user.getId(), 28001));
 		pm.close();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void someoneBoughtUser(User user) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -73,7 +73,7 @@ public class AchievementsManager extends HttpServlet {
 			pm.makePersistent(new UserAchievement(user.getId(), 30001));
 		pm.close();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static void userValueIncreased(User user) {
 		if (user.getValue() >= 1000) {
