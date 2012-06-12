@@ -53,24 +53,9 @@ public class InboxManager extends HttpServlet {
 		}
 		out.println(message);
 		
-		pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(DeviceInfo.class);
 		
-		query.setFilter("userID == " + destination);
-		//query.setOrdering(Util.REGISTRATION_TIMESTAMP + " desc");
-		//query.setUnique(true);
-		
-		//DeviceInfo device = (DeviceInfo) query.execute();
-		List<DeviceInfo> devices = (List<DeviceInfo>) query.execute();
-		DeviceInfo device = devices.get(0);
-		
-		for (int i=1; i < devices.size(); i++) {
-			Date newest = device.getRegistrationTimestamp();
-			Date cur = devices.get(i).getRegistrationTimestamp();
-			if (cur.compareTo(newest) > 0)
-				device = devices.get(i);
-		}
-		//String recipient = device.getDeviceRegistrationID();
+		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(destination);
+
 		try {
 			SendMessage.sendMessage(getServletContext(), device, message.toC2DMMessage());
 		} catch (JSONException e) {
