@@ -11,7 +11,7 @@ import org.json.JSONException;
 
 import com.google.android.c2dm.server.PMF;
 
-import com.teamagly.friendizer.Notifications.notificationType;
+import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
@@ -51,7 +51,7 @@ public class MarketManager extends HttpServlet {
 		buyer.setLevel(Util.calculateLevel(buyer.getLevel(), buyer.getPoints()));
 		pm.makePersistent(buyer);
 		ActionsManager.madeBuy(userID, buyID);
-		AchievementsManager.userBoughtSomeone(buyer,getServletContext());
+		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
 		if (buy.getOwner() > 0) {
 			query = pm.newQuery(User.class);
 			query.setFilter("id == " + buy.getOwner());
@@ -72,11 +72,10 @@ public class MarketManager extends HttpServlet {
 		AchievementsManager.someoneBoughtUser(buy, getServletContext());
 		pm.close();
 		response.getWriter().println("Purchase Done");
-		
+
 		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(buyID);
-		
-		Notification notif = new Notification(buyID,Notifications.BEEN_BOUGHT_MSG,
-				notificationType.BUY);
+
+		Notification notif = new Notification(buyID, Notifications.BEEN_BOUGHT_MSG, NotificationType.BUY);
 		try {
 			SendMessage.sendMessage(getServletContext(), device, notif.toC2DMMessage());
 		} catch (JSONException e) {

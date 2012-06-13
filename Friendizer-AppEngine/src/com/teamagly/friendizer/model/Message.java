@@ -90,7 +90,7 @@ public class Message {
 		JSONObject c2dm = new JSONObject();
 		c2dm.put("userID", source);
 		c2dm.put("text", text);
-		c2dm.put("type", Notifications.notificationType.MSG);
+		c2dm.put("type", Notifications.NotificationType.MSG);
 		return c2dm.toString();
 	}
 

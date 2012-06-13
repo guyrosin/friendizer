@@ -4,11 +4,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.teamagly.friendizer.Notifications;
-import com.teamagly.friendizer.Notifications.notificationType;
+import com.teamagly.friendizer.Notifications.NotificationType;
 
 public class Notification {
 	
-	public Notification(long source, String text, notificationType type) {
+	public Notification(long source, String text, NotificationType type) {
 		super();
 		this.source = source;
 		this.text = text;
@@ -24,7 +24,7 @@ public class Notification {
 	
 	protected String text;
 	
-	protected notificationType type;
+	protected NotificationType type;
 	
 
 	
@@ -68,11 +68,11 @@ public class Notification {
 		this.text = text;
 	}
 
-	public notificationType getType() {
+	public NotificationType getType() {
 		return type;
 	}
 
-	public void setType(notificationType type) {
+	public void setType(NotificationType type) {
 		this.type = type;
 	}
 

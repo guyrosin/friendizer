@@ -12,7 +12,7 @@ import org.json.JSONException;
 
 import com.google.android.c2dm.server.PMF;
 
-import com.teamagly.friendizer.Notifications.notificationType;
+import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public class GiftsManager extends HttpServlet {
 		query.closeAll();
 		JSONArray giftsArray = new JSONArray();
 		for (Gift gift : result)
-			giftsArray.put(gift);
+			giftsArray.put(gift.toJSONObject());
 		pm.close();
 		response.getWriter().println(giftsArray);
 	}
@@ -71,7 +71,7 @@ public class GiftsManager extends HttpServlet {
 		query.closeAll();
 		JSONArray giftsArray = new JSONArray();
 		for (Gift gift : userGifts)
-			giftsArray.put(gift);
+			giftsArray.put(gift.toJSONObject());
 		pm.close();
 		response.getWriter().println(giftsArray);
 	}
@@ -116,12 +116,11 @@ public class GiftsManager extends HttpServlet {
 			pm.makePersistent(new UserGift(receiverID, giftID));
 		pm.close();
 		response.getWriter().println("The gift has been sent");
-		
-		//sending notification
+
+		// sending notification
 		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(receiverID);
-		
-		Notification notif = new Notification(receiverID,Notifications.GIFT_MSG,
-				notificationType.GFT);
+
+		Notification notif = new Notification(receiverID, Notifications.GIFT_MSG, NotificationType.GFT);
 		try {
 			SendMessage.sendMessage(getServletContext(), device, notif.toC2DMMessage());
 		} catch (JSONException e) {

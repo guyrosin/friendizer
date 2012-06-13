@@ -15,7 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.google.android.c2dm.server.PMF;
-import com.teamagly.friendizer.Notifications.notificationType;
+import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.DeviceInfo;
 import com.teamagly.friendizer.model.Message;
 import com.teamagly.friendizer.model.Notification;

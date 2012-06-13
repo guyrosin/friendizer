@@ -43,18 +43,18 @@ public class ActionsManager extends HttpServlet {
 			if (i < result1.size()) {
 				if (j < result2.size()) {
 					if (result1.get(i).getDate().after(result2.get(j).getDate())) {
-						actionsArray.put(result1.get(i));
+						actionsArray.put(result1.get(i).toJSONObject());
 						i++;
 					} else {
-						actionsArray.put(result2.get(j));
+						actionsArray.put(result2.get(j).toJSONObject());
 						j++;
 					}
 				} else {
-					actionsArray.put(result1.get(i));
+					actionsArray.put(result1.get(i).toJSONObject());
 					i++;
 				}
 			} else if (j < result2.size()) {
-				actionsArray.put(result2.get(j));
+				actionsArray.put(result2.get(j).toJSONObject());
 				j++;
 			} else
 				break;
@@ -62,7 +62,7 @@ public class ActionsManager extends HttpServlet {
 		pm.close();
 		response.getWriter().println(actionsArray);
 	}
-	
+
 	public static void madeBuy(long buyerID, long boughtID) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		pm.makePersistent(new Action(buyerID, boughtID, new Date()));
