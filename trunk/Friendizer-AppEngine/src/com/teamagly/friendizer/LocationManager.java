@@ -58,6 +58,8 @@ public class LocationManager extends HttpServlet {
 		if (result.isEmpty())
 			throw new ServletException("This user doesn't exist");
 		User user = result.get(0);
+		// Update the current date
+		user.setSince(new Date());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		cal.add(Calendar.MINUTE, -30);

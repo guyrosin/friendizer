@@ -57,6 +57,24 @@ public class AchievementsManager extends HttpServlet {
 		query.setFilter("userID == " + user.getId() + " && achievementID == 28001");
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
+		
+		/* Get the achievement from the database */
+		query = pm.newQuery(Achievement.class);
+		query.setFilter("id == " + 28001);
+		List<Achievement> achvResult = (List<Achievement>) query.execute();
+		query.closeAll();
+		
+		Achievement achv = achvResult.get(0);
+		
+		// Reward the user with money
+		user.setMoney(user.getMoney() + achv.getReward());
+		// Reward the user with points
+		user.setPoints(user.getPoints() + achv.getPoints());
+		// Check for another achievement
+//		AchievementsManager.userValueIncreased(user,getServletContext()); TODO: getServletContext() not working (undo)
+		// check for level up
+		Util.calculateLevel(user.getLevel(), user.getPoints());
+		
 		if (result.isEmpty()) {
 			pm.makePersistent(new UserAchievement(user.getId(), 28001));
 			notificate(user,28001,context);
@@ -71,6 +89,25 @@ public class AchievementsManager extends HttpServlet {
 		query.setFilter("userID == " + user.getId() + " && achievementID == 30001");
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
+		
+		/* Get the achievement from the database */
+		query = pm.newQuery(Achievement.class);
+		query.setFilter("id == " + 30001);
+		List<Achievement> achvResult = (List<Achievement>) query.execute();
+		query.closeAll();
+		
+		Achievement achv = achvResult.get(0);
+		
+		// Reward the user with money
+		user.setMoney(user.getMoney() + achv.getReward());
+		// Reward the user with points
+		user.setPoints(user.getPoints() + achv.getPoints());
+		
+		// Check for another achievement
+//		AchievementsManager.userValueIncreased(user,getServletContext()); TODO: getServletContext() not working (undo)
+		// check for level up
+		Util.calculateLevel(user.getLevel(), user.getPoints());
+		
 		if (result.isEmpty()) {
 			pm.makePersistent(new UserAchievement(user.getId(), 30001));
 			notificate(user,30001,context);
@@ -80,12 +117,28 @@ public class AchievementsManager extends HttpServlet {
 
 	@SuppressWarnings("unchecked")
 	public static void userValueIncreased(User user, ServletContext context) {
-		if (user.getValue() >= 1000) {
+		if (user.getPoints() >= 1000) {
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			Query query = pm.newQuery(UserAchievement.class);
 			query.setFilter("userID == " + user.getId() + " && achievementID == 29001");
 			List<UserAchievement> result = (List<UserAchievement>) query.execute();
 			query.closeAll();
+
+			/* Get the achievement from the database */
+			query = pm.newQuery(Achievement.class);
+			query.setFilter("id == " + 29001);
+			List<Achievement> achvResult = (List<Achievement>) query.execute();
+			query.closeAll();
+			
+			Achievement achv = achvResult.get(0);
+			
+			// Reward the user with money
+			user.setMoney(user.getMoney() + achv.getReward());
+			// Reward the user with points
+			user.setPoints(user.getPoints() + achv.getPoints());
+			// check for level up
+			Util.calculateLevel(user.getLevel(), user.getPoints());
+			
 			if (result.isEmpty()) {
 				pm.makePersistent(new UserAchievement(user.getId(), 29001));				
 				notificate(user,29001,context);
