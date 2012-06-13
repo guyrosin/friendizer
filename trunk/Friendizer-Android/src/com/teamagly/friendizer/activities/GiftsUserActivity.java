@@ -10,7 +10,10 @@ import java.util.List;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -26,13 +29,14 @@ import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class GiftsUserActivity extends SherlockActivity {
+public class GiftsUserActivity extends SherlockActivity implements OnItemClickListener {
 
 	private final String TAG = getClass().getName();
 	GiftsAdapter adapter;
 	protected GridView gridView;
 	protected List<Gift> giftsList;
 	protected User user;
+	protected GiftsUserActivity activity;
 
 	/*
 	 * (non-Javadoc)
@@ -43,12 +47,18 @@ public class GiftsUserActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
+		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one
+			actionBar.setTitle("My Gifts");
+		else {
+			actionBar.setTitle(user.getName());
+			actionBar.setSubtitle("Gifts");
+		}
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.gifts_layout);
 		gridView = (GridView) findViewById(R.id.gridview);
 		giftsList = new ArrayList<Gift>();
 		user = ((User) getIntent().getSerializableExtra("user"));
+		activity = this;
 	}
 
 	/*
@@ -59,8 +69,6 @@ public class GiftsUserActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		adapter = new GiftsAdapter(this, 0, giftsList);
-		gridView.setAdapter(adapter);
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -72,7 +80,9 @@ public class GiftsUserActivity extends SherlockActivity {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						adapter.notifyDataSetChanged();
+						adapter = new GiftsAdapter(activity, 0, giftsList);
+						gridView.setAdapter(adapter);
+						gridView.setOnItemClickListener(activity);
 						setSupportProgressBarIndeterminateVisibility(false);
 					}
 				});
@@ -125,5 +135,15 @@ public class GiftsUserActivity extends SherlockActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
+	 */
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		// TODO Auto-generated method stub
+
 	}
 }

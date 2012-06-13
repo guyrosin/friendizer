@@ -32,10 +32,10 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.TextProgressBar;
 
 public class FriendProfileActivity extends SherlockFragmentActivity {
 
@@ -54,6 +54,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	private ImageView imgOwnerPic;
 	private TextView txtMutualFriends;
 	private TableLayout buttonsTable;
+	private TextView txtLevel;
+	private TextProgressBar xpBar;
 	final Handler handler = new Handler();
 	boolean connectedFlag = false; // Whether I'm connected to this user
 
@@ -82,6 +84,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		imgOwnerPic = (ImageView) findViewById(R.id.owner_pic);
 		txtMutualFriends = (TextView) findViewById(R.id.mutual_friends);
 		buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
+		txtLevel = (TextView) findViewById(R.id.level);
+		xpBar = (TextProgressBar) findViewById(R.id.xp_bar);
 
 		userInfo = (User) intent.getSerializableExtra("user");
 		if (userInfo == null) {
@@ -182,6 +186,13 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	}
 
 	protected void updateFriendizerViews() {
+		txtLevel.setText("Level " + userInfo.getLevel());
+		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
+		int currentLevelPoints = userInfo.getLevelPoints();
+		xpBar.setMax(currentLevelPoints);
+		xpBar.setProgress(earnedPointsThisLevel);
+		xpBar.setText(earnedPointsThisLevel + " / " + currentLevelPoints);
+
 		txtValue.setText(String.valueOf(userInfo.getPoints()));
 		if (userInfo.getOwnsList() != null)
 			txtOwns.setText(String.valueOf(userInfo.getOwnsList().length));

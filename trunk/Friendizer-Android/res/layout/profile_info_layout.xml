@@ -31,7 +31,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
-                android:text="Level 3"
                 android:textSize="16sp" />
         </LinearLayout>
 
@@ -72,7 +71,7 @@
             android:paddingBottom="5dp"
             android:textSize="16sp" />
 
-        <ProgressBar
+        <com.teamagly.friendizer.widgets.TextProgressBar
             android:id="@+id/xp_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
@@ -80,7 +79,6 @@
             android:layout_alignLeft="@+id/name"
             android:layout_below="@+id/status"
             android:indeterminateOnly="false"
-            android:max="100"
             android:progressDrawable="@drawable/xp_bar_states" />
     </RelativeLayout>
 

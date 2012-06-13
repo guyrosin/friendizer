@@ -81,7 +81,7 @@ public class MessageHandler {
 					params.putString("fields", "name, picture");
 					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new BoughtRequestListener(context,
 							userInfo, text));
-				} else if (type == NotificationType.BUY) { // Received a gift
+				} else if (type == NotificationType.GFT) { // Received a gift
 					User userInfo = new User();
 					userInfo.setId(userID);
 					// Load the user's details from Facebook
@@ -176,7 +176,8 @@ public class MessageHandler {
 				// TODO: put the gift ID in the intent...
 				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent);
+				// Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent); TODO
+				Util.generateNotification(context, "Received a new gift", notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);

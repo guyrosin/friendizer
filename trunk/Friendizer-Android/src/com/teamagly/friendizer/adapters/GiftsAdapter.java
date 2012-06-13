@@ -37,12 +37,6 @@ public class GiftsAdapter extends ArrayAdapter<Gift> {
 			holder.icon = (ImageView) hView.findViewById(R.id.gift_icon);
 			holder.value = (TextView) hView.findViewById(R.id.gift_value);
 			hView.setTag(holder);
-
-			// imageView = new ImageView(getContext());
-			// imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-			// imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-			// imageView.setPadding(3, 3, 3, 3);
-			// imageView.setBackgroundResource(R.drawable.image_border);
 		}
 		Gift gift = getItem(position);
 		ViewHolder holder = (ViewHolder) hView.getTag();

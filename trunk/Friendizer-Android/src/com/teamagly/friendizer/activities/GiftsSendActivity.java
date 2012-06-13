@@ -52,6 +52,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.gifts_layout);
+		destUser = ((User) getIntent().getSerializableExtra("user"));
 		gridView = (GridView) findViewById(R.id.gridview);
 		giftsList = new ArrayList<Gift>();
 		activity = this;
