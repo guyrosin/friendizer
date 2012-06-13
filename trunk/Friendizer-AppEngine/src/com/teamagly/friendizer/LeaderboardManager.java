@@ -34,8 +34,6 @@ public class LeaderboardManager extends HttpServlet {
 					throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
 
-
-
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
 		Query query = pm.newQuery(Message.class);
