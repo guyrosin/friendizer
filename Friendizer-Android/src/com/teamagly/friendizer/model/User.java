@@ -146,18 +146,33 @@ public class User implements Serializable {
     }
 
     /**
-     * @return the value
+     * @return the points
      */
-    public long getValue() {
-	return fz.value;
+    public long getPoints() {
+	return fz.points;
     }
 
     /**
-     * @param value
-     *            the value to set
+     * @param points
+     *            the points to set
      */
-    public void setValue(long value) {
-	this.fz.value = value;
+    public void setPoints(long points) {
+	this.fz.points = points;
+    }
+    
+    /**
+     * @return the level
+     */
+    public long getLevel() {
+	return fz.level;
+    }
+
+    /**
+     * @param level
+     *            the level to set
+     */
+    public void setLevel(int level) {
+	this.fz.points = level;
     }
 
     /**

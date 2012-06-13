@@ -13,7 +13,8 @@ import com.google.android.maps.GeoPoint;
 public class FriendizerUser implements Serializable {
 
     long id = 0;
-    long value = 0;
+    long points = 0;
+    int level = 0;
     long money = 0;
     long ownerID = 0;
     FriendizerUser[] ownsList = {};
@@ -35,7 +36,8 @@ public class FriendizerUser implements Serializable {
      */
     public FriendizerUser(JSONObject obj) throws JSONException {
 	id = obj.getLong("id");
-	value = obj.getLong("value");
+	points = obj.getLong("points");
+	level = obj.getInt("level");
 	money = obj.getLong("money");
 	ownerID = obj.getLong("owner");
 	latitude = obj.getDouble("latitude");
@@ -58,7 +60,8 @@ public class FriendizerUser implements Serializable {
      */
     public FriendizerUser(FriendizerUser fzUser) {
 	id = fzUser.id;
-	value = fzUser.value;
+	points = fzUser.points;
+	level = fzUser.level;
 	money = fzUser.money;
 	ownerID = fzUser.ownerID;
 	ownsList = fzUser.ownsList;
@@ -74,7 +77,8 @@ public class FriendizerUser implements Serializable {
 	JSONObject obj = new JSONObject();
 	try {
 	    obj.put("id", id);
-	    obj.put("value", value);
+	    obj.put("points", points);
+	    obj.put("level", level);
 	    obj.put("money", money);
 	    obj.put("owner", ownerID);
 	    obj.put("latitude", latitude);
@@ -116,19 +120,34 @@ public class FriendizerUser implements Serializable {
     }
 
     /**
-     * @return the value
+     * @return the points
      */
-    public long getValue() {
-	return value;
+    public long getPoints() {
+	return points;
     }
 
     /**
-     * @param value
-     *            the value to set
+     * @param points
+     *            the points to set
      */
-    public void setValue(long value) {
-	this.value = value;
+    public void setPoints(long points) {
+	this.points = points;
     }
+    
+    /**
+     * @return the level
+     */
+    public int getLevel() {
+		return level;
+	}
+    
+    /**
+     * @param level
+     *            the level to set
+     */
+    public void setLevel(int level) {
+		this.level = level;
+	}
 
     /**
      * @return the money

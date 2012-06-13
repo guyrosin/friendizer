@@ -53,9 +53,9 @@ public class FriendsListAdapter extends FriendsAdapter {
 	holder.age.setText(userInfo.getAge());
 	if (userInfo.getAge().length() == 0)
 	    holder.ageTitle.setText("");
-	if (userInfo.getValue() > 0) // If value==0 don't show it (it means the user object still isn't loaded)
-	    holder.value.setText(String.valueOf(userInfo.getValue()));
-	if (userInfo.getValue() > 0) // If matching==0 don't show it
+	if (userInfo.getPoints() > 0) // If value==0 don't show it (it means the user object still isn't loaded)
+	    holder.value.setText(String.valueOf(userInfo.getPoints()));
+	if (userInfo.getPoints() > 0) // If matching==0 don't show it
 	    holder.matching.setText(String.valueOf(userInfo.getMatching()));
 	return hView;
     }

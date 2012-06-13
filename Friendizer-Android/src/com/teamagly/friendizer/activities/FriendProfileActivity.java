@@ -172,7 +172,7 @@ public class FriendProfileActivity extends SherlockActivity {
 	}
 
 	protected void updateFriendizerViews() {
-		txtValue.setText(String.valueOf(userInfo.getValue()));
+		txtValue.setText(String.valueOf(userInfo.getPoints()));
 		if (userInfo.getOwnsList() != null)
 			txtOwns.setText(String.valueOf(userInfo.getOwnsList().length));
 		if (userInfo.getStatus().length() > 0) {
