@@ -4,64 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/buttons"
-        style="@android:style/ButtonBar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal" >
-
-        <com.teamagly.friendizer.widgets.SegmentedRadioGroup
-            android:id="@+id/segment_text"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:checkedButton="@+id/button_one"
-            android:orientation="horizontal"
-            android:weightSum="3" >
-
-            <RadioButton
-                android:id="@id/button_one"
-                android:layout_weight="1"
-                android:button="@null"
-                android:gravity="center"
-                android:minHeight="33dip"
-                android:minWidth="40dip"
-                android:text="Info"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/radio_colors"
-                android:width="0dp" />
-
-            <RadioButton
-                android:id="@+id/button_two"
-                android:layout_weight="1"
-                android:button="@null"
-                android:gravity="center"
-                android:minHeight="33dip"
-                android:minWidth="40dip"
-                android:text="Achievements"
-                android:maxLines="1"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/radio_colors"
-                android:width="0dp" />
-
-            <RadioButton
-                android:id="@+id/button_three"
-                android:layout_weight="1"
-                android:button="@null"
-                android:gravity="center"
-                android:minHeight="33dip"
-                android:minWidth="40dip"
-                android:text="History"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/radio_colors"
-                android:width="0dp" />
-        </com.teamagly.friendizer.widgets.SegmentedRadioGroup>
-    </LinearLayout>
-
     <FrameLayout
         android:id="@+id/content"
         android:layout_width="fill_parent"

@@ -1,210 +1,287 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:fillViewport="true"
+    android:orientation="vertical"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp" >
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:fillViewport="true"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="4dp" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp" >
+            android:paddingBottom="15dp"
+            android:paddingTop="8dp" >
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="10dip"
-                android:textSize="19dip" />
-
-            <RelativeLayout
+            <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
+                android:id="@+id/image_layout"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="14dp" >
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:orientation="vertical" >
 
                 <ImageView
                     android:id="@+id/user_pic"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentTop="true"
-                    android:contentDescription="Profile Picture"
-                    android:src="@drawable/status_icon" />
+                    android:contentDescription="Profile Picture" />
 
                 <TextView
-                    android:id="@+id/status"
+                    android:id="@+id/level"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/user_pic"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="20dp"
-                    android:textSize="15sp" />
+                    android:paddingTop="5dp"
+                    android:text="Level 3"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
-                <TextView
-                    android:id="@+id/gender"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/status"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_toRightOf="@+id/user_pic" />
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="8dp"
+                android:layout_toRightOf="@+id/image_layout"
+                android:paddingBottom="5dp"
+                android:text="Guy R"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/age_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/status"
-                    android:layout_toRightOf="@+id/gender"
-                    android:text=", age: " />
+            <TextView
+                android:id="@+id/age"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/name"
+                android:layout_marginRight="8dp"
+                android:paddingBottom="5dp" />
 
-                <TextView
-                    android:id="@+id/age"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/status"
-                    android:layout_toRightOf="@+id/age_title"
-                    android:text="21" />
+            <TextView
+                android:id="@+id/gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/age"
+                android:layout_toRightOf="@+id/age" />
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/age"
+                android:paddingBottom="5dp"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/mutual_friends"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/age"
+                android:layout_below="@+id/status"
+                android:text="0" />
+
+            <TextView
+                android:id="@+id/mutual_friends_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/mutual_friends"
+                android:layout_toRightOf="@+id/mutual_friends"
+                android:text=" mutual friends" />
+
+            <ProgressBar
+                android:id="@+id/xp_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="20dp"
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/status"
+                android:indeterminateOnly="false"
+                android:max="100"
+                android:progressDrawable="@drawable/xp_bar_states" />
+        </RelativeLayout>
+
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:padding="8dp" >
+
+            <TableRow>
 
                 <TextView
                     android:id="@+id/value_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/gender"
-                    android:text="Value: " />
-
-                <TextView
-                    android:id="@+id/value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/gender"
-                    android:layout_toRightOf="@+id/value_title"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/matching"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/value"
-                    android:text="0" />
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="Value"
+                    android:textColor="@color/soft_grey" />
 
                 <TextView
                     android:id="@+id/matching_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/value"
-                    android:layout_toRightOf="@+id/matching"
-                    android:text="% match" />
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="Matching"
+                    android:textColor="@color/soft_grey" />
 
                 <TextView
                     android:id="@+id/owns_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/matching"
-                    android:text="Owns " />
-
-                <TextView
-                    android:id="@+id/owns"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/matching"
-                    android:layout_toRightOf="@+id/owns_title"
-                    android:text="" />
-
-                <TextView
-                    android:id="@+id/owns_cont"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/matching"
-                    android:layout_toRightOf="@+id/owns"
-                    android:text=" people" />
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="Owns"
+                    android:textColor="@color/soft_grey" />
 
                 <TextView
                     android:id="@+id/owner_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/owns"
-                    android:text="Owner: " />
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="Owner"
+                    android:textColor="@color/soft_grey" />
+            </TableRow>
+
+            <TableRow android:paddingTop="3dp" >
 
                 <TextView
-                    android:id="@+id/owner_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/owns"
-                    android:layout_toRightOf="@+id/owner_title"
-                    android:text="none" />
+                    android:id="@+id/value"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/mutual_friends"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignLeft="@+id/gender"
-                    android:layout_below="@+id/owner_title"
-                    android:text="0" />
+                    android:id="@+id/matching"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text="60%"
+                    android:textSize="18sp" />
 
                 <TextView
-                    android:id="@+id/mutual_friends_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/owner_title"
-                    android:layout_toRightOf="@+id/mutual_friends"
-                    android:text=" mutual friends" />
+                    android:id="@+id/owns"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textSize="18sp" />
 
                 <ImageView
                     android:id="@+id/owner_pic"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_alignTop="@+id/owner_title"
-                    android:layout_toRightOf="@+id/owner_name"
-                    android:paddingLeft="5dp" />
-            </RelativeLayout>
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.25"
+                    android:gravity="center" />
+            </TableRow>
+        </TableLayout>
 
-            <TableLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal" >
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/buttons_friend"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" >
 
-                <TableRow android:layout_marginBottom="-9dp" >
+            <TableRow android:layout_marginBottom="-1dp" >
 
-                    <Button
-                        android:id="@+id/btn1"
-                        style="@style/ButtonText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/button_top_selector"
-                        android:text="Buy"
-                        android:visibility="gone" />
-                </TableRow>
+                <Button
+                    android:id="@+id/btn_friend_chat"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_top_selector"
+                    android:text="Chat" />
+            </TableRow>
 
-                <TableRow>
+            <TableRow android:layout_marginBottom="-1dp" >
 
-                    <Button
-                        android:id="@+id/btn2"
-                        style="@style/ButtonText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="-3dip"
-                        android:background="@drawable/button_bottom_selector"
-                        android:text="Achievements"
-                        android:visibility="gone" />
-                </TableRow>
-            </TableLayout>
-        </LinearLayout>
-    </ScrollView>
+                <Button
+                    android:id="@+id/btn_friend_achievements"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_middle_selector"
+                    android:text="Achievements" />
+            </TableRow>
 
-</LinearLayout>
+            <TableRow>
+
+                <Button
+                    android:id="@+id/btn_friend_gift"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bottom_selector"
+                    android:text="Send a Gift" />
+            </TableRow>
+        </TableLayout>
+
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/buttons_stranger"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <TableRow android:layout_marginBottom="-1dp" >
+
+                <Button
+                    android:id="@+id/btn_stranger_buy"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_top_selector"
+                    android:text="Buy" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="-1dp" >
+
+                <Button
+                    android:id="@+id/btn_stranger_achievements"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_middle_selector"
+                    android:text="Achievements" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/btn_stranger_gift"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bottom_selector"
+                    android:text="Send a Gift" />
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+
+</ScrollView>

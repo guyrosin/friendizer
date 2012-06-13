@@ -3,23 +3,40 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.GridView;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.adapters.GiftsAdapter;
+import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
+import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class FBFriendsActivity extends SherlockFragmentActivity {
+public class GiftsUserActivity extends SherlockActivity {
+
+	private final String TAG = getClass().getName();
+	GiftsAdapter adapter;
+	protected GridView gridView;
+	protected List<Gift> giftsList;
+	protected User user;
+
 	/*
 	 * (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +45,39 @@ public class FBFriendsActivity extends SherlockFragmentActivity {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		setContentView(R.layout.fbfriends_layout);
+		setContentView(R.layout.gifts_layout);
+		gridView = (GridView) findViewById(R.id.gridview);
+		giftsList = new ArrayList<Gift>();
+		user = ((User) getIntent().getSerializableExtra("user"));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.app.Activity#onResume()
+	 */
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setSupportProgressBarIndeterminateVisibility(true);
+		adapter = new GiftsAdapter(this, 0, giftsList);
+		gridView.setAdapter(adapter);
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Gift[] gifts = ServerFacade.getUserGifts(user.getId());
+					giftsList = Arrays.asList(gifts);
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
+				}
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						adapter.notifyDataSetChanged();
+						setSupportProgressBarIndeterminateVisibility(false);
+					}
+				});
+			}
+		}).start();
 	}
 
 	/*
@@ -50,10 +99,16 @@ public class FBFriendsActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case android.R.id.home: // Move to the connections activity
-			Intent intent = new Intent(this, FriendizerActivity.class);
+		case android.R.id.home: // Move to the user's profile
+			Intent intent;
+			if (user.getId() == Utility.getInstance().userInfo.getId()) { // If the user is the current one
+				intent = new Intent(this, FriendizerActivity.class);
+				// intent.putExtra("tab", R.string.my_profile);
+			} else {
+				intent = new Intent(this, FriendProfileActivity.class);
+				intent.putExtra("user", user);
+			}
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra("tab", R.string.connections);
 			startActivity(intent);
 			return true;
 		case R.id.menu_refresh:

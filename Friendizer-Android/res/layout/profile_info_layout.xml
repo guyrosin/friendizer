@@ -8,18 +8,32 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="8dp" >
+        android:padding="8dp" >
 
-        <ImageView
-            android:id="@+id/user_pic"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/image_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="Profile Picture"
-            android:src="@drawable/status_icon" />
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <ImageView
+                android:id="@+id/user_pic"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:contentDescription="Profile Picture" />
+
+            <TextView
+                android:id="@+id/level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Level 3"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/name"
@@ -27,17 +41,20 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="8dp"
-            android:layout_toRightOf="@+id/user_pic"
+            android:layout_toRightOf="@+id/image_layout"
+            android:paddingBottom="5dp"
             android:text="Guy R"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/age"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/name"
+            android:layout_alignLeft="@+id/name"
+            android:layout_below="@+id/name"
             android:layout_marginRight="8dp"
-            android:layout_toRightOf="@+id/name" />
+            android:paddingBottom="5dp" />
 
         <TextView
             android:id="@+id/gender"
@@ -51,89 +68,149 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/name"
+            android:layout_below="@+id/age"
             android:paddingBottom="5dp"
-            android:paddingTop="5dp"
-            android:text="&quot;lolzzzz&quot;" />
+            android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/value_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ProgressBar
+            android:id="@+id/xp_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="20dp"
             android:layout_alignLeft="@+id/name"
             android:layout_below="@+id/status"
-            android:text="Value: " />
-
-        <TextView
-            android:id="@+id/value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/status"
-            android:layout_toRightOf="@+id/value_title"
-            android:text="0" />
-
-        <TextView
-            android:id="@+id/money_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/value"
-            android:text="Money: " />
-
-        <TextView
-            android:id="@+id/money"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/value"
-            android:layout_toRightOf="@+id/money_title"
-            android:text="20,000" />
-
-        <TextView
-            android:id="@+id/owns_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/money_title"
-            android:text="Owns: " />
-
-        <TextView
-            android:id="@+id/owns"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/money"
-            android:layout_toRightOf="@+id/owns_title"
-            android:text="0" />
-
-        <TextView
-            android:id="@+id/owns_cont"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/money"
-            android:layout_toRightOf="@+id/owns"
-            android:text=" people" />
-
-        <TextView
-            android:id="@+id/owner_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/owns"
-            android:text="Owner: " />
-
-        <TextView
-            android:id="@+id/owner_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/owns"
-            android:layout_toRightOf="@+id/owner_title"
-            android:text="none" />
-
-        <ImageView
-            android:id="@+id/owner_pic"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignTop="@+id/owner_title"
-            android:layout_toRightOf="@+id/owner_name" />
+            android:indeterminateOnly="false"
+            android:max="100"
+            android:progressDrawable="@drawable/xp_bar_states" />
     </RelativeLayout>
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp" >
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/value_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:gravity="center_horizontal"
+                android:text="Value"
+                android:textColor="@color/soft_grey" />
+
+            <TextView
+                android:id="@+id/money_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:gravity="center_horizontal"
+                android:text="Money"
+                android:textColor="@color/soft_grey" />
+
+            <TextView
+                android:id="@+id/owns_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:gravity="center_horizontal"
+                android:text="Owns"
+                android:textColor="@color/soft_grey" />
+
+            <TextView
+                android:id="@+id/owner_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.25"
+                android:gravity="center_horizontal"
+                android:text="Owner"
+                android:textColor="@color/soft_grey" />
+        </TableRow>
+
+        <TableRow android:paddingTop="3dp" >
+
+            <TextView
+                android:id="@+id/value"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.25"
+                android:gravity="center"
+                android:text="0"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/money"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.25"
+                android:gravity="center"
+                android:text="20,000"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/owns"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.25"
+                android:gravity="center"
+                android:text="0"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/owner_pic"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_weight="0.25"
+                android:gravity="center" />
+        </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/buttons"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="8dp" >
+
+        <TableRow android:layout_marginBottom="-1dp" >
+
+            <Button
+                android:id="@+id/btn_achievements"
+                style="@style/LeftAlignedButtonText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_top_selector"
+                android:text="@string/achievements" />
+        </TableRow>
+
+        <TableRow android:layout_marginBottom="-1dp" >
+
+            <Button
+                android:id="@+id/btn_gifts"
+                style="@style/LeftAlignedButtonText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_middle_selector"
+                android:text="@string/gifts" />
+        </TableRow>
+
+        <TableRow>
+
+            <Button
+                android:id="@+id/btn_action_history"
+                style="@style/LeftAlignedButtonText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_bottom_selector"
+                android:text="@string/action_history" />
+        </TableRow>
+    </TableLayout>
 
 </LinearLayout>

@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,50 +16,46 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ImageLoader.Type;
 import com.teamagly.friendizer.utils.BaseDialogListener;
+import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.widgets.SegmentedRadioGroup;
 
-public class FriendProfileActivity extends SherlockActivity {
+public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	private final String TAG = getClass().getName();
 	ActionBar actionBar;
-	SegmentedRadioGroup segmentedControl;
 	User userInfo;
 
 	private ImageView userPic;
 	private TextView txtName;
 	private TextView txtStatus;
 	private TextView txtAge;
-	private TextView txtAgeTitle;
 	private TextView txtGender;
 	private TextView txtValue;
 	private TextView txtMatching;
 	private TextView txtOwns;
-	private TextView txtOwnerName;
-	private ImageView txtOwnerPic;
+	private ImageView imgOwnerPic;
 	private TextView txtMutualFriends;
-	private Button btn1;
-	private Button btn2;
+	private TableLayout buttonsTable;
 	final Handler handler = new Handler();
+	boolean connectedFlag = false; // Whether I'm connected to this user
 
 	/*
 	 * (non-Javadoc)
@@ -71,21 +69,19 @@ public class FriendProfileActivity extends SherlockActivity {
 		setContentView(R.layout.friend_profile_layout);
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(false);
 
 		userPic = (ImageView) findViewById(R.id.user_pic);
 		txtName = (TextView) findViewById(R.id.name);
 		txtStatus = (TextView) findViewById(R.id.status);
 		txtAge = (TextView) findViewById(R.id.age);
-		txtAgeTitle = (TextView) findViewById(R.id.age_title);
 		txtGender = (TextView) findViewById(R.id.gender);
 		txtValue = (TextView) findViewById(R.id.value);
 		txtMatching = (TextView) findViewById(R.id.matching);
 		txtOwns = (TextView) findViewById(R.id.owns);
-		txtOwnerName = (TextView) findViewById(R.id.owner_name);
-		txtOwnerPic = (ImageView) findViewById(R.id.owner_pic);
+		imgOwnerPic = (ImageView) findViewById(R.id.owner_pic);
 		txtMutualFriends = (TextView) findViewById(R.id.mutual_friends);
-		btn1 = (Button) findViewById(R.id.btn1);
-		btn2 = (Button) findViewById(R.id.btn2);
+		buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
 
 		userInfo = (User) intent.getSerializableExtra("user");
 		if (userInfo == null) {
@@ -98,9 +94,8 @@ public class FriendProfileActivity extends SherlockActivity {
 				finish();
 			}
 		} else {
-			actionBar.setTitle(userInfo.getName());
+			// actionBar.setTitle(userInfo.getName());
 			updateViews();
-			updateButtons();
 		}
 	}
 
@@ -136,7 +131,7 @@ public class FriendProfileActivity extends SherlockActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
+		inflater.inflate(R.menu.friend_menu, menu);
 		return true;
 	}
 
@@ -147,8 +142,10 @@ public class FriendProfileActivity extends SherlockActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case android.R.id.home:
-			finish(); // Just go back
+		case android.R.id.home: // Move up to the main activity
+			Intent intent = new Intent(this, FriendizerActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 			return true;
 		case R.id.menu_refresh:
 			onResume();
@@ -156,10 +153,23 @@ public class FriendProfileActivity extends SherlockActivity {
 		case R.id.menu_settings: // Move to the settings activity
 			startActivity(new Intent(this, FriendsPrefs.class));
 			return true;
-		case R.id.menu_invite: // Show the Facebook invitation dialog
-			Bundle params = new Bundle();
-			params.putString("message", getString(R.string.invitation_msg));
-			Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
+		case R.id.menu_block: // Show a confirmation dialog
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Block " + userInfo.getName() + "?").setMessage("You'll automatically ignore every action from him")
+					.setCancelable(false).setPositiveButton("Block", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							try {
+								ServerFacade.block(Utility.getInstance().userInfo.getId(), userInfo.getId());
+							} catch (Exception e) {
+								Log.e(TAG, e.getMessage());
+							}
+						}
+					}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					}).setIcon(android.R.drawable.ic_dialog_alert);
+			builder.show();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -183,37 +193,54 @@ public class FriendProfileActivity extends SherlockActivity {
 	}
 
 	protected void updateFacebookViews() {
-		userPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(userInfo.getPicURL(), Type.ROUND_CORNERS));
+		ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
 		txtName.setText(userInfo.getName());
 		txtAge.setText(userInfo.getAge());
-		if (userInfo.getAge().length() == 0)
-			txtAgeTitle.setVisibility(View.GONE);
-		else
-			txtAgeTitle.setVisibility(View.VISIBLE);
 		if (userInfo.getGender().length() > 0) {
 			String genderStr = userInfo.getGender();
 			// Capitalize the first letter
-			txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
+			// txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
+			txtGender.setText(genderStr);
 		}
 	}
 
 	protected void updateButtons() {
-		btn1.setVisibility(View.VISIBLE);
-		if (userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) { // If I own this user
-			// Define the first button
-			btn1.setText("Chat");
-			btn1.setOnClickListener(new View.OnClickListener() {
+		if (connectedFlag) {
+			// Show the relevant buttons layout
+			buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
+			buttonsTable.setVisibility(View.VISIBLE);
+			findViewById(R.id.buttons_stranger).setVisibility(View.GONE);
+			// Define the chat button
+			findViewById(R.id.btn_friend_chat).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					// Move to the chat activity
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, ChatActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}
 			});
+			// Define the achievements button
+			findViewById(R.id.btn_friend_achievements).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, AchievementsActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
+			// Define the gift button
+			findViewById(R.id.btn_friend_gift).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsSendActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
 		} else {
-			// Define the first button
-			btn1.setText("Buy");
-			btn1.setOnClickListener(new View.OnClickListener() {
+			// Show the relevant buttons layout
+			buttonsTable = (TableLayout) findViewById(R.id.buttons_stranger);
+			buttonsTable.setVisibility(View.VISIBLE);
+			findViewById(R.id.buttons_friend).setVisibility(View.GONE);
+			// Define the buy button
+			findViewById(R.id.btn_stranger_buy).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					try {
 						ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
@@ -224,19 +251,25 @@ public class FriendProfileActivity extends SherlockActivity {
 					onResume(); // Refresh
 				}
 			});
+			// Define the achievements button
+			findViewById(R.id.btn_stranger_achievements).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					// Move to the chat activity
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendAchievementsActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
+			// Define the gift button
+			findViewById(R.id.btn_stranger_gift).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					// Move to the chat activity
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsSendActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
 		}
-
-		btn2.setVisibility(View.VISIBLE);
-		// Define the second button
-		btn2.setText("Achievements");
-		btn2.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				// Move to the achievements activity
-				Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendAchievementsActivity.class);
-				intent.putExtra("user", userInfo);
-				startActivity(intent);
-			}
-		});
 	}
 
 	/*
@@ -280,7 +313,7 @@ public class FriendProfileActivity extends SherlockActivity {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						actionBar.setTitle(userInfo.getName());
+						// actionBar.setTitle(userInfo.getName());
 						updateFacebookViews();
 					}
 				});
@@ -299,28 +332,25 @@ public class FriendProfileActivity extends SherlockActivity {
 		public void onComplete(final String response, final Object state) {
 			try {
 				JSONObject jsonObject = new JSONObject(response);
-
-				final String ownerNameStr = jsonObject.getString("name");
 				final String picURL = jsonObject.getString("picture");
 
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						txtOwnerName.setText(ownerNameStr);
-						txtOwnerPic.setImageBitmap(Utility.getInstance().imageLoader.getImage(picURL, Type.ROUND_CORNERS));
+						ImageLoader.getInstance().displayImage(picURL, imgOwnerPic);
 						// Add a listener for the owner's pic
-						txtOwnerPic.setOnClickListener(new OnClickListener() {
+						imgOwnerPic.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								Intent intent = null;
 								// Move to the owner's profile
 								if (userInfo.getOwnerID() != Utility.getInstance().userInfo.getId()) {
-									intent = new Intent().setClass(FriendProfileActivity.this, FriendProfileActivity.class);
+									intent = new Intent(v.getContext(), FriendProfileActivity.class);
 									intent.putExtra("userID", userInfo.getOwnerID());
 								} else {
 									// Move to my profile
-									intent = new Intent().setClass(v.getContext(), FriendizerActivity.class);
-									intent.putExtra("to", R.string.my_profile);
+									intent = new Intent(v.getContext(), FriendizerActivity.class);
+									intent.putExtra("tab", R.string.my_profile);
 								}
 								startActivity(intent);
 							}
@@ -358,6 +388,10 @@ public class FriendProfileActivity extends SherlockActivity {
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
 			}
+			// Check if I'm connected to this user
+			if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())
+					|| (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID()))
+				connectedFlag = true;
 			// Update the views
 			updateFriendizerViews();
 			updateButtons();

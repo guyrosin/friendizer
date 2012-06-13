@@ -4,11 +4,18 @@
 package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ListView;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -17,21 +24,21 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.adapters.AchievementsAdapter;
-import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.adapters.GiftsAdapter;
+import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class FriendAchievementsActivity extends SherlockActivity {
+public class GiftsSendActivity extends SherlockActivity implements OnItemClickListener {
 
 	private final String TAG = getClass().getName();
-	ActionBar actionBar;
-	AchievementsAdapter adapter;
-	ArrayList<Achievement> achievements = new ArrayList<Achievement>();
-	ListView listView;
-	User userInfo;
+	GiftsAdapter adapter;
+	protected GridView gridView;
+	protected List<Gift> giftsList;
+	protected User destUser;
+	protected GiftsSendActivity activity;
 
 	/*
 	 * (non-Javadoc)
@@ -41,51 +48,72 @@ public class FriendAchievementsActivity extends SherlockActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.achievements_layout);
-		actionBar = getSupportActionBar();
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		listView = (ListView) findViewById(R.id.achievements_list);
-		userInfo = (User) getIntent().getSerializableExtra("user");
-		actionBar.setTitle(userInfo.getName());
+		setContentView(R.layout.gifts_layout);
+		gridView = (GridView) findViewById(R.id.gridview);
+		giftsList = new ArrayList<Gift>();
+		activity = this;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onResume()
+	 * @see android.app.Activity#onResume()
 	 */
 	@Override
-	public void onResume() {
+	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		achievements.clear();
-		adapter = new AchievementsAdapter(this, R.layout.achievements_list_item, achievements);
-		listView.setAdapter(adapter);
-
-		// Get the user's achievements in the background
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Achievement[] achvs = ServerFacade.getAchievements(userInfo.getId());
-					for (Achievement achv : achvs)
-						achievements.add(achv);
+					Gift[] gifts = ServerFacade.getAllGifts();
+					giftsList = Arrays.asList(gifts);
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage());
 				}
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						adapter.notifyDataSetChanged();
+						adapter = new GiftsAdapter(activity, 0, giftsList);
+						gridView.setAdapter(adapter);
+						gridView.setOnItemClickListener(activity);
 						setSupportProgressBarIndeterminateVisibility(false);
 					}
 				});
 			}
 		}).start();
-
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.actionbarsherlock.app.SherlockActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
+	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
+	 */
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+		final Gift gift = giftsList.get(position);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?")
+				.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						try {
+							ServerFacade.sendGift(Utility.getInstance().userInfo.getId(), destUser.getId(), gift.getId());
+						} catch (Exception e) {
+							Log.e(TAG, e.getMessage());
+						}
+					}
+				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+		builder.show();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.SherlockFragmentActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -97,7 +125,7 @@ public class FriendAchievementsActivity extends SherlockActivity {
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.actionbarsherlock.app.SherlockActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
+	 * @see com.actionbarsherlock.app.SherlockFragmentActivity#onOptionsItemSelected(com.actionbarsherlock.view.MenuItem)
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -105,7 +133,7 @@ public class FriendAchievementsActivity extends SherlockActivity {
 		case android.R.id.home: // Move to the user's profile
 			Intent intent = new Intent(this, FriendProfileActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra("user", userInfo);
+			intent.putExtra("user", destUser);
 			startActivity(intent);
 			return true;
 		case R.id.menu_refresh:
@@ -123,5 +151,4 @@ public class FriendAchievementsActivity extends SherlockActivity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
 }
