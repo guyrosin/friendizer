@@ -65,7 +65,7 @@ public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayI
 	} else {
 	    // Move to my profile
 	    intent = new Intent().setClass(c, FriendizerActivity.class);
-	    intent.putExtra("to", R.string.my_profile);
+	    intent.putExtra("tab", R.string.my_profile);
 	}
 	c.startActivity(intent);
 	return true;

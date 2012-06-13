@@ -28,7 +28,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.teamagly.friendizer.activities.AchievementsActivity;
 import com.teamagly.friendizer.activities.ChatActivity;
+import com.teamagly.friendizer.activities.FriendizerActivity;
+import com.teamagly.friendizer.activities.GiftsUserActivity;
 import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.User;
 
@@ -38,22 +41,53 @@ import com.teamagly.friendizer.model.User;
 public class MessageHandler {
 	private final static String TAG = "MessageHandler";
 
+	public static enum NotificationType {
+		MSG,
+		BUY,
+		GFT,
+		UPD,
+		ACH;
+	}
+
 	public void displayMessage(Context context, Intent intent) {
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
 			try {
 				JSONObject message = new JSONObject(extras.getString("message"));
 				long userID = message.getLong("userID");
-				User userInfo = new User();
-				userInfo.setId(userID);
-				String text = message.getString("text");
-				String type = message.getString("type");
-
-				if (type.equals("MSG")) { // Chat message
+				String text = message.optString("text");
+				NotificationType type = NotificationType.valueOf(message.getString("type"));
+				Log.d(TAG, "Got C2DM from" + userID + ", type=" + type);
+				if (type == NotificationType.MSG) { // Chat message
+					User userInfo = new User();
+					userInfo.setId(userID);
 					// Load the user's details from Facebook
 					Bundle params = new Bundle();
 					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new UserRequestListener(context,
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new ChatRequestListener(context,
+							userInfo, text));
+				} else if (type == NotificationType.ACH) { // Achievement earned
+					String title = message.optString("title");
+					// Show a status bar notification
+					Intent notificationIntent = new Intent(context, AchievementsActivity.class);
+					notificationIntent.putExtra("user", Utility.getInstance().userInfo);
+					Util.generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
+					playNotificationSound(context);
+				} else if (type == NotificationType.BUY) { // Bought by someone
+					User userInfo = new User();
+					userInfo.setId(userID);
+					// Load the user's details from Facebook
+					Bundle params = new Bundle();
+					params.putString("fields", "name, picture");
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new BoughtRequestListener(context,
+							userInfo, text));
+				} else if (type == NotificationType.BUY) { // Received a gift
+					User userInfo = new User();
+					userInfo.setId(userID);
+					// Load the user's details from Facebook
+					Bundle params = new Bundle();
+					params.putString("fields", "name");
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new GiftRequestListener(context,
 							userInfo, text));
 				}
 			} catch (JSONException e) {
@@ -73,15 +107,12 @@ public class MessageHandler {
 		}
 	}
 
-	/*
-	 * Callback for fetching user's details from Facebook
-	 */
-	public class UserRequestListener extends BaseRequestListener {
+	public class ChatRequestListener extends BaseRequestListener {
 		String text;
 		User userInfo;
 		Context context;
 
-		public UserRequestListener(Context context, User userInfo, String text) {
+		public ChatRequestListener(Context context, User userInfo, String text) {
 			this.text = text;
 			this.userInfo = userInfo;
 			this.context = context;
@@ -115,6 +146,70 @@ public class MessageHandler {
 						}
 					}
 				}, null, Activity.RESULT_CANCELED, null, null);
+			} catch (JSONException e) {
+				Log.e(TAG, "", e);
+			}
+		}
+	}
+
+	public class GiftRequestListener extends BaseRequestListener {
+		String text;
+		User userInfo;
+		Context context;
+
+		public GiftRequestListener(Context context, User userInfo, String text) {
+			this.text = text;
+			this.userInfo = userInfo;
+			this.context = context;
+		}
+
+		@Override
+		public void onComplete(final String response, final Object state) {
+			JSONObject jsonObject;
+			try {
+				jsonObject = new JSONObject(response);
+				final FacebookUser newUserInfo = new FacebookUser(jsonObject);
+				// Update the user's details from Facebook
+				userInfo.updateFacebookData(newUserInfo);
+
+				// Show a status bar notification
+				// TODO: put the gift ID in the intent...
+				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
+				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
+				Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent);
+				playNotificationSound(context);
+			} catch (JSONException e) {
+				Log.e(TAG, "", e);
+			}
+		}
+	}
+
+	public class BoughtRequestListener extends BaseRequestListener {
+		String text;
+		User userInfo;
+		Context context;
+
+		public BoughtRequestListener(Context context, User userInfo, String text) {
+			this.text = text;
+			this.userInfo = userInfo;
+			this.context = context;
+		}
+
+		@Override
+		public void onComplete(final String response, final Object state) {
+			JSONObject jsonObject;
+			try {
+				jsonObject = new JSONObject(response);
+				final FacebookUser newUserInfo = new FacebookUser(jsonObject);
+				// Update the user's details from Facebook
+				userInfo.updateFacebookData(newUserInfo);
+
+				// Show a status bar notification
+				// TODO: should redirect to the buyer's profile
+				Intent notificationIntent = new Intent(context, FriendizerActivity.class);
+				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
+				Util.generateNotification(context, "You've been bought by " + userInfo.getName(), notificationIntent);
+				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);
 			}

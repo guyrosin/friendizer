@@ -12,26 +12,22 @@ import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.AchievementsAdapter;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class FriendAchievementsActivity extends SherlockActivity {
+public class AchievementsActivity extends SherlockActivity {
 
 	private final String TAG = getClass().getName();
-	ActionBar actionBar;
 	AchievementsAdapter adapter;
 	ArrayList<Achievement> achievements = new ArrayList<Achievement>();
 	ListView listView;
-	User userInfo;
+	ActionBar actionBar;
+	protected User user;
 
 	/*
 	 * (non-Javadoc)
@@ -40,32 +36,32 @@ public class FriendAchievementsActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.achievements_layout);
+		user = ((User) getIntent().getSerializableExtra("user"));
 		actionBar = getSupportActionBar();
+		actionBar.setTitle(user.getName());
 		actionBar.setDisplayHomeAsUpEnabled(true);
+		setContentView(R.layout.achievements_layout);
 		listView = (ListView) findViewById(R.id.achievements_list);
-		userInfo = (User) getIntent().getSerializableExtra("user");
-		actionBar.setTitle(userInfo.getName());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onResume()
+	 * @see android.app.Activity#onResume()
 	 */
 	@Override
-	public void onResume() {
+	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
+		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one
+			actionBar.setTitle("My Achievements");
 		achievements.clear();
 		adapter = new AchievementsAdapter(this, R.layout.achievements_list_item, achievements);
 		listView.setAdapter(adapter);
 
-		// Get the user's achievements in the background
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Achievement[] achvs = ServerFacade.getAchievements(userInfo.getId());
+					Achievement[] achvs = ServerFacade.getAchievements(user.getId());
 					for (Achievement achv : achvs)
 						achievements.add(achv);
 				} catch (Exception e) {
@@ -80,19 +76,6 @@ public class FriendAchievementsActivity extends SherlockActivity {
 				});
 			}
 		}).start();
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.actionbarsherlock.app.SherlockActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
-	 */
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		MenuInflater inflater = getSupportMenuInflater();
-		inflater.inflate(R.menu.main_menu, menu);
-		return true;
 	}
 
 	/*
@@ -103,21 +86,16 @@ public class FriendAchievementsActivity extends SherlockActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home: // Move to the user's profile
-			Intent intent = new Intent(this, FriendProfileActivity.class);
+			Intent intent;
+			if (user.getId() == Utility.getInstance().userInfo.getId()) { // If the user is the current one
+				intent = new Intent(this, FriendizerActivity.class);
+				// intent.putExtra("tab", R.string.my_profile);
+			} else {
+				intent = new Intent(this, FriendProfileActivity.class);
+				intent.putExtra("user", user);
+			}
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra("user", userInfo);
 			startActivity(intent);
-			return true;
-		case R.id.menu_refresh:
-			onResume();
-			return true;
-		case R.id.menu_settings: // Move to the settings activity
-			startActivity(new Intent(this, FriendsPrefs.class));
-			return true;
-		case R.id.menu_invite: // Show the Facebook invitation dialog
-			Bundle params = new Bundle();
-			params.putString("message", getString(R.string.invitation_msg));
-			Utility.getInstance().facebook.dialog(this, "apprequests", params, new BaseDialogListener());
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

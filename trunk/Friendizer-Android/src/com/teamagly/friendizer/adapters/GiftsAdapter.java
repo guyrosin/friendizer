@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.teamagly.friendizer.adapters;
 
 import java.util.List;
@@ -17,60 +14,56 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.model.Gift;
 
-public class AchievementsAdapter extends ArrayAdapter<Achievement> {
+public class GiftsAdapter extends ArrayAdapter<Gift> {
 	private final String TAG = getClass().getName();
-	protected static LayoutInflater inflater = null;
 
-	public AchievementsAdapter(Context context, int textViewResourceId, List<Achievement> objects) {
+	protected LayoutInflater inflater;
+	protected List<Gift> giftsList;
+
+	public GiftsAdapter(Context context, int textViewResourceId, List<Gift> objects) {
 		super(context, textViewResourceId, objects);
+		giftsList = objects;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.widget.ArrayAdapter#getView(int, android.view.View, android.view.ViewGroup)
-	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View hView = convertView;
 		if (convertView == null) {
-			hView = inflater.inflate(R.layout.achievements_list_item, null);
+			hView = inflater.inflate(R.layout.gift_item_layout, null);
 			ViewHolder holder = new ViewHolder();
-			holder.icon = (ImageView) hView.findViewById(R.id.achievement_icon);
-			holder.title = (TextView) hView.findViewById(R.id.achievement_title);
-			holder.description = (TextView) hView.findViewById(R.id.achievement_description);
-			holder.reward = (TextView) hView.findViewById(R.id.achievement_reward);
+			holder.icon = (ImageView) hView.findViewById(R.id.gift_icon);
+			holder.value = (TextView) hView.findViewById(R.id.gift_value);
 			hView.setTag(holder);
-		}
 
-		Achievement achievement = getItem(position);
+			// imageView = new ImageView(getContext());
+			// imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
+			// imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			// imageView.setPadding(3, 3, 3, 3);
+			// imageView.setBackgroundResource(R.drawable.image_border);
+		}
+		Gift gift = getItem(position);
 		ViewHolder holder = (ViewHolder) hView.getTag();
 
 		// Load the image resource
-		String uri = "drawable/" + achievement.getIconRes();
+		String uri = "drawable/" + gift.getIconRes();
 		int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
 		try {
 			Drawable image = getContext().getResources().getDrawable(imageResource);
-			if (!achievement.isEarned()) // If the achievement is earned, display a grayscale icon
-				image = Utility.convertToGrayscale(image);
 			holder.icon.setImageDrawable(image);
 		} catch (NotFoundException e) { // The image wasn't found
 			Log.e(TAG, e.getMessage());
 		}
 
-		holder.title.setText(achievement.getTitle());
-		holder.description.setText(achievement.getDescription());
-		holder.reward.setText(String.valueOf(achievement.getReward()));
+		holder.value.setText(String.valueOf(gift.getValue()));
 		return hView;
 	}
 
 	class ViewHolder {
 		ImageView icon;
-		TextView title;
-		TextView description;
-		TextView reward;
+		TextView name;
+		TextView value;
 	}
 }

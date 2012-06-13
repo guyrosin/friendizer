@@ -18,13 +18,14 @@ import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.utils.Utility;
 
-public class AchievementsAdapter extends ArrayAdapter<Achievement> {
+public class ActionsAdapter extends ArrayAdapter<Action> {
 	private final String TAG = getClass().getName();
 	protected static LayoutInflater inflater = null;
 
-	public AchievementsAdapter(Context context, int textViewResourceId, List<Achievement> objects) {
+	public ActionsAdapter(Context context, int textViewResourceId, List<Action> objects) {
 		super(context, textViewResourceId, objects);
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -36,8 +37,8 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View hView = convertView;
-		if (convertView == null) {
-			hView = inflater.inflate(R.layout.achievements_list_item, null);
+		/*if (convertView == null) {
+			hView = inflater.inflate(R.layout.action_item, null);
 			ViewHolder holder = new ViewHolder();
 			holder.icon = (ImageView) hView.findViewById(R.id.achievement_icon);
 			holder.title = (TextView) hView.findViewById(R.id.achievement_title);
@@ -46,24 +47,24 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 			hView.setTag(holder);
 		}
 
-		Achievement achievement = getItem(position);
+		Action action = getItem(position);
 		ViewHolder holder = (ViewHolder) hView.getTag();
 
 		// Load the image resource
-		String uri = "drawable/" + achievement.getIconRes();
+		String uri = "drawable/" + action.getIconRes();
 		int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
 		try {
 			Drawable image = getContext().getResources().getDrawable(imageResource);
-			if (!achievement.isEarned()) // If the achievement is earned, display a grayscale icon
+			if (!action.isEarned()) // If the achievement is earned, display a grayscale icon
 				image = Utility.convertToGrayscale(image);
 			holder.icon.setImageDrawable(image);
 		} catch (NotFoundException e) { // The image wasn't found
 			Log.e(TAG, e.getMessage());
 		}
 
-		holder.title.setText(achievement.getTitle());
-		holder.description.setText(achievement.getDescription());
-		holder.reward.setText(String.valueOf(achievement.getReward()));
+		holder.title.setText(action.getTitle());
+		holder.description.setText(action.getDescription());
+		holder.reward.setText(String.valueOf(action.getReward()));*/
 		return hView;
 	}
 

@@ -26,7 +26,7 @@ public class DashboardActivity extends Activity {
 	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
 	    public void onClick(View view) {
 		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-		intent.putExtra("to", R.string.my_profile);
+		intent.putExtra("tab", R.string.my_profile);
 		startActivity(intent);
 	    }
 
@@ -36,7 +36,7 @@ public class DashboardActivity extends Activity {
 	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
 	    public void onClick(View view) {
 		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-		intent.putExtra("to", R.string.my_profile);
+		intent.putExtra("tab", R.string.my_profile);
 		startActivity(intent);
 	    }
 
@@ -46,7 +46,7 @@ public class DashboardActivity extends Activity {
 	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
 	    public void onClick(View view) {
 		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-		intent.putExtra("to", R.string.my_profile);
+		intent.putExtra("tab", R.string.my_profile);
 		startActivity(intent);
 	    }
 
@@ -56,7 +56,7 @@ public class DashboardActivity extends Activity {
 	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
 	    public void onClick(View view) {
 		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-		intent.putExtra("to", R.string.my_profile);
+		intent.putExtra("tab", R.string.my_profile);
 		startActivity(intent);
 	    }
 
@@ -66,7 +66,7 @@ public class DashboardActivity extends Activity {
 	findViewById(R.id.home_btn_me).setOnClickListener(new OnClickListener() {
 	    public void onClick(View view) {
 		Intent intent = new Intent(getBaseContext(), FriendizerActivity.class);
-		intent.putExtra("to", R.string.my_profile);
+		intent.putExtra("tab", R.string.my_profile);
 		startActivity(intent);
 	    }
 
