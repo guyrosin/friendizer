@@ -85,7 +85,7 @@ public class AbuseControl extends HttpServlet {
 		query.closeAll();
 		JSONArray blockedArray = new JSONArray();
 		for (User user : blocked)
-			blockedArray.put(user);
+			blockedArray.put(user.toJSONObject());
 		pm.close();
 		response.getWriter().println(blockedArray);
 	}

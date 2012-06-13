@@ -3,12 +3,12 @@ package com.teamagly.friendizer.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.teamagly.friendizer.Notifications.notificationType;
+import com.teamagly.friendizer.Notifications.NotificationType;
 
 public class AchievementNotification extends Notification {
 	
 	
-	private String tilte;
+	private String title;
 	
 	private String iconRes;
 	
@@ -19,8 +19,8 @@ public class AchievementNotification extends Notification {
 	
 	
 	public AchievementNotification(Achievement achievement, long source, String text) {
-		super(source,text,notificationType.ACH);
-		tilte = achievement.getTitle();
+		super(source,text,NotificationType.ACH);
+		title = achievement.getTitle();
 		iconRes = achievement.getIconRes();
 	}
 	
@@ -29,7 +29,7 @@ public class AchievementNotification extends Notification {
 		c2dm.put("userID", source);
 		c2dm.put("text", text);
 		c2dm.put("type", type);
-		c2dm.put("tilte", tilte);
+		c2dm.put("title", title);
 		c2dm.put("iconRes", iconRes);
 		return c2dm.toString();
 	}
@@ -45,12 +45,12 @@ public class AchievementNotification extends Notification {
 
 
 	public String getTilte() {
-		return tilte;
+		return title;
 	}
 
 
 	public void setTilte(String tilte) {
-		this.tilte = tilte;
+		this.title = tilte;
 	}
 
 }
