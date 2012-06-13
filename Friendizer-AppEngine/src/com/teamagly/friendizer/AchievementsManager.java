@@ -10,10 +10,8 @@ import javax.servlet.http.*;
 import org.json.JSONArray;
 
 import com.google.android.c2dm.server.PMF;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserAchievement;
+
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class AchievementsManager extends HttpServlet {

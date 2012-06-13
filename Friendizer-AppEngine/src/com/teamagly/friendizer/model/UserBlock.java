@@ -3,7 +3,7 @@ package com.teamagly.friendizer.model;
 import javax.jdo.annotations.*;
 
 @PersistenceCapable
-public class UserGift {
+public class UserBlock {
 	@SuppressWarnings("unused")
 	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
@@ -13,11 +13,11 @@ public class UserGift {
 	private long userID;
 	
 	@Persistent
-	private long giftID;
+	private long blockedID;
 
-	public UserGift(long userID, long giftID) {
+	public UserBlock(long userID, long blockedID) {
 		this.userID = userID;
-		this.giftID = giftID;
+		this.blockedID = blockedID;
 	}
 
 	public long getUserID() {
@@ -28,11 +28,11 @@ public class UserGift {
 		this.userID = userID;
 	}
 
-	public long getGiftID() {
-		return giftID;
+	public long getBlockedID() {
+		return blockedID;
 	}
 
-	public void setGiftID(long giftID) {
-		this.giftID = giftID;
+	public void setBlockedID(long blockedID) {
+		this.blockedID = blockedID;
 	}
 }

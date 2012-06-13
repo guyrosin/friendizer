@@ -1,7 +1,5 @@
 package com.teamagly.friendizer.model;
 
-import java.text.SimpleDateFormat;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

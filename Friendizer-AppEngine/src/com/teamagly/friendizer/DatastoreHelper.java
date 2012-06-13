@@ -21,6 +21,7 @@ public class DatastoreHelper {
 		return instance;
 	}
 
+	@SuppressWarnings("unchecked")
 	public DeviceInfo getDeviceInfo(long id) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(DeviceInfo.class);

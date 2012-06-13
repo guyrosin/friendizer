@@ -1,11 +1,8 @@
 package com.teamagly.friendizer.model;
 
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.jdo.annotations.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 @PersistenceCapable
 public class Gift {
