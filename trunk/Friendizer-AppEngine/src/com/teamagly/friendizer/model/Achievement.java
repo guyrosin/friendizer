@@ -19,13 +19,17 @@ public class Achievement {
     
 	@Persistent
 	private int reward;
+	
+	@Persistent
+	private long points;
 
-	public Achievement(long id, String title, String description, String iconRes, int reward) {
+	public Achievement(long id, String title, String description, String iconRes, int reward, long points) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
 		this.iconRes = iconRes;
 		this.reward = reward;
+		this.points = points;
 	}
 
 	public long getId() {
@@ -66,5 +70,13 @@ public class Achievement {
 
 	public void setReward(int reward) {
 		this.reward = reward;
+	}
+	
+	public long getPoints() {
+		return points;
+	}
+	
+	public void setPoints(long points) {
+		this.points = points;
 	}
 }

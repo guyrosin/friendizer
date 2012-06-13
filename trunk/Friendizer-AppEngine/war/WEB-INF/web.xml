@@ -141,6 +141,16 @@
 	    <url-pattern>/blockList</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+	    <servlet-name>TempServlet</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.TempServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>TempServlet</servlet-name>
+	    <url-pattern>/temp</url-pattern>
+	</servlet-mapping>
+	
 		<servlet>
 	    <servlet-name>LeaderboardManager</servlet-name>
 	    <servlet-class>com.teamagly.friendizer.LeaderboardManager</servlet-class>

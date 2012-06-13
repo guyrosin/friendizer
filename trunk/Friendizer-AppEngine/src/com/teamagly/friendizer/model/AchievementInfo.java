@@ -17,7 +17,8 @@ public class AchievementInfo {
 		String description = obj.getString("description");
 		String iconRes = obj.getString("iconRes");
 		int reward = obj.getInt("reward");
-		achv = new Achievement(id, title, description, iconRes, reward);
+		long points = obj.getLong("points");
+		achv = new Achievement(id, title, description, iconRes, reward, points);
 		earned = obj.getBoolean("earned");
 	}
 
@@ -45,6 +46,7 @@ public class AchievementInfo {
 			obj.put("description", achv.getDescription());
 			obj.put("iconRes", achv.getIconRes());
 			obj.put("reward", achv.getReward());
+			obj.put("points", achv.getPoints());
 			obj.put("earned", earned);
 		} catch (JSONException e) {
 		}
