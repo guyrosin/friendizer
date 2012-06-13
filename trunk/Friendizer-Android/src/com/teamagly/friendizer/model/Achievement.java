@@ -16,6 +16,8 @@ public class Achievement {
     private String iconRes;
 
     private int reward;
+    
+    private long points;
 
     public boolean earned;
 
@@ -25,6 +27,7 @@ public class Achievement {
 	description = obj.getString("description");
 	iconRes = obj.getString("iconRes");
 	reward = obj.getInt("reward");
+	points = obj.getLong("points");
 	earned = obj.getBoolean("earned");
     }
 
@@ -36,6 +39,7 @@ public class Achievement {
 	    obj.put("description", description);
 	    obj.put("iconRes", iconRes);
 	    obj.put("reward", reward);
+	    obj.put("points", points);
 	    obj.put("earned", earned);
 	} catch (JSONException e) {
 	}
@@ -86,6 +90,14 @@ public class Achievement {
     public void setReward(int reward) {
 	this.reward = reward;
     }
+    
+    public long getPoints() {
+		return points;
+	}
+    
+    public void setPoints(long points) {
+		this.points = points;
+	}
 
     /**
      * @return the earned

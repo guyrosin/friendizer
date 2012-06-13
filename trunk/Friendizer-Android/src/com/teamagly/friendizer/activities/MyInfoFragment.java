@@ -198,7 +198,7 @@ public class MyInfoFragment extends SherlockFragment {
 
     protected void updateFriendizerViews() {
 	User userInfo = Utility.getInstance().userInfo;
-	value.setText(String.valueOf(userInfo.getValue()));
+	value.setText(String.valueOf(userInfo.getPoints()));
 	money.setText(String.valueOf(userInfo.getMoney()));
 	if (userInfo.getStatus().length() > 0) {
 	    status.setText("\"" + userInfo.getStatus() + "\"");

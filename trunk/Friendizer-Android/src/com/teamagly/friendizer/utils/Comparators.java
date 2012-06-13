@@ -19,7 +19,7 @@ public class Comparators {
     public class ValueComparator implements Comparator<User> {
 	@Override
 	public int compare(User u1, User u2) {
-	    return -((Long) u1.getValue()).compareTo(u2.getValue()); // Descending order
+	    return -((Long) u1.getPoints()).compareTo(u2.getPoints()); // Descending order
 	}
     }
 
