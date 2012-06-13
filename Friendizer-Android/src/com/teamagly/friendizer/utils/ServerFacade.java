@@ -215,4 +215,21 @@ public final class ServerFacade {
     	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
     	in.close();
     }
+    
+    public static void block(long userID, long blockedID) throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "block?userID=" + userID + "&blockedID=" + blockedID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	in.close();
+    }
+    
+    public static FriendizerUser[] blockList(long userID) throws IOException, JSONException {
+    	URL url = new URL(fullServerAddress + "blockList?userID=" + userID);
+    	BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+    	JSONArray blocked = new JSONArray(in.readLine());
+    	in.close();
+    	FriendizerUser[] blockedArray = new FriendizerUser[blocked.length()];
+    	for (int i = 0; i < blocked.length(); i++)
+    	    blockedArray[i] = new FriendizerUser(blocked.getJSONObject(i));
+    	return blockedArray;
+    }
 }
