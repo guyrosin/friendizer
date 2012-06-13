@@ -129,5 +129,16 @@
 	    <url-pattern>/userGifts</url-pattern>
 	    <url-pattern>/sendGift</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+	    <servlet-name>AbuseControl</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.AbuseControl</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>AbuseControl</servlet-name>
+	    <url-pattern>/block</url-pattern>
+	    <url-pattern>/blockList</url-pattern>
+	</servlet-mapping>
 
 </web-app>

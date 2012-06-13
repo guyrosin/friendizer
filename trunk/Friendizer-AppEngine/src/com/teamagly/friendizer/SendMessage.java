@@ -12,13 +12,11 @@ package com.teamagly.friendizer;
 
 import com.google.android.c2dm.server.C2DMessaging;
 import com.google.android.c2dm.server.PMF;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.teamagly.friendizer.model.DeviceInfo;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
@@ -46,7 +44,7 @@ public class SendMessage {
 			log.info("sendMessage: message = " + message);
 
 			// ok = we sent to at least one device.
-			boolean ok = false;
+			//boolean ok = false;
 
 			// Send push message to phone
 			C2DMessaging push = C2DMessaging.get(context);

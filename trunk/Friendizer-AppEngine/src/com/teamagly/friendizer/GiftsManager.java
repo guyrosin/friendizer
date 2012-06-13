@@ -56,6 +56,7 @@ public class GiftsManager extends HttpServlet {
 		query.closeAll();
 		if (userGiftsID.isEmpty()) {
 			response.getWriter().println(new JSONArray());
+			pm.close();
 			return;
 		}
 		StringBuilder giftsFilter = new StringBuilder();
@@ -106,7 +107,7 @@ public class GiftsManager extends HttpServlet {
 		sender.setMoney(sender.getMoney() - gift.getValue());
 		pm.makePersistent(sender);
 		query = pm.newQuery(UserGift.class);
-		query.setFilter("userID == " + receiver.getId() + " && giftID == " + giftID);
+		query.setFilter("userID == " + receiverID + " && giftID == " + giftID);
 		List<UserGift> result3 = (List<UserGift>) query.execute();
 		query.closeAll();
 		if (result3.isEmpty())

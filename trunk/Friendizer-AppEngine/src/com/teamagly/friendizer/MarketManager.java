@@ -8,8 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import com.google.android.c2dm.server.PMF;
-import com.teamagly.friendizer.model.DeviceInfo;
-import com.teamagly.friendizer.model.User;
+
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class MarketManager extends HttpServlet {

@@ -5,23 +5,17 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import org.json.JSONArray;
 
 import com.google.android.c2dm.server.PMF;
-import com.restfb.Connection;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.teamagly.friendizer.model.DeviceInfo;
-import com.teamagly.friendizer.model.Like;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserMatching;
+
+import com.restfb.*;
+
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class UserManager extends HttpServlet{
@@ -30,7 +24,6 @@ public class UserManager extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
-		System.err.println(servlet.intern());
 		if (servlet.intern() == "login")
 			login(request, response);
 		else if (servlet.intern() == "userDetails")
@@ -42,12 +35,12 @@ public class UserManager extends HttpServlet{
 		else if (servlet.intern() == "matching")
 			matching(request, response);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		String accesToken = request.getParameter("accessToken");
-		String deviceRegistrationID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
+		//String deviceRegistrationID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
