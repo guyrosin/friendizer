@@ -11,6 +11,8 @@ import javax.jdo.annotations.PrimaryKey;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.teamagly.friendizer.Notifications;
+
 import java.util.Date;
 
 @PersistenceCapable
@@ -88,7 +90,7 @@ public class Message {
 		JSONObject c2dm = new JSONObject();
 		c2dm.put("userID", source);
 		c2dm.put("text", text);
-		c2dm.put("type", "MSG");
+		c2dm.put("type", Notifications.notificationType.MSG);
 		return c2dm.toString();
 	}
 
