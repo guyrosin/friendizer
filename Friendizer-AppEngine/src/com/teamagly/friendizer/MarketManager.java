@@ -43,12 +43,15 @@ public class MarketManager extends HttpServlet {
 			throw new ServletException("The user you want to buy doesn't exist");
 		if (buy.getOwner() == userID)
 			throw new ServletException("You already own the user you want to buy");
-		if (buyer.getMoney() < buy.getValue())
+		if (buyer.getMoney() < buy.getPoints())
 			throw new ServletException("You don't have enough money to buy this user");
-		buyer.setMoney(buyer.getMoney() - buy.getValue());
+		buyer.setMoney(buyer.getMoney() - buy.getPoints());
+		buyer.setPoints(buyer.getPoints() + 10);
+		// Check for level up
+		buyer.setLevel(Util.calculateLevel(buyer.getLevel(), buyer.getPoints()));
 		pm.makePersistent(buyer);
 		ActionsManager.madeBuy(userID, buyID);
-		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
+		AchievementsManager.userBoughtSomeone(buyer,getServletContext());
 		if (buy.getOwner() > 0) {
 			query = pm.newQuery(User.class);
 			query.setFilter("id == " + buy.getOwner());
@@ -56,11 +59,13 @@ public class MarketManager extends HttpServlet {
 			query.closeAll();
 			if (!result.isEmpty()) {
 				User preOwner = result.get(0);
-				preOwner.setMoney(preOwner.getMoney() + buy.getValue());
+				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 				pm.makePersistent(preOwner);
 			}
 		}
-		buy.setValue(buy.getValue() * 11 / 10);
+		buy.setPoints(buy.getPoints() + 20);
+		// Check for level up
+		buy.setLevel(Util.calculateLevel(buy.getLevel(), buy.getPoints()));
 		buy.setOwner(userID);
 		pm.makePersistent(buy);
 		AchievementsManager.userValueIncreased(buy, getServletContext());
