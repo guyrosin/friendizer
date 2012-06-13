@@ -98,7 +98,7 @@
                 android:layout_toRightOf="@+id/mutual_friends"
                 android:text=" mutual friends" />
 
-            <ProgressBar
+            <com.teamagly.friendizer.widgets.TextProgressBar
                 android:id="@+id/xp_bar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="fill_parent"
@@ -106,7 +106,6 @@
                 android:layout_alignLeft="@+id/name"
                 android:layout_below="@+id/status"
                 android:indeterminateOnly="false"
-                android:max="100"
                 android:progressDrawable="@drawable/xp_bar_states" />
         </RelativeLayout>
 

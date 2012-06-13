@@ -38,7 +38,12 @@ public class AchievementsActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		user = ((User) getIntent().getSerializableExtra("user"));
 		actionBar = getSupportActionBar();
-		actionBar.setTitle(user.getName());
+		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one
+			actionBar.setTitle("My Achievements");
+		else {
+			actionBar.setTitle(user.getName());
+			actionBar.setSubtitle("Achievements");
+		}
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.achievements_layout);
 		listView = (ListView) findViewById(R.id.achievements_list);
@@ -52,8 +57,6 @@ public class AchievementsActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one
-			actionBar.setTitle("My Achievements");
 		achievements.clear();
 		adapter = new AchievementsAdapter(this, R.layout.achievements_list_item, achievements);
 		listView.setAdapter(adapter);

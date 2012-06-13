@@ -17,7 +17,6 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +33,7 @@ import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.TextProgressBar;
 
 public class MyProfileFragment extends SherlockFragment {
 
@@ -49,7 +49,7 @@ public class MyProfileFragment extends SherlockFragment {
 	private TextView owns;
 	private ImageView ownerPic;
 	private TextView txtLevel;
-	private ProgressBar xpBar;
+	private TextProgressBar xpBar;
 
 	/*
 	 * (non-Javadoc)
@@ -84,7 +84,7 @@ public class MyProfileFragment extends SherlockFragment {
 		owns = (TextView) activity.findViewById(R.id.owns);
 		ownerPic = (ImageView) activity.findViewById(R.id.owner_pic);
 		txtLevel = (TextView) activity.findViewById(R.id.level);
-		xpBar = (ProgressBar) activity.findViewById(R.id.xp_bar);
+		xpBar = (TextProgressBar) activity.findViewById(R.id.xp_bar);
 
 		status.setOnClickListener(new OnClickListener() {
 			@Override
@@ -92,7 +92,6 @@ public class MyProfileFragment extends SherlockFragment {
 				showStatusDialog();
 			}
 		});
-		// updateViews();
 	}
 
 	/**
@@ -226,7 +225,12 @@ public class MyProfileFragment extends SherlockFragment {
 	protected void updateFriendizerViews() {
 		User userInfo = Utility.getInstance().userInfo;
 		txtLevel.setText("Level " + userInfo.getLevel());
-		xpBar.setProgress(65); // TODO
+		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
+		int currentLevelPoints = userInfo.getLevelPoints();
+		xpBar.setMax(currentLevelPoints);
+		xpBar.setProgress(earnedPointsThisLevel);
+		xpBar.setText(earnedPointsThisLevel + " / " + currentLevelPoints);
+
 		value.setText(String.valueOf(userInfo.getPoints()));
 		money.setText(String.valueOf(userInfo.getMoney()));
 		if (userInfo.getStatus().length() > 0) {

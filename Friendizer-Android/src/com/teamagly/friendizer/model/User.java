@@ -7,313 +7,327 @@ import com.google.android.maps.GeoPoint;
 
 public class User implements Serializable {
 
-    FacebookUser fb; // Data from Facebook
-    FriendizerUser fz; // Data from our servers
+	FacebookUser fb; // Data from Facebook
+	FriendizerUser fz; // Data from our servers
 
-    public enum FBQueryType {
-	GRAPH, FQL
-    }
+	public enum FBQueryType {
+		GRAPH,
+		FQL
+	}
 
-    private static final long serialVersionUID = 8643574985757595599L;
+	private static final long serialVersionUID = 8643574985757595599L;
 
-    public User(FacebookUser fbUser) {
-	fb = new FacebookUser(fbUser);
-	fz = null;
-    }
+	public User(FacebookUser fbUser) {
+		fb = new FacebookUser(fbUser);
+		fz = null;
+	}
 
-    public User(FriendizerUser fzUser) {
-	fz = new FriendizerUser(fzUser);
-	fb = null;
-    }
+	public User(FriendizerUser fzUser) {
+		fz = new FriendizerUser(fzUser);
+		fb = null;
+	}
 
-    public User() {
-	fb = new FacebookUser();
-	fz = new FriendizerUser();
-    }
+	public User() {
+		fb = new FacebookUser();
+		fz = new FriendizerUser();
+	}
 
-    /**
-     * @param friendizerUser
-     * @param facebookUser
-     */
-    public User(FriendizerUser fzUser, FacebookUser fbUser) {
-	fb = new FacebookUser(fbUser);
-	fz = new FriendizerUser(fzUser);
-    }
+	/**
+	 * @param friendizerUser
+	 * @param facebookUser
+	 */
+	public User(FriendizerUser fzUser, FacebookUser fbUser) {
+		fb = new FacebookUser(fbUser);
+		fz = new FriendizerUser(fzUser);
+	}
 
-    // Updates the Facebook data from the given FacebookUser object
-    public void updateFacebookData(FacebookUser fbUser) {
-	fb = new FacebookUser(fbUser);
-    }
+	// Updates the Facebook data from the given FacebookUser object
+	public void updateFacebookData(FacebookUser fbUser) {
+		fb = new FacebookUser(fbUser);
+	}
 
-    // Updates the Friendizer data from the given FriendizerUser object
-    public void updateFriendizerData(FriendizerUser fzUser) {
-	fz = new FriendizerUser(fzUser);
-    }
+	// Updates the Friendizer data from the given FriendizerUser object
+	public void updateFriendizerData(FriendizerUser fzUser) {
+		fz = new FriendizerUser(fzUser);
+	}
 
-    // Getters and setters
+	public final int getLevelPoints() {
+		double threshold = 200 * Math.pow(fz.level, 1.5);
+		double prevLevelThreshold = 200 * Math.pow(fz.level - 1, 1.5);
+		double currentLevelPoints = threshold - prevLevelThreshold;
+		return (int) currentLevelPoints;
+	}
 
-    /**
-     * @return the firstName
-     */
-    public String getFirstName() {
-	return fb.firstName;
-    }
+	public final int getEarnedPointsThisLevel() {
+		double prevLevelThreshold = 200 * Math.pow(fz.level - 1, 1.5);
+		double earnedPointsThisLevel = fz.points - prevLevelThreshold;
+		return (int) earnedPointsThisLevel;
+	}
 
-    /**
-     * @param firstName
-     *            the firstName to set
-     */
-    public void setFirstName(String firstName) {
-	this.fb.firstName = firstName;
-    }
+	// Getters and setters
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-	return fb.name;
-    }
+	/**
+	 * @return the firstName
+	 */
+	public String getFirstName() {
+		return fb.firstName;
+	}
 
-    /**
-     * @param name
-     *            the name to set
-     */
-    public void setName(String name) {
-	this.fb.name = name;
-    }
+	/**
+	 * @param firstName
+	 *            the firstName to set
+	 */
+	public void setFirstName(String firstName) {
+		this.fb.firstName = firstName;
+	}
 
-    /**
-     * @return the gender
-     */
-    public String getGender() {
-	return fb.gender;
-    }
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return fb.name;
+	}
 
-    /**
-     * @param gender
-     *            the gender to set
-     */
-    public void setGender(String gender) {
-	this.fb.gender = gender;
-    }
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.fb.name = name;
+	}
 
-    /**
-     * @return the age
-     */
-    public String getAge() {
-	return fb.age;
-    }
+	/**
+	 * @return the gender
+	 */
+	public String getGender() {
+		return fb.gender;
+	}
 
-    /**
-     * @param age
-     *            the age to set
-     */
-    public void setAge(String age) {
-	this.fb.age = age;
-    }
+	/**
+	 * @param gender
+	 *            the gender to set
+	 */
+	public void setGender(String gender) {
+		this.fb.gender = gender;
+	}
 
-    /**
-     * @return the picURL
-     */
-    public String getPicURL() {
-	return fb.picURL;
-    }
+	/**
+	 * @return the age
+	 */
+	public String getAge() {
+		return fb.age;
+	}
 
-    /**
-     * @param picURL
-     *            the picURL to set
-     */
-    public void setPicURL(String picURL) {
-	this.fb.picURL = picURL;
-    }
+	/**
+	 * @param age
+	 *            the age to set
+	 */
+	public void setAge(String age) {
+		this.fb.age = age;
+	}
 
-    /**
-     * @return the id
-     */
-    public long getId() {
-	if (fz != null)
-	    return fz.id;
-	else
-	    return fb.id;
-    }
+	/**
+	 * @return the picURL
+	 */
+	public String getPicURL() {
+		return fb.picURL;
+	}
 
-    /**
-     * @param id
-     *            the id to set
-     */
-    public void setId(long id) {
-	this.fz.id = id;
-    }
+	/**
+	 * @param picURL
+	 *            the picURL to set
+	 */
+	public void setPicURL(String picURL) {
+		this.fb.picURL = picURL;
+	}
 
-    /**
-     * @return the points
-     */
-    public long getPoints() {
-	return fz.points;
-    }
+	/**
+	 * @return the id
+	 */
+	public long getId() {
+		if (fz != null)
+			return fz.id;
+		else
+			return fb.id;
+	}
 
-    /**
-     * @param points
-     *            the points to set
-     */
-    public void setPoints(long points) {
-	this.fz.points = points;
-    }
-    
-    /**
-     * @return the level
-     */
-    public long getLevel() {
-	return fz.level;
-    }
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(long id) {
+		this.fz.id = id;
+	}
 
-    /**
-     * @param level
-     *            the level to set
-     */
-    public void setLevel(int level) {
-	this.fz.points = level;
-    }
+	/**
+	 * @return the points
+	 */
+	public long getPoints() {
+		return fz.points;
+	}
 
-    /**
-     * @return the money
-     */
-    public long getMoney() {
-	return fz.money;
-    }
+	/**
+	 * @param points
+	 *            the points to set
+	 */
+	public void setPoints(long points) {
+		this.fz.points = points;
+	}
 
-    /**
-     * @param money
-     *            the money to set
-     */
-    public void setMoney(long money) {
-	this.fz.money = money;
-    }
+	/**
+	 * @return the level
+	 */
+	public long getLevel() {
+		return fz.level;
+	}
 
-    /**
-     * @return the ownerID
-     */
-    public long getOwnerID() {
-	return fz.ownerID;
-    }
+	/**
+	 * @param level
+	 *            the level to set
+	 */
+	public void setLevel(int level) {
+		this.fz.points = level;
+	}
 
-    /**
-     * @param ownerID
-     *            the ownerID to set
-     */
-    public void setOwnerID(long ownerID) {
-	this.fz.ownerID = ownerID;
-    }
+	/**
+	 * @return the money
+	 */
+	public long getMoney() {
+		return fz.money;
+	}
 
-    /**
-     * @return the ownsList
-     */
-    public FriendizerUser[] getOwnsList() {
-	return fz.ownsList;
-    }
+	/**
+	 * @param money
+	 *            the money to set
+	 */
+	public void setMoney(long money) {
+		this.fz.money = money;
+	}
 
-    /**
-     * @param ownsList
-     *            the ownsList to set
-     */
-    public void setOwnsList(FriendizerUser[] ownsList) {
-	this.fz.ownsList = ownsList;
-    }
+	/**
+	 * @return the ownerID
+	 */
+	public long getOwnerID() {
+		return fz.ownerID;
+	}
 
-    /**
-     * @return the latitude
-     */
-    public double getLatitude() {
-	return fz.latitude;
-    }
+	/**
+	 * @param ownerID
+	 *            the ownerID to set
+	 */
+	public void setOwnerID(long ownerID) {
+		this.fz.ownerID = ownerID;
+	}
 
-    /**
-     * @param latitude
-     *            the latitude to set
-     */
-    public void setLatitude(double latitude) {
-	this.fz.latitude = latitude;
-    }
+	/**
+	 * @return the ownsList
+	 */
+	public FriendizerUser[] getOwnsList() {
+		return fz.ownsList;
+	}
 
-    /**
-     * @return the longitude
-     */
-    public double getLongitude() {
-	return fz.longitude;
-    }
+	/**
+	 * @param ownsList
+	 *            the ownsList to set
+	 */
+	public void setOwnsList(FriendizerUser[] ownsList) {
+		this.fz.ownsList = ownsList;
+	}
 
-    /**
-     * @param longitude
-     *            the longitude to set
-     */
-    public void setLongitude(double longitude) {
-	this.fz.longitude = longitude;
-    }
+	/**
+	 * @return the latitude
+	 */
+	public double getLatitude() {
+		return fz.latitude;
+	}
 
-    /**
-     * @return the user's location as a GeoPoint
-     */
-    public GeoPoint getGeoPoint() {
-	return fz.getGeoPoint();
-    }
+	/**
+	 * @param latitude
+	 *            the latitude to set
+	 */
+	public void setLatitude(double latitude) {
+		this.fz.latitude = latitude;
+	}
 
-    /**
-     * @return the since
-     */
-    public Date getSince() {
-	return fz.since;
-    }
+	/**
+	 * @return the longitude
+	 */
+	public double getLongitude() {
+		return fz.longitude;
+	}
 
-    /**
-     * @param since
-     *            the since to set
-     */
-    public void setSince(Date since) {
-	this.fz.since = since;
-    }
+	/**
+	 * @param longitude
+	 *            the longitude to set
+	 */
+	public void setLongitude(double longitude) {
+		this.fz.longitude = longitude;
+	}
 
-    /**
-     * @return the distance
-     */
-    public long getDistance() {
-	return fz.distance;
-    }
+	/**
+	 * @return the user's location as a GeoPoint
+	 */
+	public GeoPoint getGeoPoint() {
+		return fz.getGeoPoint();
+	}
 
-    /**
-     * @param distance
-     *            the distance to set
-     */
-    public void setDistance(long distance) {
-	this.fz.distance = distance;
-    }
+	/**
+	 * @return the since
+	 */
+	public Date getSince() {
+		return fz.since;
+	}
 
-    /**
-     * @return the matching
-     */
-    public int getMatching() {
-	return fz.matching;
-    }
+	/**
+	 * @param since
+	 *            the since to set
+	 */
+	public void setSince(Date since) {
+		this.fz.since = since;
+	}
 
-    /**
-     * @param matching
-     *            the matching to set
-     */
-    public void setMatching(int matching) {
-	this.fz.matching = matching;
-    }
+	/**
+	 * @return the distance
+	 */
+	public long getDistance() {
+		return fz.distance;
+	}
 
-    /**
-     * @return the status
-     */
-    public String getStatus() {
-	return fz.status;
-    }
+	/**
+	 * @param distance
+	 *            the distance to set
+	 */
+	public void setDistance(long distance) {
+		this.fz.distance = distance;
+	}
 
-    /**
-     * @param status
-     *            the status to set
-     */
-    public void setStatus(String status) {
-	fz.status = status;
-    }
+	/**
+	 * @return the matching
+	 */
+	public int getMatching() {
+		return fz.matching;
+	}
+
+	/**
+	 * @param matching
+	 *            the matching to set
+	 */
+	public void setMatching(int matching) {
+		this.fz.matching = matching;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public String getStatus() {
+		return fz.status;
+	}
+
+	/**
+	 * @param status
+	 *            the status to set
+	 */
+	public void setStatus(String status) {
+		fz.status = status;
+	}
 }
