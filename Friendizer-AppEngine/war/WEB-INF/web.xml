@@ -140,5 +140,16 @@
 	    <url-pattern>/block</url-pattern>
 	    <url-pattern>/blockList</url-pattern>
 	</servlet-mapping>
+	
+		<servlet>
+	    <servlet-name>LeaderboardManager</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.LeaderboardManager</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>LeaderboardManager</servlet-name>
+	    <url-pattern>/valueLeaderboard</url-pattern>
+	    <url-pattern>/moneyLeaderboard</url-pattern>
+	</servlet-mapping>
 
 </web-app>

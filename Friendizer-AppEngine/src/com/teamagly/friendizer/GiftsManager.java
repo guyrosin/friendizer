@@ -8,9 +8,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.google.android.c2dm.server.PMF;
 
+import com.teamagly.friendizer.Notifications.notificationType;
 import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
@@ -26,7 +28,7 @@ public class GiftsManager extends HttpServlet {
 		else
 			sendGift(request, response);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void allGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -39,7 +41,7 @@ public class GiftsManager extends HttpServlet {
 		pm.close();
 		response.getWriter().println(giftsArray);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void userGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
@@ -114,5 +116,17 @@ public class GiftsManager extends HttpServlet {
 			pm.makePersistent(new UserGift(receiverID, giftID));
 		pm.close();
 		response.getWriter().println("The gift has been sent");
+		
+		//sending notification
+		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(receiverID);
+		
+		Notification notif = new Notification(receiverID,Notifications.GIFT_MSG,
+				notificationType.GFT);
+		try {
+			SendMessage.sendMessage(getServletContext(), device, notif.toC2DMMessage());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
