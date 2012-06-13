@@ -22,8 +22,8 @@ import com.teamagly.friendizer.model.User;
 public class LeaderboardManager extends HttpServlet {
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if (request.getRequestURI().endsWith("/valueLeaderboard"))
-			getLeaderboard(request, response,"value");
+		if (request.getRequestURI().endsWith("/pointsLeaderboard"))
+			getLeaderboard(request, response,"points");
 		else if (request.getRequestURI().endsWith("/moneyLeaderboard"))
 			getLeaderboard(request, response,"money");
 	}
@@ -36,7 +36,7 @@ public class LeaderboardManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Query query = pm.newQuery(Message.class);
+		Query query = pm.newQuery(User.class);
 		String order = type + " desc";
 		query.setOrdering(order);
 		query.setRange(0, 10);

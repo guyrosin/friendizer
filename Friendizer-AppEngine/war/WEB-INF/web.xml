@@ -159,7 +159,7 @@
 	
 	<servlet-mapping>
 	    <servlet-name>LeaderboardManager</servlet-name>
-	    <url-pattern>/valueLeaderboard</url-pattern>
+	    <url-pattern>/pointsLeaderboard</url-pattern>
 	    <url-pattern>/moneyLeaderboard</url-pattern>
 	</servlet-mapping>
 
