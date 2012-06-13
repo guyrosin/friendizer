@@ -17,7 +17,10 @@ public class User {
     private long owner;
 
     @Persistent
-    private long value;
+    private long points;
+    
+    @Persistent
+    private int level;
 
     @Persistent
     private long money;
@@ -37,10 +40,11 @@ public class User {
     @Persistent
     private String status;
 
-    public User(long id, long owner, long value, long money, double latitude, double longitude, Date since, String token, String status) {
+    public User(long id, long owner, long points, int level, long money, double latitude, double longitude, Date since, String token, String status) {
 	this.id = id;
 	this.owner = owner;
-	this.value = value;
+	this.points = points;
+	this.level = level;
 	this.money = money;
 	this.latitude = latitude;
 	this.longitude = longitude;
@@ -55,7 +59,8 @@ public class User {
     public User(long id, String token) {
 	this.id = id;
 	this.owner = 0;
-	this.value = 100;
+	this.points = 100;
+	this.level = 1;
 	this.money = 1000;
 	this.latitude = -1;
 	this.longitude = -1;
@@ -67,7 +72,8 @@ public class User {
     public User(JSONObject obj) throws JSONException {
 	id = obj.getLong("id");
 	owner = obj.getLong("owner");
-	value = obj.getLong("value");
+	points = obj.getLong("points");
+	level = obj.getInt("level");
 	money = obj.getLong("money");
 	latitude = obj.getDouble("latitude");
 	longitude = obj.getDouble("longitude");
@@ -97,13 +103,21 @@ public class User {
 	this.owner = owner;
     }
 
-    public long getValue() {
-	return value;
+    public long getPoints() {
+	return points;
     }
 
-    public void setValue(long value) {
-	this.value = value;
+    public void setPoints(long points) {
+	this.points = points;
     }
+    
+    public int getLevel() {
+		return level;
+	}
+    
+    public void setLevel(int level) {
+		this.level = level;
+	}
 
     public long getMoney() {
 	return money;
@@ -158,7 +172,8 @@ public class User {
 	try {
 	    obj.put("id", id);
 	    obj.put("owner", owner);
-	    obj.put("value", value);
+	    obj.put("points", points);
+	    obj.put("level", level);
 	    obj.put("money", money);
 	    obj.put("latitude", latitude);
 	    obj.put("longitude", longitude);
