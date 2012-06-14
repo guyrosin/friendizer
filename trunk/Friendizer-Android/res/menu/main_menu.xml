@@ -15,6 +15,11 @@
         android:title="@string/invite_title">
     </item>
     <item
+        android:id="@+id/menu_feedback"
+        android:icon="@android:drawable/ic_menu_send"
+        android:menuCategory="container"
+        android:title="@string/feedback_title"/>
+    <item
         android:id="@+id/menu_settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:menuCategory="container"

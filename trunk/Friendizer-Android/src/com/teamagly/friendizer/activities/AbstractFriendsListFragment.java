@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -189,6 +190,8 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
 		case R.id.menu_settings: // Move to the settings activity
 			startActivity(new Intent(activity, FriendsPrefs.class));
 			return true;
+		case R.id.menu_feedback:
+			return Utility.startFeedback(activity);
 		case R.id.menu_invite: // Show the Facebook invitation dialog
 			Bundle params = new Bundle();
 			params.putString("message", getString(R.string.invitation_msg));
