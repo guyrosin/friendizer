@@ -75,7 +75,7 @@ public class MarketManager extends HttpServlet {
 
 		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(buyID);
 
-		Notification notif = new Notification(buyID, Notifications.BEEN_BOUGHT_MSG, NotificationType.BUY);
+		Notification notif = new Notification(userID, Notifications.BEEN_BOUGHT_MSG, NotificationType.BUY);
 		try {
 			SendMessage.sendMessage(getServletContext(), device, notif.toC2DMMessage());
 		} catch (JSONException e) {
