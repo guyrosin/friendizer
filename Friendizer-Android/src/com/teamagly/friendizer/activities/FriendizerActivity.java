@@ -168,6 +168,8 @@ public class FriendizerActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_feedback:
+			return Utility.startFeedback(this);
 		case R.id.menu_settings: // Move to the settings activity
 			startActivity(new Intent(this, FriendsPrefs.class));
 			return true;

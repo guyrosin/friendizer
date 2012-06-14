@@ -10,6 +10,7 @@ import com.teamagly.friendizer.model.User;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -25,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.widget.Toast;
 
 public class Utility extends Application {
 
@@ -62,6 +64,24 @@ public class Utility extends Application {
 		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
 		drawable.setColorFilter(filter);
 		return drawable;
+	}
+
+	/**
+	 * Lets the user choose an email client and send us feedback
+	 */
+	public static boolean startFeedback(Context context) {
+		Intent i = new Intent(Intent.ACTION_SEND);
+		i.setType("text/plain");
+		i.putExtra(Intent.EXTRA_EMAIL, new String[] { "friendizer.team@gmail.com" });
+		i.putExtra(Intent.EXTRA_SUBJECT, "Friendizer Feedback");
+		i.setType("message/rfc822");
+		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		try {
+			context.startActivity(Intent.createChooser(i, "Choose an Email client:"));
+		} catch (android.content.ActivityNotFoundException ex) {
+			Toast.makeText(context, "There are no email clients installed", Toast.LENGTH_SHORT).show();
+		}
+		return true;
 	}
 
 	public static int getOrientation(Context context, Uri photoUri) {

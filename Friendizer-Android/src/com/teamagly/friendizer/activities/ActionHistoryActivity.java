@@ -115,6 +115,8 @@ public class ActionHistoryActivity extends SherlockActivity {
 		case R.id.menu_refresh:
 			onResume();
 			return true;
+		case R.id.menu_feedback:
+			return Utility.startFeedback(this);
 		case R.id.menu_settings: // Move to the settings activity
 			startActivity(new Intent(this, FriendsPrefs.class));
 			return true;
