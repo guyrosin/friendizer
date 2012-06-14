@@ -47,6 +47,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		ActionBar actionBar = getSupportActionBar();
+		user = ((User) getIntent().getSerializableExtra("user"));
 		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one
 			actionBar.setTitle("My Gifts");
 		else {
@@ -57,7 +58,6 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		setContentView(R.layout.gifts_layout);
 		gridView = (GridView) findViewById(R.id.gridview);
 		giftsList = new ArrayList<Gift>();
-		user = ((User) getIntent().getSerializableExtra("user"));
 		activity = this;
 	}
 
@@ -143,7 +143,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 	 */
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
+		// Show a dialog with info
 
 	}
 }

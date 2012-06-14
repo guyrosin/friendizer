@@ -94,7 +94,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				userInfo = new User();
 				userInfo.setId(intent.getLongExtra("userID", 0));
 			} else {
-				Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT);
+				Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
 				finish();
 			}
 		} else {
@@ -162,11 +162,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			builder.setTitle("Block " + userInfo.getName() + "?").setMessage("You'll automatically ignore every action from him")
 					.setCancelable(false).setPositiveButton("Block", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							try {
-								ServerFacade.block(Utility.getInstance().userInfo.getId(), userInfo.getId());
-							} catch (Exception e) {
-								Log.e(TAG, e.getMessage());
-							}
+							new BlockTask().execute();
 						}
 					}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
@@ -177,6 +173,26 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	protected class BlockTask extends AsyncTask<Void, Void, Boolean> {
+
+		protected Boolean doInBackground(Void... v) {
+			try {
+				ServerFacade.block(Utility.getInstance().userInfo.getId(), userInfo.getId());
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+				return false;
+			}
+			return true;
+		}
+
+		protected void onPostExecute(Boolean result) {
+			if (result)
+				Toast.makeText(getBaseContext(), userInfo.getName() + " has been blocked!", Toast.LENGTH_LONG).show();
+			else
+				Toast.makeText(getBaseContext(), "Couldn't buy", Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -253,13 +269,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			// Define the buy button
 			findViewById(R.id.btn_stranger_buy).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					try {
-						ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
-					} catch (Exception e) {
-						Log.w(TAG, "", e);
-						Toast.makeText(getBaseContext(), "Couldn't buy " + txtName, Toast.LENGTH_SHORT).show();
-					}
-					onResume(); // Refresh
+					new BuyTask().execute();
 				}
 			});
 			// Define the achievements button
@@ -280,6 +290,23 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					startActivity(intent);
 				}
 			});
+		}
+	}
+
+	protected class BuyTask extends AsyncTask<Void, Void, Void> {
+
+		protected Void doInBackground(Void... v) {
+			try {
+				ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
+			} catch (Exception e) {
+				Log.w(TAG, "", e);
+				Toast.makeText(getBaseContext(), "Couldn't buy", Toast.LENGTH_SHORT).show();
+			}
+			return null;
+		}
+
+		protected void onPostExecute(Void v) {
+			onResume(); // Refresh
 		}
 	}
 

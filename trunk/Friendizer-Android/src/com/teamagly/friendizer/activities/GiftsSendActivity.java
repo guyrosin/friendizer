@@ -10,12 +10,14 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -98,11 +100,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?")
 				.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						try {
-							ServerFacade.sendGift(Utility.getInstance().userInfo.getId(), destUser.getId(), gift.getId());
-						} catch (Exception e) {
-							Log.e(TAG, e.getMessage());
-						}
+						new SendGiftTask().execute(gift);
 					}
 				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -110,6 +108,23 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 					}
 				});
 		builder.show();
+	}
+
+	protected class SendGiftTask extends AsyncTask<Gift, Void, Void> {
+
+		protected Void doInBackground(Gift... gifts) {
+			try {
+				ServerFacade.sendGift(Utility.getInstance().userInfo.getId(), destUser.getId(), gifts[0].getId());
+			} catch (Exception e) {
+				Log.w(TAG, "", e);
+				Toast.makeText(getBaseContext(), "Couldn't buy", Toast.LENGTH_SHORT).show();
+			}
+			return null;
+		}
+
+		protected void onPostExecute(Void v) {
+			Toast.makeText(activity, "Gift sent!", Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/*

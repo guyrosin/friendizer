@@ -3,6 +3,7 @@ package com.teamagly.friendizer.widgets;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -10,6 +11,8 @@ import android.widget.ImageView;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 
@@ -50,43 +53,60 @@ public class CustomOverlayItem extends OverlayItem {
 		imageURL = userInfo.getPicURL();
 		userID = userInfo.getId();
 		this.markerLayout = markerLayout;
-		setMarker(generateMarker());
+
+		// make sure our marker layout isn't null
+		if (markerLayout != null) {
+			ImageView imageView = (ImageView) markerLayout.findViewById(R.id.pic);
+			ImageLoader.getInstance().displayImage(imageURL, imageView, new ImageLoadingListener() {
+
+				@Override
+				public void onLoadingStarted() {
+				}
+
+				@Override
+				public void onLoadingFailed(FailReason arg0) {
+					Log.e("lolz",arg0.toString());
+				}
+
+				@Override
+				public void onLoadingComplete() {
+					setMarker(generateMarker());
+				}
+
+				@Override
+				public void onLoadingCancelled() {
+				}
+			});
+		}
 	}
 
 	public Drawable generateMarker() {
 
 		Bitmap viewCapture = null;
 
-		// make sure our marker layout isn't null
-		if (markerLayout != null) {
+		// we need to enable the drawing cache
+		markerLayout.setDrawingCacheEnabled(true);
 
-			ImageView imageView = (ImageView) markerLayout.findViewById(R.id.pic);
-			ImageLoader.getInstance().displayImage(imageURL, imageView);
+		// this is the important code
+		// Without it the view will have a dimension of 0,0 and the bitmap
+		// will be null
+		markerLayout.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+				MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+		markerLayout.layout(0, 0, markerLayout.getMeasuredWidth(), markerLayout.getMeasuredHeight());
 
-			// we need to enable the drawing cache
-			markerLayout.setDrawingCacheEnabled(true);
+		// we need to build our drawing cache
+		markerLayout.buildDrawingCache(true);
 
-			// this is the important code
-			// Without it the view will have a dimension of 0,0 and the bitmap
-			// will be null
-			markerLayout.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-			markerLayout.layout(0, 0, markerLayout.getMeasuredWidth(), markerLayout.getMeasuredHeight());
-
-			// we need to build our drawing cache
-			markerLayout.buildDrawingCache(true);
-
-			if (markerLayout.getDrawingCache() != null) {
-				viewCapture = Bitmap.createBitmap(markerLayout.getDrawingCache());
-				if (viewCapture != null) {
-					markerLayout.setDrawingCacheEnabled(false);
-					drawable = new BitmapDrawable(viewCapture);
-					// Bound to "boundCenterBottom"
-					int dWidth = drawable.getIntrinsicWidth();
-					int dHeight = drawable.getIntrinsicHeight();
-					drawable.setBounds(-dWidth / 2, -dHeight, dWidth / 2, 0);
-					return drawable;
-				}
+		if (markerLayout.getDrawingCache() != null) {
+			viewCapture = Bitmap.createBitmap(markerLayout.getDrawingCache());
+			if (viewCapture != null) {
+				markerLayout.setDrawingCacheEnabled(false);
+				drawable = new BitmapDrawable(viewCapture);
+				// Bound to "boundCenterBottom"
+				int dWidth = drawable.getIntrinsicWidth();
+				int dHeight = drawable.getIntrinsicHeight();
+				drawable.setBounds(-dWidth / 2, -dHeight, dWidth / 2, 0);
+				return drawable;
 			}
 		}
 		return null;

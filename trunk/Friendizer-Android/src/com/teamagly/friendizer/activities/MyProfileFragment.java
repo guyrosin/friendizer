@@ -9,8 +9,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,7 +41,7 @@ public class MyProfileFragment extends SherlockFragment {
 	protected SherlockFragmentActivity activity;
 	private ImageView userPic;
 	private TextView name;
-	private TextView status;
+	private TextView txtStatus;
 	private TextView age;
 	private TextView gender;
 	private TextView value;
@@ -76,7 +76,7 @@ public class MyProfileFragment extends SherlockFragment {
 
 		userPic = (ImageView) activity.findViewById(R.id.user_pic);
 		name = (TextView) activity.findViewById(R.id.name);
-		status = (TextView) activity.findViewById(R.id.status);
+		txtStatus = (TextView) activity.findViewById(R.id.status);
 		age = (TextView) activity.findViewById(R.id.age);
 		gender = (TextView) activity.findViewById(R.id.gender);
 		value = (TextView) activity.findViewById(R.id.value);
@@ -86,64 +86,12 @@ public class MyProfileFragment extends SherlockFragment {
 		txtLevel = (TextView) activity.findViewById(R.id.level);
 		xpBar = (TextProgressBar) activity.findViewById(R.id.xp_bar);
 
-		status.setOnClickListener(new OnClickListener() {
+		txtStatus.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showStatusDialog();
 			}
 		});
-	}
-
-	/**
-     * 
-     */
-	protected void showStatusDialog() {
-		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
-
-		dialogBuilder.setTitle("Enter Your Status");
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(activity);
-		input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-				if (hasFocus)
-					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-				else
-					imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-			}
-		});
-		dialogBuilder.setView(input);
-		dialogBuilder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				final String newStatus = input.getText().toString();
-				// Update the DB
-				try {
-					ServerFacade.updateStatus(newStatus);
-				} catch (Exception e) {
-					Log.w(TAG, e.getMessage());
-				}
-				// Update the view
-				new Handler().post(new Runnable() {
-					@Override
-					public void run() {
-						if (newStatus.length() > 0) {
-							status.setText("\"" + newStatus + "\"");
-							status.setVisibility(View.VISIBLE);
-						} else
-							status.setVisibility(View.GONE);
-					}
-				});
-			}
-		});
-		dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-			}
-		});
-		dialogBuilder.show();
 	}
 
 	/*
@@ -234,10 +182,10 @@ public class MyProfileFragment extends SherlockFragment {
 		value.setText(String.valueOf(userInfo.getPoints()));
 		money.setText(String.valueOf(userInfo.getMoney()));
 		if (userInfo.getStatus().length() > 0) {
-			status.setText("\"" + userInfo.getStatus() + "\"");
-			status.setVisibility(View.VISIBLE);
+			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
+			txtStatus.setVisibility(View.VISIBLE);
 		} else
-			status.setVisibility(View.GONE);
+			txtStatus.setVisibility(View.GONE);
 		if (userInfo.getOwnsList() != null)
 			owns.setText(String.valueOf(userInfo.getOwnsList().length));
 		activity.setSupportProgressBarIndeterminateVisibility(false);
@@ -249,6 +197,65 @@ public class MyProfileFragment extends SherlockFragment {
 		name.setText(userInfo.getName());
 		age.setText(userInfo.getAge());
 		gender.setText(userInfo.getGender());
+	}
+
+	/**
+     * 
+     */
+	protected void showStatusDialog() {
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+
+		dialogBuilder.setTitle("Enter Your Status");
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(activity);
+		final InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		input.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus)
+					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+				else
+					imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+			}
+		});
+		dialogBuilder.setView(input);
+		dialogBuilder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				final String newStatus = input.getText().toString();
+				new UpdateStatusTask().execute(newStatus);
+				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			}
+		});
+		dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+			}
+		});
+		dialogBuilder.show();
+	}
+
+	protected class UpdateStatusTask extends AsyncTask<String, Void, Void> {
+		String status;
+
+		protected Void doInBackground(String... statuses) {
+			status = statuses[0];
+			try {
+				ServerFacade.updateStatus(status);
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return null;
+		}
+
+		protected void onPostExecute(Void v) {
+			// Update the view
+			if (status.length() > 0) {
+				txtStatus.setText("\"" + status + "\"");
+				txtStatus.setVisibility(View.VISIBLE);
+			} else
+				txtStatus.setVisibility(View.GONE);
+		}
 	}
 
 	/*

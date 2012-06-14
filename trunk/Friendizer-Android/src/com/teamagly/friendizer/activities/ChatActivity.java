@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -157,15 +158,29 @@ public class ChatActivity extends SherlockActivity {
 		// Check that there's actually something to send
 		if (text.length() > 0) {
 			Message newMsg = new Message(destUser.getId(), text);
+			new SendTask().execute(newMsg);
+		}
+	}
+
+	protected class SendTask extends AsyncTask<Message, Void, Void> {
+		Message msg;
+
+		protected Void doInBackground(Message... msgs) {
+			msg = msgs[0];
 			try {
-				ServerFacade.sendMessage(newMsg);
-				newMsgText.setText(""); // Clear the edit text field
-				messages.add(newMsg);
-				messagesAdapter = new MessagesAdapter(this, R.id.message, messages);
-				messagesView.setAdapter(messagesAdapter);
+				ServerFacade.sendMessage(msg);
 			} catch (Exception e) {
-				Log.w(TAG, e.getMessage());
+				Log.e(TAG, "", e);
 			}
+			return null;
+		}
+
+		protected void onPostExecute(Void v) {
+			newMsgText.setText(""); // Clear the edit text field
+			messages.add(msg);
+			messagesAdapter.notifyDataSetChanged();
+			// messagesAdapter = new MessagesAdapter(getBaseContext(), R.id.message, messages);
+			// messagesView.setAdapter(messagesAdapter);
 		}
 	}
 
