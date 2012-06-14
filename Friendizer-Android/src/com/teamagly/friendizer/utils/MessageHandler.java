@@ -206,7 +206,7 @@ public class MessageHandler {
 				userInfo.updateFacebookData(newUserInfo);
 
 				// Show a status bar notification
-				// TODO: should redirect to the buyer's profile
+				// TODO: should redirect to the buyer's profile (problem is the user object is partial)
 				Intent notificationIntent = new Intent(context, FriendizerActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
 				Util.generateNotification(context, "You've been bought by " + userInfo.getName(), notificationIntent);

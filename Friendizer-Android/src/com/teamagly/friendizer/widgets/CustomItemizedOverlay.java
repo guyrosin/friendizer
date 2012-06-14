@@ -27,75 +27,75 @@ import com.teamagly.friendizer.utils.Utility;
 
 public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayItem> {
 
-    private ArrayList<CustomOverlayItem> mOverlays = new ArrayList<CustomOverlayItem>();
-    private Context c;
+	private ArrayList<CustomOverlayItem> mOverlays = new ArrayList<CustomOverlayItem>();
+	private Context c;
 
-    public CustomItemizedOverlay(Drawable defaultMarker, MapView mapView) {
-	super(boundCenter(defaultMarker), mapView);
-	c = mapView.getContext();
-    }
-
-    public void addOverlay(CustomOverlayItem overlay) {
-	mOverlays.add(overlay);
-	populate();
-    }
-
-    @Override
-    protected CustomOverlayItem createItem(int i) {
-	return mOverlays.get(i);
-    }
-
-    @Override
-    public int size() {
-	return mOverlays.size();
-    }
-
-    public void clear() {
-	mOverlays.clear();
-	populate();
-    }
-
-    @Override
-    protected boolean onBalloonTap(int index, CustomOverlayItem item) {
-	Intent intent = null;
-	if (item.getUserID() != Utility.getInstance().userInfo.getId()) {
-	    // Move to the user's profile
-	    intent = new Intent().setClass(c, FriendProfileActivity.class);
-	    intent.putExtra("userID", item.getUserID());
-	} else {
-	    // Move to my profile
-	    intent = new Intent().setClass(c, FriendizerActivity.class);
-	    intent.putExtra("tab", R.string.my_profile);
+	public CustomItemizedOverlay(Drawable defaultMarker, MapView mapView) {
+		super(boundCenter(defaultMarker), mapView);
+		c = mapView.getContext();
 	}
-	c.startActivity(intent);
-	return true;
-    }
 
-    /*
-     * (non-Javadoc)
-     * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#hideBalloon()
-     */
-    @Override
-    public void hideBalloon() {
-	if (currentFocusedItem != null)
-	    currentFocusedItem.showMarker(); // Restore the marker
-	super.hideBalloon();
-    }
+	public void addOverlay(CustomOverlayItem overlay) {
+		mOverlays.add(overlay);
+		populate();
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#createAndDisplayBalloonOverlay()
-     */
-    @Override
-    protected boolean createAndDisplayBalloonOverlay() {
-	boolean result = super.createAndDisplayBalloonOverlay();
-	if (currentFocusedItem != null)
-	    currentFocusedItem.setMarker(getMapView().getResources().getDrawable(R.drawable.stub)); // Remove the marker
-	return result;
-    }
+	@Override
+	protected CustomOverlayItem createItem(int i) {
+		return mOverlays.get(i);
+	}
 
-    @Override
-    protected BalloonOverlayView<CustomOverlayItem> createBalloonOverlayView() {
-	return new CustomBalloonOverlayView<CustomOverlayItem>(getMapView().getContext(), getBalloonBottomOffset());
-    }
+	@Override
+	public int size() {
+		return mOverlays.size();
+	}
+
+	public void clear() {
+		mOverlays.clear();
+		populate();
+	}
+
+	@Override
+	protected boolean onBalloonTap(int index, CustomOverlayItem item) {
+		Intent intent = null;
+		if (item.getUserID() != Utility.getInstance().userInfo.getId()) {
+			// Move to the user's profile
+			intent = new Intent().setClass(c, FriendProfileActivity.class);
+			intent.putExtra("userID", item.getUserID());
+		} else {
+			// Move to my profile TODO
+			intent = new Intent().setClass(c, FriendizerActivity.class);
+			// intent.putExtra("tab", R.string.my_profile);
+		}
+		c.startActivity(intent);
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#hideBalloon()
+	 */
+	@Override
+	public void hideBalloon() {
+		if (currentFocusedItem != null)
+			currentFocusedItem.showMarker(); // Restore the marker
+		super.hideBalloon();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay#createAndDisplayBalloonOverlay()
+	 */
+	@Override
+	protected boolean createAndDisplayBalloonOverlay() {
+		boolean result = super.createAndDisplayBalloonOverlay();
+		if (currentFocusedItem != null)
+			currentFocusedItem.setMarker(getMapView().getResources().getDrawable(R.drawable.stub)); // Remove the marker
+		return result;
+	}
+
+	@Override
+	protected BalloonOverlayView<CustomOverlayItem> createBalloonOverlayView() {
+		return new CustomBalloonOverlayView<CustomOverlayItem>(getMapView().getContext(), getBalloonBottomOffset());
+	}
 }

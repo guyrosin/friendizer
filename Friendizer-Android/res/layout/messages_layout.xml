@@ -26,6 +26,7 @@
             android:id="@+id/new_msg_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:hint="Enter your message" />

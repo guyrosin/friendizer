@@ -94,7 +94,9 @@ public class SplashActivity extends SherlockActivity {
 		handler = new Handler();
 
 		if (!isOnline()) {
-			((TextView) findViewById(R.id.status)).setText("No Internet connection, please try again later");
+			TextView txtStatus = (TextView) findViewById(R.id.status);
+			txtStatus.setText("No Internet connection!");
+			txtStatus.setVisibility(View.VISIBLE);
 			return;
 		}
 
@@ -157,7 +159,10 @@ public class SplashActivity extends SherlockActivity {
 
 	@Override
 	public void onDestroy() {
-		unregisterReceiver(mUpdateUIReceiver);
+		try {
+			unregisterReceiver(mUpdateUIReceiver);
+		} catch (Exception e) {
+		}
 		super.onDestroy();
 	}
 
@@ -199,7 +204,7 @@ public class SplashActivity extends SherlockActivity {
 	@Override
 	public void onBackPressed() {
 		// Quit the app
-		moveTaskToBack(true);
+		finish();
 	}
 
 	/*
