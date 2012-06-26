@@ -6,33 +6,34 @@ import javax.jdo.annotations.*;
 public class UserGift {
 	@SuppressWarnings("unused")
 	@PrimaryKey
-	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+	@Persistent(
+			valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
-	
+
 	@Persistent
-	private long userID;
-	
+	private long receiverID;
+
+	@Persistent
+	private long senderID;
+
 	@Persistent
 	private long giftID;
 
-	public UserGift(long userID, long giftID) {
-		this.userID = userID;
+	public UserGift(long receiverID, long senderID, long giftID) {
+		this.receiverID = receiverID;
+		this.senderID = senderID;
 		this.giftID = giftID;
-	}
-
-	public long getUserID() {
-		return userID;
-	}
-
-	public void setUserID(long userID) {
-		this.userID = userID;
 	}
 
 	public long getGiftID() {
 		return giftID;
 	}
 
-	public void setGiftID(long giftID) {
-		this.giftID = giftID;
+	public long getSenderID() {
+		return senderID;
+	}
+
+	public long getReceiverID() {
+		return receiverID;
 	}
 }

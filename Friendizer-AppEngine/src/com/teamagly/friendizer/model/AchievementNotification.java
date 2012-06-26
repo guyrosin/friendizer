@@ -6,24 +6,21 @@ import org.json.JSONObject;
 import com.teamagly.friendizer.Notifications.NotificationType;
 
 public class AchievementNotification extends Notification {
-	
-	
+
 	private String title;
-	
+
 	private String iconRes;
-	
-	
+
 	public AchievementNotification() {
 		super();
 	}
-	
-	
+
 	public AchievementNotification(Achievement achievement, long source, String text) {
-		super(source,text,NotificationType.ACH);
+		super(source, text, NotificationType.ACH);
 		title = achievement.getTitle();
 		iconRes = achievement.getIconRes();
 	}
-	
+
 	public String toC2DMMessage() throws JSONException {
 		JSONObject c2dm = new JSONObject();
 		c2dm.put("userID", source);
@@ -33,7 +30,6 @@ public class AchievementNotification extends Notification {
 		c2dm.put("iconRes", iconRes);
 		return c2dm.toString();
 	}
-	
 
 	public String getIconRes() {
 		return iconRes;
@@ -42,15 +38,4 @@ public class AchievementNotification extends Notification {
 	public void setIconRes(String iconRes) {
 		this.iconRes = iconRes;
 	}
-
-
-	public String getTilte() {
-		return title;
-	}
-
-
-	public void setTilte(String tilte) {
-		this.title = tilte;
-	}
-
 }
