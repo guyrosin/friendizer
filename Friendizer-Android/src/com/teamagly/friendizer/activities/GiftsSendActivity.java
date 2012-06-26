@@ -51,7 +51,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setTitle("Send a Gift");
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.gifts_layout);
 		destUser = ((User) getIntent().getSerializableExtra("user"));

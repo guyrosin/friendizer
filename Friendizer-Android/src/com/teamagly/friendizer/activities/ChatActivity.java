@@ -135,6 +135,7 @@ public class ChatActivity extends SherlockActivity {
 				String msg = intent.getStringExtra("text");
 				Message newMsg = new Message(userID, Utility.getInstance().userInfo.getId(), msg);
 				messages.add(newMsg);
+				// messagesAdapter.notifyDataSetChanged(); not working, so recreate the adapter instead
 				messagesAdapter = new MessagesAdapter(context, R.id.message, messages);
 				messagesView.setAdapter(messagesAdapter);
 				setResultCode(Activity.RESULT_OK); // Set the result code to indicate the broadcast intent has been received
@@ -178,9 +179,9 @@ public class ChatActivity extends SherlockActivity {
 		protected void onPostExecute(Void v) {
 			newMsgText.setText(""); // Clear the edit text field
 			messages.add(msg);
-			messagesAdapter.notifyDataSetChanged();
-			// messagesAdapter = new MessagesAdapter(getBaseContext(), R.id.message, messages);
-			// messagesView.setAdapter(messagesAdapter);
+			// messagesAdapter.notifyDataSetChanged(); not working, so recreate the adapter instead
+			messagesAdapter = new MessagesAdapter(getBaseContext(), R.id.message, messages);
+			messagesView.setAdapter(messagesAdapter);
 		}
 	}
 

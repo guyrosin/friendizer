@@ -115,6 +115,7 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	@Override
 	protected void requestFriends() {
 		usersList.clear();
+		friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 		class NearbyUsersTask extends AsyncTask<Long, Void, FriendizerUser[]> {
 
 			protected FriendizerUser[] doInBackground(Long... userIDs) {

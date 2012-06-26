@@ -139,16 +139,10 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		mAccel = 0.00f;
 		mAccelCurrent = SensorManager.GRAVITY_EARTH;
 		mAccelLast = SensorManager.GRAVITY_EARTH;
-
-		if (Utility.getInstance().location != null) {
-			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
-			zoomMyLoation();
-		}
-
 	}
 
 	protected void zoomMyLoation() {
-		if (Utility.getInstance().location != null) {
+		if (myLocationPoint != null) {
 			mapView.getController().animateTo(myLocationPoint);
 			mapView.getController().setZoom(17);
 		}
@@ -170,6 +164,7 @@ public class NearbyMapActivity extends SherlockMapActivity {
 			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
 			CustomOverlayItem overlayitem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo, markerLayout);
 			myItemizedOverlay.addOverlay(overlayitem);
+			zoomMyLoation();
 		}
 
 		mapView.postInvalidate();

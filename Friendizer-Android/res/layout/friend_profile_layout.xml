@@ -2,7 +2,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:fillViewport="true"
     android:orientation="vertical"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
@@ -42,8 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
-                    android:text="Level 3"
-                    android:textSize="16sp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <TextView
@@ -54,7 +52,6 @@
                 android:layout_marginRight="8dp"
                 android:layout_toRightOf="@+id/image_layout"
                 android:paddingBottom="5dp"
-                android:text="Guy R"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -88,8 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/age"
-                android:layout_below="@+id/status"
-                android:text="0" />
+                android:layout_below="@+id/status" />
 
             <TextView
                 android:id="@+id/mutual_friends_title"
@@ -120,52 +116,13 @@
             <TableRow>
 
                 <TextView
-                    android:id="@+id/value_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="Value"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/matching_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="Matching"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/owns_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="Owns"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/owner_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="Owner"
-                    android:textColor="@color/soft_grey" />
-            </TableRow>
-
-            <TableRow android:paddingTop="3dp" >
-
-                <TextView
                     android:id="@+id/value"
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
                     android:layout_weight="0.25"
                     android:gravity="center"
                     android:text=""
-                    android:textSize="18sp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/matching"
@@ -174,7 +131,7 @@
                     android:layout_weight="0.25"
                     android:gravity="center"
                     android:text=""
-                    android:textSize="18sp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/owns"
@@ -183,7 +140,7 @@
                     android:layout_weight="0.25"
                     android:gravity="center"
                     android:text=""
-                    android:textSize="18sp" />
+                    android:textSize="20sp" />
 
                 <ImageView
                     android:id="@+id/owner_pic"
@@ -191,6 +148,45 @@
                     android:layout_height="50dp"
                     android:layout_weight="0.25"
                     android:gravity="center" />
+            </TableRow>
+
+            <TableRow android:paddingTop="1dp" >
+
+                <TextView
+                    android:id="@+id/value_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/points"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/matching_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/matching"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/owns_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/owned"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/owner_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/owner"
+                    android:textColor="@color/soft_grey" />
             </TableRow>
         </TableLayout>
 
@@ -200,6 +196,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:paddingTop="4dp"
             android:visibility="gone" >
 
             <TableRow android:layout_marginBottom="-1dp" >
@@ -211,7 +208,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@drawable/button_top_selector"
-                    android:text="Chat" />
+                    android:text="@string/chat" />
             </TableRow>
 
             <TableRow android:layout_marginBottom="-1dp" >
@@ -261,6 +258,18 @@
             <TableRow android:layout_marginBottom="-1dp" >
 
                 <Button
+                    android:id="@+id/btn_stranger_chat"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bottom_selector"
+                    android:text="Chat" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
                     android:id="@+id/btn_stranger_achievements"
                     style="@style/LeftAlignedButtonText"
                     android:layout_width="wrap_content"
@@ -268,18 +277,6 @@
                     android:layout_weight="1"
                     android:background="@drawable/button_middle_selector"
                     android:text="Achievements" />
-            </TableRow>
-
-            <TableRow>
-
-                <Button
-                    android:id="@+id/btn_stranger_gift"
-                    style="@style/LeftAlignedButtonText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@drawable/button_bottom_selector"
-                    android:text="Send a Gift" />
             </TableRow>
         </TableLayout>
     </LinearLayout>
