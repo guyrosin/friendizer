@@ -129,24 +129,32 @@ public class FriendizerActivity extends SherlockFragmentActivity {
 		tabs.add(R.string.nearby);
 		tabs.add(R.string.friends);
 		tabs.add(R.string.my_profile);
-		actionBar.addTab(actionBar
-				.newTab()
-				.setText(R.string.nearby)
-				.setTabListener(
-						new TabListener<PeopleRadarFragment>(this, getResources().getString(R.string.nearby),
-								PeopleRadarFragment.class)));
-		actionBar.addTab(actionBar
-				.newTab()
-				.setText(R.string.friends)
-				.setTabListener(
-						new TabListener<ConnectionsFragment>(this, getResources().getString(R.string.friends),
-								ConnectionsFragment.class)));
-		actionBar.addTab(actionBar
-				.newTab()
-				.setText(R.string.my_profile)
-				.setTabListener(
-						new TabListener<MyProfileFragment>(this, getResources().getString(R.string.my_profile),
-								MyProfileFragment.class)));
+		int tab = getIntent().getIntExtra("tab", 0); // Get the selected tab (if exists)
+		if (tab == 0) // Set the default tab
+			tab = R.string.nearby;
+
+		// Create the tabs
+		actionBar.addTab(
+				actionBar
+						.newTab()
+						.setText(R.string.nearby)
+						.setTabListener(
+								new TabListener<PeopleRadarFragment>(this, getResources().getString(R.string.nearby),
+										PeopleRadarFragment.class)), (tab == R.string.nearby));
+		actionBar.addTab(
+				actionBar
+						.newTab()
+						.setText(R.string.friends)
+						.setTabListener(
+								new TabListener<ConnectionsFragment>(this, getResources().getString(R.string.friends),
+										ConnectionsFragment.class)), (tab == R.string.friends));
+		actionBar.addTab(
+				actionBar
+						.newTab()
+						.setText(R.string.my_profile)
+						.setTabListener(
+								new TabListener<MyProfileFragment>(this, getResources().getString(R.string.my_profile),
+										MyProfileFragment.class)), (tab == R.string.my_profile));
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 	}
 

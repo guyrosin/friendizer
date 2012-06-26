@@ -176,8 +176,7 @@ public class MessageHandler {
 				// TODO: put the gift ID in the intent...
 				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				// Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent); TODO
-				Util.generateNotification(context, "Received a new gift", notificationIntent);
+				Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);

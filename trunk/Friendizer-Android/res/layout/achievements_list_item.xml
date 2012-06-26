@@ -32,7 +32,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:singleLine="true"
-                android:text="This is a cool Award" />
+                android:text="" />
 
             <TextView
                 android:id="@+id/achievement_description"
@@ -41,7 +41,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:singleLine="false"
-                android:text="some very long description which is actually not that long but probably longer than neccessary." />
+                android:text="" />
         </LinearLayout>
 
         <LinearLayout
@@ -58,7 +58,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginTop="10dp"
                 android:singleLine="true"
-                android:text="25" />
+                android:text="" />
             <TextView
                 android:id="@+id/achievement_reward_suffix"
                 android:layout_width="wrap_content"

@@ -61,6 +61,7 @@
         <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.ChatActivity" />
         <activity android:name=".activities.AchievementsActivity" />
+        <activity android:name=".activities.FriendAchievementsActivity" />
         <activity android:name=".activities.NearbyMapActivity" />
         <activity android:name=".activities.GiftsSendActivity" />
         <activity android:name=".activities.GiftsUserActivity" />

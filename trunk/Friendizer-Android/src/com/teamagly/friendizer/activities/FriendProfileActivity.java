@@ -275,17 +275,17 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			// Define the achievements button
 			findViewById(R.id.btn_stranger_achievements).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					// Move to the chat activity
+					// Move to the achievements activity
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendAchievementsActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}
 			});
 			// Define the gift button
-			findViewById(R.id.btn_stranger_gift).setOnClickListener(new View.OnClickListener() {
+			findViewById(R.id.btn_stranger_chat).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					// Move to the chat activity
-					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsSendActivity.class);
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, ChatActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}
@@ -450,7 +450,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		protected void onPostExecute(Integer matching) {
 			userInfo.setMatching(matching);
 			// Update the view
-			txtMatching.setText(String.valueOf(matching));
+			txtMatching.setText(String.valueOf(matching) + "%");
 			setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 		}
 	}
