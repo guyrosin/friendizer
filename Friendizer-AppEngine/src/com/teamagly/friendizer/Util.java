@@ -15,50 +15,38 @@ package com.teamagly.friendizer;
  */
 public class Util {
 
-    // Shared constants
+	/**
+	 * Key for user ID (from Facebook) in shared preferences.
+	 */
+	public static final String USER_ID = "userID";
 
-    /**
-     * Key for account name in shared preferences.
-     */
-    public static final String ACCOUNT_NAME = "accountName";
+	/**
+	 * Key for device registration id in shared preferences.
+	 */
+	public static final String REG_ID = "regID";
 
-    /**
-     * Key for user ID (from Facebook) in shared preferences.
-     */
-    public static final String USER_ID = "userID";
+	public static final String ACCESS_TOKEN = "accessToken";
 
-    /**
-     * Key for auth cookie name in shared preferences.
-     */
-    // public static final String AUTH_COOKIE = "authCookie";
+	public static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
 
-    /**
-     * Key for device registration id in shared preferences.
-     */
-    public static final String DEVICE_REGISTRATION_ID = "deviceRegistrationID";
-    
-    /**
-     * Date of the device field update
-     */
-    public static final String REGISTRATION_TIMESTAMP = "registrationTimestamp";
-    
-    /**
-     * 
-     * The function calculates the level according to the given points
-     * 
-     * @param currentLevel - the current level of the user
-     * @param points - the updated points of the user
-     * @return int - the new level of the user (his current level if the points are not enough and the next level otherwise)
-     */
-    public static final int calculateLevel(int currentLevel,long points)
-    {
-    	// Calculate the threshold for next level
-    	double threshold = 200 * Math.pow(currentLevel,1.5);
-    	
-    	// If the user has enough points for the next level - return the next level
-    	if (points >= threshold)
-    		return currentLevel + 1;
-    	else
-    		return currentLevel;
-    }
+	/**
+	 * 
+	 * The function calculates the level according to the given points
+	 * 
+	 * @param currentLevel
+	 *            - the current level of the user
+	 * @param points
+	 *            - the updated points of the user
+	 * @return int - the new level of the user (his current level if the points are not enough and the next level otherwise)
+	 */
+	public static final int calculateLevel(int currentLevel, long points) {
+		// Calculate the threshold for next level
+		double threshold = 200 * Math.pow(currentLevel, 1.5);
+
+		// If the user has enough points for the next level - return the next level
+		if (points >= threshold)
+			return currentLevel + 1;
+		else
+			return currentLevel;
+	}
 }

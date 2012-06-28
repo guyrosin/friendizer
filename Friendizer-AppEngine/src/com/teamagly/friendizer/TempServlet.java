@@ -1,11 +1,13 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
+
 import javax.jdo.PersistenceManager;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import com.google.android.c2dm.server.PMF;
 import com.teamagly.friendizer.model.Achievement;
 
 @SuppressWarnings("serial")

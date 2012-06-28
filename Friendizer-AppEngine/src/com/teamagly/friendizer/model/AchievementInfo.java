@@ -1,6 +1,7 @@
 package com.teamagly.friendizer.model;
 
-import org.json.*;
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
 public class AchievementInfo {
 	private Achievement achv;

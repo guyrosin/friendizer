@@ -1,104 +1,156 @@
-/*******************************************************************************
- * Copyright 2011 Google Inc. All Rights Reserved.
- * 
- * All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public
- * License v1.0 which accompanies this distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS"
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- *******************************************************************************/
 package com.teamagly.friendizer;
 
-import com.google.android.c2dm.server.C2DMessaging;
-import com.google.android.c2dm.server.PMF;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.teamagly.friendizer.model.DeviceInfo;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
-import javax.servlet.ServletContext;
+import javax.jdo.Query;
+
+import com.google.android.gcm.server.Constants;
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.MulticastResult;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
+import com.teamagly.friendizer.model.UserDevice;
 
 /**
- * Send a message using C2DM.
+ * Send a message using GCM
  */
 public class SendMessage {
 
 	private static final Logger log = Logger.getLogger(SendMessage.class.getName());
 
-	public static String sendMessage(ServletContext context, DeviceInfo deviceInfo, String message) {
+	public static void sendMessage(long userIDParam, Message msg) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		String recipient = deviceInfo.getDeviceRegistrationID();
+		Query q = pm.newQuery(UserDevice.class);
+		q.setFilter("userID == userIDParam");
+		q.declareParameters("long userIDParam");
 		try {
-			UserService userService = UserServiceFactory.getUserService();
-			User user = userService.getCurrentUser();
-			String sender = "nobody";
-			if (user != null) {
-				sender = user.getEmail();
-			}
-			log.info("sendMessage: sender = " + sender);
-			log.info("sendMessage: recipient = " + recipient);
-			log.info("sendMessage: message = " + message);
-
-			// ok = we sent to at least one device.
-			//boolean ok = false;
-
-			// Send push message to phone
-			C2DMessaging push = C2DMessaging.get(context);
-			boolean res = false;
-
-			String collapseKey = "" + message.hashCode();
-
-			// delete will fail if the pm is different than the one used to
-			// load the object - we must close the object when we're done
-			/*
-			List<DeviceInfo> registrations = null;
-			registrations = DeviceInfo.getDeviceInfoForUser(recipient);
-			log.info("sendMessage: got " + registrations.size() + " registrations");
-
-			// Deal with upgrades and multi-device:
-			// If user has one device with an old version and few new ones -
-			// the old registration will be deleted.
-			if (registrations.size() > 1) {
-				// Make sure there is no 'bare' registration
-				// Keys are sorted - check the first
-				DeviceInfo first = registrations.get(0);
-				Key oldKey = first.getKey();
-				if (oldKey.toString().indexOf("#") < 0) {
-					// multiple devices, first is old-style.
-					registrations.remove(0); // don't send to it
-					pm.deletePersistent(first);
+			@SuppressWarnings("unchecked")
+			List<UserDevice> results = (List<UserDevice>) q.execute(userIDParam);
+			if (!results.isEmpty()) {
+				Sender sender = new Sender(Util.SENDER_ID);
+				if (results.size() == 1)
+					sendSingleMessage(msg, results.get(0).getRegID(), sender);
+				else {
+					List<String> regIDs = new ArrayList<String>();
+					for (UserDevice device : results)
+						regIDs.add(device.getRegID());
+					sendMulticastMessage(msg, regIDs, sender);
 				}
-			}
-			 */
-			int numSendAttempts = 0;
-
-			res = doSendViaC2dm(message, sender, push, collapseKey, deviceInfo);
-
-
-			if (res) {
-				return "Success: Message sent";
-			} else if (numSendAttempts == 0) {
-				return "Failure: User " + recipient + " not registered";
 			} else {
-				return "Failure: Unable to send message";
+				log.warning("no devices for user" + userIDParam);
 			}
-		} catch (Exception e) {
-			return "Failure: Got exception " + e;
 		} finally {
 			pm.close();
 		}
 	}
 
-	private static boolean doSendViaC2dm(String message, String sender, C2DMessaging push, String collapseKey, DeviceInfo deviceInfo) {
-		// Trim message if needed.
-		if (message.length() > 1000) {
-			message = message.substring(0, 1000) + "[...]";
+	private static void sendMulticastMessage(Message message, List<String> regIDs, Sender sender) {
+		// Recover registration ids from datastore
+		MulticastResult multicastResult;
+		try {
+			multicastResult = sender.send(message, regIDs, 3);
+		} catch (IOException e) {
+			log.log(Level.SEVERE, "Exception posting " + message, e);
+			return;
 		}
-
-		return push.sendNoRetry(deviceInfo.getDeviceRegistrationID(), collapseKey, "sender", sender, "message", message);
+		// check if any registration id must be updated
+		if (multicastResult.getCanonicalIds() != 0) {
+			List<Result> results = multicastResult.getResults();
+			for (int i = 0; i < results.size(); i++) {
+				String canonicalRegId = results.get(i).getCanonicalRegistrationId();
+				if (canonicalRegId != null) {
+					String regID = regIDs.get(i);
+					// same device has more than on registration id: update it
+					log.finest("canonicalRegId " + canonicalRegId);
+					PersistenceManager pm = PMF.get().getPersistenceManager();
+					try {
+						UserDevice device = pm.getObjectById(UserDevice.class, regID);
+						device.setRegID(canonicalRegId);
+						pm.makePersistent(device);
+					} catch (Exception e) {
+					}
+					pm.close();
+				}
+			}
+		}
+		if (multicastResult.getFailure() != 0) {
+			// there were failures, check if any could be retried
+			List<Result> results = multicastResult.getResults();
+			for (int i = 0; i < results.size(); i++) {
+				String error = results.get(i).getErrorCodeName();
+				if (error != null) {
+					String regId = regIDs.get(i);
+					log.warning("Got error (" + error + ") for regId " + regId);
+					if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+						// The app has been removed from device, so unregister it
+						PersistenceManager pm = PMF.get().getPersistenceManager();
+						try {
+							Query query = pm.newQuery(UserDevice.class);
+							query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
+							query.declareParameters("String regIDParam, String userIDParam");
+							query.deletePersistentAll();
+						} catch (Exception e) {
+							log.severe("Error unregistering device: " + e.getMessage());
+						} finally {
+							pm.close();
+						}
+					}
+				}
+			}
+		}
 	}
+
+	private static void sendSingleMessage(Message message, String regIDParam, Sender sender) {
+		log.info("Sending message to device " + regIDParam);
+		Result result;
+		try {
+			result = sender.send(message, regIDParam, 3);
+		} catch (IOException e) {
+			log.severe("Exception posting " + message + ", " + e.getMessage());
+			return;
+		}
+		if (result == null)
+			return;
+		if (result.getMessageId() != null) {
+			log.info("Succesfully sent message to device " + regIDParam);
+			String canonicalRegId = result.getCanonicalRegistrationId();
+			if (canonicalRegId != null) {
+				// same device has more than on registration id: update it
+				log.finest("canonicalRegId " + canonicalRegId);
+				PersistenceManager pm = PMF.get().getPersistenceManager();
+				UserDevice device;
+				try {
+					device = pm.getObjectById(UserDevice.class, regIDParam);
+					device.setRegID(canonicalRegId);
+					pm.makePersistent(device);
+				} catch (Exception e) {
+				}
+				pm.close();
+			}
+		} else {
+			String error = result.getErrorCodeName();
+			if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+				PersistenceManager pm = PMF.get().getPersistenceManager();
+				try {
+					// The app has been removed from device, so unregister it
+					Query query = pm.newQuery(UserDevice.class);
+					query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
+					query.declareParameters("String regIDParam, String userIDParam");
+					query.deletePersistentAll();
+				} catch (Exception e) {
+					log.severe("Error unregistering device: " + e.getMessage());
+				} finally {
+					pm.close();
+				}
+			} else {
+				log.severe("Error sending message to device " + regIDParam + ": " + error);
+			}
+		}
+	}
+
 }

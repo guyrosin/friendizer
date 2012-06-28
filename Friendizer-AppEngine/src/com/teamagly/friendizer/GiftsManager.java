@@ -10,13 +10,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.google.android.c2dm.server.PMF;
-import com.teamagly.friendizer.model.DeviceInfo;
+import com.google.android.gcm.server.Message;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.Gift;
-import com.teamagly.friendizer.model.GiftNotification;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.UserGift;
 
@@ -114,25 +111,19 @@ public class GiftsManager extends HttpServlet {
 		sender.setMoney(sender.getMoney() - gift.getValue());
 		pm.makePersistent(sender);
 
-		UserGift newGift = new UserGift(receiverID, senderID, giftID);
+		UserGift userGift = new UserGift(receiverID, senderID, giftID);
 		query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + receiverID + " && giftID == " + giftID);
 		List<UserGift> result3 = (List<UserGift>) query.execute();
 		query.closeAll();
 		if (result3.isEmpty())
-			pm.makePersistent(newGift);
+			pm.makePersistent(userGift);
 		pm.close();
 		response.getWriter().println("The gift has been sent");
 
-		// sending notification
-		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(receiverID);
-
-		GiftNotification notif = new GiftNotification(newGift, Notifications.GIFT_MSG);
-		try {
-			SendMessage.sendMessage(getServletContext(), device, notif.toC2DMMessage());
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Message msg = new Message.Builder().addData("type", NotificationType.GFT.toString())
+				.addData(Util.USER_ID, String.valueOf(senderID)).addData("giftID", String.valueOf(userGift.getGiftID()))
+				.addData("giftName", String.valueOf(gift.getName())).build();
+		SendMessage.sendMessage(receiverID, msg);
 	}
 }

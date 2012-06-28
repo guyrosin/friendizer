@@ -11,10 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-
-import com.google.android.c2dm.server.PMF;
-import com.teamagly.friendizer.model.Message;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.teamagly.friendizer.model.User;
 
 

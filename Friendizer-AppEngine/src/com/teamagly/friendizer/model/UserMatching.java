@@ -1,12 +1,11 @@
 package com.teamagly.friendizer.model;
 
-import java.util.Date;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
 public class UserMatching {
 

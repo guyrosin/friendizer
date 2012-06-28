@@ -115,7 +115,6 @@ p {
 </head>
 
 <body>
-
 	<div id="page-wrap">
 
 		<div>
@@ -136,16 +135,11 @@ p {
 				id="pic"
 				class="thumbnails">
 				<a
-					href="screenshots/splash.jpg"
-					rel="lightbox[ss]"><img
-					src="screenshots/splash_thumb.jpg"
-					alt="Splash screen"
-					class="thumb" /></a><a
 					href="screenshots/my_profile.png"
 					rel="lightbox[ss]"><img
 					src="screenshots/my_profile_thumb.png"
 					alt="Profile"
-					class="thumb" /></a> <br /> <a
+					class="thumb" /></a> <a
 					href="screenshots/achievements.png"
 					rel="lightbox[ss]"><img
 					src="screenshots/achievements_thumb.png"
@@ -164,7 +158,10 @@ p {
 					style="float: right;"
 					src="http://chart.apis.google.com/chart?cht=qr&chs=210x210&chl=http%3A//friendizer.googlecode.com/svn/trunk/Friendizer-Android/bin/Friendizer-Android.apk&chld=H|0"
 					alt="QR Code"
-					title="Scan to download" /></a>
+					title="Scan to download" /></a> <br /> <img
+					id="brought-to-you"
+					src="brought-to-you.jpg"
+					style="width: 233px; height: 133px; float: right;"></img>
 			</div>
 			<br /> <br /> <br />
 		</div>
@@ -174,6 +171,28 @@ p {
 				<i>friendizer</i> is a social Android app. It's a competitive social game based on location that offers an opportunity to meet
 				new people with common interests.
 			</p>
+			<object
+				width="500"
+				height="281">
+				<param
+					name="movie"
+					value="http://www.youtube.com/v/RsTySc1xXYk?version=3&amp;hl=en_US&amp;rel=0;hd=1"
+					wmode="transparent"></param>
+				<param
+					name="allowFullScreen"
+					value="true"></param>
+				<param
+					name="allowscriptaccess"
+					value="always"></param>
+				<embed
+					src="http://www.youtube.com/v/RsTySc1xXYk?version=3&amp;hl=en_US&amp;rel=0&hd=1"
+					type="application/x-shockwave-flash"
+					width="500"
+					height="281"
+					allowscriptaccess="always"
+					allowfullscreen="true"
+					wmode="transparent"></embed>
+			</object>
 			<br />
 			<p>
 				<i>friendizer</i> is currently under development. You can download the beta version by scanning the barcode to the right or by
@@ -197,9 +216,8 @@ p {
 
 		<div class="clear"></div>
 		<img
-			id="brought-to-you"
-			src="brought-to-you.jpg"
-			style="position: fixed; bottom: 1%; right: 1%; width: 233px; height: 133px;"></img>
+			src="icon.png"
+			style="position: fixed; top: 40%; right: 70%; width: 680px; height: 680px; z-index: -1;" />
 		<div
 			style="position: fixed; bottom: 1%; left: 1%; font-size: small; color: gray;"
 			onclick="changeTheme()">

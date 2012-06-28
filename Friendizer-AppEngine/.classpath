@@ -2,10 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/json-1.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.0.0.GA.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/c2dm-server.jar" sourcepath="war/WEB-INF/lib/c2dm-server-src.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gcm-server.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/restfb-1.6.9.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
