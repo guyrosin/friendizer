@@ -201,7 +201,7 @@
                 android:text="@string/gifts" />
         </TableRow>
 
-        <TableRow>
+        <TableRow android:layout_marginBottom="-1dp">
 
             <Button
                 android:id="@+id/btn_action_history"
@@ -209,8 +209,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/button_bottom_selector"
+                android:background="@drawable/button_middle_selector"
                 android:text="@string/action_history" />
+        </TableRow>
+        <TableRow >
+
+            <Button
+                android:id="@+id/btn_change_status"
+                style="@style/LeftAlignedButtonText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/button_bottom_selector"
+                android:text="@string/change_status" />
         </TableRow>
     </TableLayout>
 

@@ -1,17 +1,3 @@
-/*******************************************************************************
- * Copyright 2011 Google Inc. All Rights Reserved.
- * 
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
 package com.teamagly.friendizer.utils;
 
 import org.json.JSONException;
@@ -28,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.activities.AchievementsActivity;
 import com.teamagly.friendizer.activities.ChatActivity;
 import com.teamagly.friendizer.activities.FriendizerActivity;
@@ -42,57 +29,49 @@ public class MessageHandler {
 	private final static String TAG = "MessageHandler";
 
 	public static enum NotificationType {
-		MSG,
+		CHAT,
 		BUY,
 		GFT,
 		UPD,
 		ACH;
 	}
 
-	public void displayMessage(Context context, Intent intent) {
-		Bundle extras = intent.getExtras();
-		if (extras != null) {
-			try {
-				JSONObject message = new JSONObject(extras.getString("message"));
-				long userID = message.getLong("userID");
-				String text = message.optString("text");
-				NotificationType type = NotificationType.valueOf(message.getString("type"));
-				Log.d(TAG, "Got C2DM from" + userID + ", type=" + type);
-				if (type == NotificationType.MSG) { // Chat message
-					User userInfo = new User();
-					userInfo.setId(userID);
-					// Load the user's details from Facebook
-					Bundle params = new Bundle();
-					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new ChatRequestListener(context,
-							userInfo, text));
-				} else if (type == NotificationType.ACH) { // Achievement earned
-					String title = message.optString("title");
-					// Show a status bar notification
-					Intent notificationIntent = new Intent(context, AchievementsActivity.class);
-					notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-					Util.generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
-					playNotificationSound(context);
-				} else if (type == NotificationType.BUY) { // Bought by someone
-					User userInfo = new User();
-					userInfo.setId(userID);
-					// Load the user's details from Facebook
-					Bundle params = new Bundle();
-					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new BoughtRequestListener(context,
-							userInfo, text));
-				} else if (type == NotificationType.GFT) { // Received a gift
-					User userInfo = new User();
-					userInfo.setId(userID);
-					// Load the user's details from Facebook
-					Bundle params = new Bundle();
-					params.putString("fields", "name");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userID), params, new GiftRequestListener(context,
-							userInfo, text));
-				}
-			} catch (JSONException e) {
-				Log.e(TAG, e.getMessage());
-			}
+	public void handleMessage(Intent intent) {
+		Context context = FriendizerApp.getContext();
+		NotificationType type = NotificationType.valueOf(intent.getStringExtra("type"));
+		String userIDStr = intent.getStringExtra(Util.USER_ID);
+		Long userID = Long.valueOf(userIDStr);
+		Log.d(TAG, "Got a message from" + userID + ", type=" + type);
+		if (type == NotificationType.CHAT) { // Chat message
+			String chatMsg = intent.getStringExtra("text");
+			User userInfo = new User();
+			userInfo.setId(userID);
+			// Load the user's details from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name, picture");
+			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new ChatRequestListener(context, userInfo, chatMsg));
+		} else if (type == NotificationType.ACH) { // Achievement earned
+			String title = intent.getStringExtra("title");
+			// Show a status bar notification
+			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
+			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
+			Util.generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
+			playNotificationSound(context);
+		} else if (type == NotificationType.BUY) { // Bought by someone
+			User userInfo = new User();
+			userInfo.setId(userID);
+			// Load the user's details from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name, picture");
+			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new BoughtRequestListener(context, userInfo));
+		} else if (type == NotificationType.GFT) { // Received a gift
+			String giftName = intent.getStringExtra("giftName");
+			User userInfo = new User();
+			userInfo.setId(userID);
+			// Load the user's details from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name");
+			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new GiftRequestListener(context, userInfo, giftName));
 		}
 	}
 
@@ -153,14 +132,14 @@ public class MessageHandler {
 	}
 
 	public class GiftRequestListener extends BaseRequestListener {
-		String text;
 		User userInfo;
 		Context context;
+		String giftName;
 
-		public GiftRequestListener(Context context, User userInfo, String text) {
-			this.text = text;
+		public GiftRequestListener(Context context, User userInfo, String giftName) {
 			this.userInfo = userInfo;
 			this.context = context;
+			this.giftName = giftName;
 		}
 
 		@Override
@@ -176,7 +155,7 @@ public class MessageHandler {
 				// TODO: put the gift ID in the intent...
 				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				Util.generateNotification(context, "Received a gift from " + userInfo.getName(), notificationIntent);
+				Util.generateNotification(context, "Received a " + giftName + " from " + userInfo.getName(), notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);
@@ -185,12 +164,10 @@ public class MessageHandler {
 	}
 
 	public class BoughtRequestListener extends BaseRequestListener {
-		String text;
 		User userInfo;
 		Context context;
 
-		public BoughtRequestListener(Context context, User userInfo, String text) {
-			this.text = text;
+		public BoughtRequestListener(Context context, User userInfo) {
 			this.userInfo = userInfo;
 			this.context = context;
 		}

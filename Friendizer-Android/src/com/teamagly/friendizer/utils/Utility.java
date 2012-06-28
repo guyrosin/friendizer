@@ -35,10 +35,8 @@ public class Utility extends Application {
 	public User userInfo;
 	public Location location;
 
-	// private static int MAX_IMAGE_DIMENSION = 720;
-	public static final String PREFS_NAME = "FriendizerPreferences";
-	public static int DEFAULT_DISTANCE = 1000;
-	public static final String APP_ID = "273844699335189";
+	public static final String APP_ID = "273844699335189"; // Facebook app ID
+	public static final String SENDER_ID = "386379587736"; // GCM sender ID
 
 	private Utility() {
 		// Create the Facebook object using the app ID.
