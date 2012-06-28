@@ -1,8 +1,7 @@
 package com.teamagly.friendizer.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
 import com.restfb.Facebook;
 
 /**

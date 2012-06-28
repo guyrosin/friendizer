@@ -79,29 +79,9 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>dataMessagingServlet</servlet-name>
-		<servlet-class>com.google.android.c2dm.server.C2DMRetryServlet</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>dataMessagingServlet</servlet-name>
-		<url-pattern>/tasks/c2dm</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>RegisterServlet</servlet-name>
-		<servlet-class>com.teamagly.friendizer.RegisterServlet</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>UnregisterServlet</servlet-name>
 		<servlet-class>com.teamagly.friendizer.UnregisterServlet</servlet-class>
 	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>RegisterServlet</servlet-name>
-		<url-pattern>/register</url-pattern>
-	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>UnregisterServlet</servlet-name>

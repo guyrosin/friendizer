@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<datastore-indexes
+  autoGenerate="true">
+  <datastore-index kind="ChatMessage" ancestor="false" source="manual">
+        <property name="destination" direction="asc"/>
+        <property name="source" direction="asc"/>
+        <property name="time" direction="desc"/>
+    </datastore-index>
+</datastore-indexes>

@@ -7,6 +7,6 @@ public class Notifications {
 	public static final String GIFT_MSG = "Received a gift from ";
 	
 	public static enum NotificationType {
-		MSG, BUY, GFT, UPD, ACH;
+		CHAT, BUY, GFT, UPD, ACH;
 	}
 }

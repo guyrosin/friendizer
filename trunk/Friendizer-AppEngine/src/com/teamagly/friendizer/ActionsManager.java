@@ -4,15 +4,16 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.*;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-
-import com.google.android.c2dm.server.PMF;
-
-import com.teamagly.friendizer.model.*;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class ActionsManager extends HttpServlet {

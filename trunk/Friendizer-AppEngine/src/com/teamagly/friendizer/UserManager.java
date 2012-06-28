@@ -5,17 +5,21 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
-import javax.jdo.*;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-
-import com.google.android.c2dm.server.PMF;
-
-import com.restfb.*;
-
-import com.teamagly.friendizer.model.*;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.restfb.Connection;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.teamagly.friendizer.model.Like;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserDevice;
+import com.teamagly.friendizer.model.UserMatching;
 
 @SuppressWarnings("serial")
 public class UserManager extends HttpServlet {
@@ -24,9 +28,7 @@ public class UserManager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
-		if (servlet.intern() == "login")
-			login(request, response);
-		else if (servlet.intern() == "userDetails")
+		if (servlet.intern() == "userDetails")
 			userDetails(request, response);
 		else if (servlet.intern() == "ownList")
 			ownList(request, response);
@@ -36,11 +38,23 @@ public class UserManager extends HttpServlet {
 			matching(request, response);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String address = req.getRequestURI();
+		String servlet = address.substring(address.lastIndexOf("/") + 1);
+		if (servlet.intern() == "login")
+			login(req, resp);
+	}
+
 	@SuppressWarnings("unchecked")
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		long userID = Long.parseLong(request.getParameter("userID"));
-		String accesToken = request.getParameter("accessToken");
-		// String deviceRegistrationID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
+		String regID = request.getParameter(Util.REG_ID);
+		long userID = Long.parseLong(request.getParameter(Util.USER_ID));
+		String accesToken = request.getParameter(Util.ACCESS_TOKEN);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
@@ -60,34 +74,21 @@ public class UserManager extends HttpServlet {
 		}
 
 		pm.close();
-		response.getWriter().println(new UserMatching(user, 0));
+		response.getWriter().println(user.toJSONObject());
 
-		// registering the user for notifications
-		String deviceID = request.getParameter(Util.DEVICE_REGISTRATION_ID);
+		// Create/update the device registration
+		String deviceID = request.getParameter(Util.REG_ID);
 
 		if (deviceID != null) {
 			pm = PMF.get().getPersistenceManager();
-			query = pm.newQuery(DeviceInfo.class);
-			// query.addFilter(Util.DEVICE_REGISTRATION_ID, Query., deviceID);
-			// /query.addFilter(Util.DEVICE_REGISTRATION_ID, Query.JDOQL, deviceID);
-			query.setUnique(true);
-
-			query.setFilter(Util.DEVICE_REGISTRATION_ID + " == deviceID");
-			query.declareParameters("String deviceID");
-			// List<DeviceInfo> devices = (List<DeviceInfo>) query.execute(deviceID);
-
-			DeviceInfo device = (DeviceInfo) query.execute(deviceID);
-			device.setUserID(userID);
-			device.setRegistrationTimestamp(new Date());
+			UserDevice device;
+			try {
+				device = pm.getObjectById(UserDevice.class, regID); // Update the user ID
+				device.setUserID(userID);
+			} catch (Exception e) { // Create a new device
+				device = new UserDevice(regID, userID);
+			}
 			pm.makePersistent(device);
-			// DeviceInfo device = devices.get(0);
-			/*
-			 * if (device.getUserID() == null || device.getUserID() != userID) {
-			 * device.setUserID(userID);
-			 * device.setRegistrationTimestamp(new Date());
-			 * pm.makePersistent(device);
-			 * }
-			 */
 			pm.close();
 		}
 	}
@@ -178,12 +179,12 @@ public class UserManager extends HttpServlet {
 		if (result2.isEmpty())
 			throw new ServletException("This user doesn't exist");
 		User user2 = result2.get(0);
-		
+
 		if (userID1 == 1658254543 || userID2 == 1658254543) {
 			response.getWriter().println(95);
 			return;
 		}
-		
+
 		try {
 			// Get the access token of user1
 			FacebookClient facebookClient1 = new DefaultFacebookClient(user1.getToken());

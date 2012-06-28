@@ -11,14 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.google.android.c2dm.server.PMF;
+import com.google.android.gcm.server.Message;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.DeviceInfo;
-import com.teamagly.friendizer.model.Message;
-import com.teamagly.friendizer.model.Notification;
+import com.teamagly.friendizer.model.ChatMessage;
 
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
@@ -45,7 +41,7 @@ public class InboxManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Message message = new Message(source, destination, text);
+		ChatMessage message = new ChatMessage(source, destination, text);
 
 		try {
 			pm.makePersistent(message);
@@ -53,17 +49,10 @@ public class InboxManager extends HttpServlet {
 			pm.close();
 		}
 		out.println(message);
-		
-		
-		DeviceInfo device = DatastoreHelper.getInstance().getDeviceInfo(destination);
-	
-		try {
-			SendMessage.sendMessage(getServletContext(), device, message.toC2DMMessage());
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
+		Message msg = new Message.Builder().addData("type", NotificationType.CHAT.toString())
+				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).build();
+		SendMessage.sendMessage(destination, msg);
 	}
 
 	private void getConversation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -78,19 +67,18 @@ public class InboxManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Query query = pm.newQuery(Message.class);
-		query.setFilter("(source == user1 || source == user2)"
-				+ " && (destination == user2 || destination == user1)");
+		Query query = pm.newQuery(ChatMessage.class);
+		query.setFilter("(source == user1 || source == user2)" + " && (destination == user2 || destination == user1)");
 		query.setOrdering("time desc");
 		query.setRange(from, to);
 		query.declareParameters("long user1, long user2");
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(user1, user2);
+			List<ChatMessage> results = (List<ChatMessage>) query.execute(user1, user2);
 			if (!results.isEmpty()) {
 				JSONArray messages = new JSONArray();
-				for (Message m : results) {
+				for (ChatMessage m : results) {
 					messages.put(m.toJSONObject());
 				}
 				out.println(messages);
@@ -108,17 +96,17 @@ public class InboxManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Query query = pm.newQuery(Message.class);
+		Query query = pm.newQuery(ChatMessage.class);
 		query.setFilter("destination == dest && unread == true");
 		query.setOrdering("id time");
 		query.declareParameters("long dest");
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(destination);
+			List<ChatMessage> results = (List<ChatMessage>) query.execute(destination);
 			if (!results.isEmpty()) {
 				JSONArray messages = new JSONArray();
-				for (Message m : results) {
+				for (ChatMessage m : results) {
 					m.setUnread(false);
 					pm.makePersistent(m);
 					messages.put(m);
@@ -139,16 +127,16 @@ public class InboxManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Query query = pm.newQuery(Message.class);
+		Query query = pm.newQuery(ChatMessage.class);
 		query.setFilter("source == src && unread == true");
 		query.setOrdering("id desc");
 		query.declareParameters("long src");
 
 		try {
 			@SuppressWarnings("unchecked")
-			List<Message> results = (List<Message>) query.execute(userId);
+			List<ChatMessage> results = (List<ChatMessage>) query.execute(userId);
 			if (!results.isEmpty()) {
-				for (Message m : results) {
+				for (ChatMessage m : results) {
 					out.println(m);
 					m.setUnread(false);
 					pm.makePersistent(m);

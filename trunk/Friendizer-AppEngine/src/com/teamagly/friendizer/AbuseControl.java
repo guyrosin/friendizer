@@ -7,10 +7,7 @@ import javax.jdo.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import org.json.JSONArray;
-
-import com.google.android.c2dm.server.PMF;
-
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
