@@ -168,6 +168,12 @@ public class MyProfileFragment extends SherlockFragment {
 				// startActivity(intent);
 			}
 		});
+		// Define the status change button
+		activity.findViewById(R.id.btn_change_status).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				showStatusDialog();
+			}
+		});
 	}
 
 	protected void updateFriendizerViews() {

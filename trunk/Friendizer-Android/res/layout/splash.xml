@@ -12,17 +12,17 @@
         android:contentDescription="@string/friendizer_logo"
         android:gravity="center_horizontal"
         android:paddingTop="30dp"
+        android:paddingBottom="20dp"
         android:src="@drawable/friendizer"
         android:textSize="36sp" />
 
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_gravity="center"
-        android:paddingTop="20dp"
-        android:scaleType="center"
-        android:src="@drawable/radar_icon" />
+        android:scaleType="fitXY"
+        android:src="@drawable/icon" />
 
     <TextView
         android:id="@+id/status"

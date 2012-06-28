@@ -2,12 +2,13 @@ package com.teamagly.friendizer.activities;
 
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -25,11 +26,12 @@ import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
+import com.google.android.gcm.GCMRegistrar;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.FacebookUser;
+import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.DeviceRegistrar;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.SessionEvents;
 import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
@@ -39,7 +41,7 @@ import com.teamagly.friendizer.utils.Util;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
- * The login flow is as follows: Facebook login -> C2DM registration -> friendizer login
+ * The login flow is as follows: Facebook login -> GCM registration -> friendizer login
  */
 public class SplashActivity extends SherlockActivity {
 	private final String TAG = getClass().getName();
@@ -48,41 +50,57 @@ public class SplashActivity extends SherlockActivity {
 	UserRequestListener userRequestListener;
 	private String requestID;
 	private Context context = this;
-	private ProgressDialog dialogC2DM;
 	private ProgressDialog dialogFriendizer;
+
+	// After GCM registration, login to friendizer
+	AsyncTask<Void, Void, Boolean> friendizerLoginTask = new AsyncTask<Void, Void, Boolean>() {
+
+		protected Boolean doInBackground(Void... v) {
+			// Get the registrationID
+			String regID = GCMRegistrar.getRegistrationId(context);
+			if (regID == null || regID.length() == 0)
+				return false;
+			FriendizerUser fzUser = ServerFacade.login(Utility.getInstance().userInfo.getId(),
+					Utility.getInstance().facebook.getAccessToken(), regID);
+			if (fzUser == null)
+				return false;
+			else {
+				Utility.getInstance().userInfo.updateFriendizerData(fzUser);
+				return true;
+			}
+		}
+
+		protected void onPostExecute(Boolean result) {
+			dialogFriendizer.dismiss(); // Dismiss the progress dialog
+			if (result) {
+				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
+						.show();
+				// Continue to the main activity
+				Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the
+																									// activity
+																									// stack
+				startActivity(intent);
+				finish();
+			} else {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setMessage("An error occured. Please restart the app").setCancelable(false)
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								finish();
+							}
+						}).show();
+			}
+		}
+	};
 
 	/**
 	 * A {@link BroadcastReceiver} to receive the response from a register or unregister request, and to update the UI.
 	 */
-	private final BroadcastReceiver mUpdateUIReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String accountName = intent.getStringExtra(Util.ACCOUNT_NAME);
-			int status = intent.getIntExtra(Util.CONNECTION_STATUS, DeviceRegistrar.ERROR_STATUS);
-			String message = null;
-			String connectionStatus = Util.DISCONNECTED;
-			if (status == DeviceRegistrar.REGISTERED_STATUS) {
-				message = getResources().getString(R.string.registration_succeeded);
-				connectionStatus = Util.CONNECTED;
-				enterFriendizer();
-			} else if (status == DeviceRegistrar.UNREGISTERED_STATUS) {
-				message = getResources().getString(R.string.unregistration_succeeded);
-			} else {
-				message = getResources().getString(R.string.registration_error);
-			}
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					dialogC2DM.dismiss();
-				}
-			});
-
-			// Set connection status
-			SharedPreferences prefs = Util.getSharedPreferences(context);
-			prefs.edit().putString(Util.CONNECTION_STATUS, connectionStatus).commit();
-
-			// Display a notification
-			Util.generateNotification(context, String.format(message, accountName), new Intent(context, FriendizerActivity.class));
+			friendizerLoginTask.execute();
 		}
 	};
 
@@ -101,7 +119,7 @@ public class SplashActivity extends SherlockActivity {
 		}
 
 		// Register a receiver to provide register/unregister notifications
-		registerReceiver(mUpdateUIReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
+		registerReceiver(mHandleMessageReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
 
 		Intent intent = getIntent();
 		// Parse any incoming Facebook notifications and save
@@ -131,13 +149,8 @@ public class SplashActivity extends SherlockActivity {
 		SessionEvents.addAuthListener(new FBLoginListener());
 		SessionEvents.addLogoutListener(new FBLogoutListener());
 
-		dialogC2DM = new ProgressDialog(context);
-		dialogC2DM.setMessage("Connecting to Google, please wait...");
-		dialogC2DM.setCancelable(false);
-
 		dialogFriendizer = new ProgressDialog(context);
 		dialogFriendizer.setMessage("Logging in, please wait...");
-		dialogFriendizer.setCancelable(false);
 
 		// Restore the Facebook session if one exists
 		if (SessionStore.restore(Utility.getInstance().facebook, this)) {
@@ -159,10 +172,10 @@ public class SplashActivity extends SherlockActivity {
 
 	@Override
 	public void onDestroy() {
-		try {
-			unregisterReceiver(mUpdateUIReceiver);
-		} catch (Exception e) {
-		}
+		if (friendizerLoginTask != null)
+			friendizerLoginTask.cancel(true);
+		unregisterReceiver(mHandleMessageReceiver);
+		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
 	}
 
@@ -201,11 +214,11 @@ public class SplashActivity extends SherlockActivity {
 	 * (non-Javadoc)
 	 * @see android.app.Activity#onBackPressed()
 	 */
-	@Override
-	public void onBackPressed() {
-		// Quit the app
-		finish();
-	}
+	// @Override
+	// public void onBackPressed() {
+	// // Quit the app
+	// finish();
+	// }
 
 	/*
 	 * Request user details from Facebook
@@ -233,95 +246,30 @@ public class SplashActivity extends SherlockActivity {
 				final User userInfo = new User(new FacebookUser(jsonObject));
 				Utility.getInstance().userInfo = userInfo;
 
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						dialogFriendizer.show();
+					}
+				});
+
 				/*
-				 * Login/Register to Google Accounts
+				 * Login/Register to GCM
 				 */
-				SharedPreferences prefs = Util.getSharedPreferences(context);
-				String connectionStatus = prefs.getString(Util.CONNECTION_STATUS, Util.DISCONNECTED);
-				// Disconnected -> register to C2DM
-				if (Util.DISCONNECTED.equals(connectionStatus)) {
-					// Move to the Accounts activity and show a progress dialog
-					startActivity(new Intent(context, AccountsActivity.class));
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							dialogC2DM.show();
-						}
-					});
-				}
-				// Connecting -> show progress dialog
-				else if (Util.CONNECTING.equals(connectionStatus))
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							dialogC2DM.show();
-						}
-					});
-				// Connected -> login to friendizer to proceed
-				else if (Util.CONNECTED.equals(connectionStatus)) {
-					handler.post(new Runnable() {
-						@Override
-						public void run() {
-							dialogFriendizer.show(); // Show a progress dialog
-						}
-					});
-					enterFriendizer();
-				}
+				GCMRegistrar.checkDevice(context);
+				// Make sure the manifest was properly set - comment out this line
+				// while developing the app, then uncomment it when it's ready.
+				GCMRegistrar.checkManifest(context);
+				final String regID = GCMRegistrar.getRegistrationId(context);
+				if (regID.equals("")) // Register to GCM
+					GCMRegistrar.register(context, Utility.SENDER_ID);
+				else
+					friendizerLoginTask.execute();
 			} catch (Exception e) {
 				Log.w(TAG, "The response from Facebook: " + response);
 				Log.e(TAG, e.getMessage());
 			} finally {
 				completed = true;
-			}
-		}
-	}
-
-	protected void enterFriendizer() {
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				dialogFriendizer.show(); // Show a progress dialog
-				new EnterFriendizerTask().execute();
-			}
-		});
-	}
-
-	/*
-	 * Login and retrieve the user details from Friendizer Note: Don't use this task directly! use the method enterFriendizer()!
-	 */
-	protected class EnterFriendizerTask extends AsyncTask<Void, Void, Boolean> {
-
-		protected Boolean doInBackground(Void... v) {
-			// Get the deviceRegistrationID
-			SharedPreferences prefs = Util.getSharedPreferences(context);
-			String deviceRegistrationID = prefs.getString(Util.DEVICE_REGISTRATION_ID, "");
-			try {
-				Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.login(Utility.getInstance().userInfo.getId(),
-						Utility.getInstance().facebook.getAccessToken(), deviceRegistrationID, context));
-			} catch (Exception e) {
-				Log.e(TAG, e.getMessage());
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						Toast.makeText(context, "Couldn't login to friendizer!", Toast.LENGTH_LONG).show();
-						dialogFriendizer.dismiss(); // Dismiss the progress dialog
-					}
-				});
-				return false;
-			}
-			return true;
-		}
-
-		protected void onPostExecute(Boolean result) {
-			if (result) {
-				Toast.makeText(SplashActivity.this, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!",
-						Toast.LENGTH_LONG).show();
-				dialogFriendizer.dismiss(); // Dismiss the progress dialog
-				// Continue to the main activity
-				Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the activity stack
-				startActivity(intent);
-				finish();
 			}
 		}
 	}
