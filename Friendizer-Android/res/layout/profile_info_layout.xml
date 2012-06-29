@@ -1,228 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="8dp"
-    android:paddingRight="8dp"
-    android:paddingTop="4dp" >
+    android:layout_height="wrap_content" >
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/image_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:gravity="center"
-            android:orientation="vertical" >
-
-            <ImageView
-                android:id="@+id/user_pic"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/image_border"
-                android:contentDescription="Profile Picture" />
-
-            <TextView
-                android:id="@+id/level"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="8dp"
-            android:layout_toRightOf="@+id/image_layout"
-            android:paddingBottom="5dp"
-            android:text=""
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/age"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/name"
-            android:layout_marginRight="8dp"
-            android:paddingBottom="5dp" />
-
-        <TextView
-            android:id="@+id/gender"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/age"
-            android:layout_toRightOf="@+id/age" />
-
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/age"
-            android:paddingBottom="5dp"
-            android:textSize="16sp" />
-
-        <com.teamagly.friendizer.widgets.TextProgressBar
-            android:id="@+id/xp_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="20dp"
-            android:layout_alignLeft="@+id/name"
-            android:layout_below="@+id/status"
-            android:indeterminateOnly="false"
-            android:progressDrawable="@drawable/xp_bar_states" />
-    </RelativeLayout>
-
-    <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp" >
-
-        <TableRow>
-
-            <TextView
-                android:id="@+id/value"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="0.25"
-                android:gravity="center"
-                android:text=""
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/money"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="0.25"
-                android:gravity="center"
-                android:text=""
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/owns"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="0.25"
-                android:gravity="center"
-                android:text=""
-                android:textSize="20sp" />
-
-            <ImageView
-                android:id="@+id/owner_pic"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_weight="0.25"
-                android:gravity="center" />
-        </TableRow>
-
-        <TableRow android:paddingTop="1dp" >
-
-            <TextView
-                android:id="@+id/value_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:gravity="center_horizontal"
-                android:text="@string/points"
-                android:textColor="@color/soft_grey" />
-
-            <TextView
-                android:id="@+id/money_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:gravity="center_horizontal"
-                android:text="@string/coins"
-                android:textColor="@color/soft_grey" />
-
-            <TextView
-                android:id="@+id/owns_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:gravity="center_horizontal"
-                android:text="@string/owned"
-                android:textColor="@color/soft_grey" />
-
-            <TextView
-                android:id="@+id/owner_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.25"
-                android:gravity="center_horizontal"
-                android:text="@string/owner"
-                android:textColor="@color/soft_grey" />
-        </TableRow>
-    </TableLayout>
-
-    <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/buttons"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         android:paddingTop="4dp" >
 
-        <TableRow android:layout_marginBottom="-1dp" >
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
 
-            <Button
-                android:id="@+id/btn_achievements"
-                style="@style/LeftAlignedButtonText"
+            <LinearLayout
+                android:id="@+id/image_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/button_top_selector"
-                android:text="@string/achievements" />
-        </TableRow>
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:orientation="vertical" >
 
-        <TableRow android:layout_marginBottom="-1dp" >
+                <ImageView
+                    android:id="@+id/user_pic"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/image_border"
+                    android:contentDescription="Profile Picture" />
 
-            <Button
-                android:id="@+id/btn_gifts"
-                style="@style/LeftAlignedButtonText"
+                <TextView
+                    android:id="@+id/level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/button_middle_selector"
-                android:text="@string/gifts" />
-        </TableRow>
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="8dp"
+                android:layout_toRightOf="@+id/image_layout"
+                android:paddingBottom="5dp"
+                android:text=""
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-        <TableRow android:layout_marginBottom="-1dp">
-
-            <Button
-                android:id="@+id/btn_action_history"
-                style="@style/LeftAlignedButtonText"
+            <TextView
+                android:id="@+id/age"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/button_middle_selector"
-                android:text="@string/action_history" />
-        </TableRow>
-        <TableRow >
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/name"
+                android:layout_marginRight="8dp"
+                android:paddingBottom="5dp" />
 
-            <Button
-                android:id="@+id/btn_change_status"
-                style="@style/LeftAlignedButtonText"
+            <TextView
+                android:id="@+id/gender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/button_bottom_selector"
-                android:text="@string/change_status" />
-        </TableRow>
-    </TableLayout>
+                android:layout_alignBaseline="@+id/age"
+                android:layout_toRightOf="@+id/age" />
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/age"
+                android:paddingBottom="5dp"
+                android:textSize="16sp" />
+
+            <com.teamagly.friendizer.widgets.TextProgressBar
+                android:id="@+id/xp_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="20dp"
+                android:layout_alignLeft="@+id/name"
+                android:layout_below="@+id/status"
+                android:indeterminateOnly="false"
+                android:progressDrawable="@drawable/xp_bar_states" />
+        </RelativeLayout>
+
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp" >
+
+            <TableRow>
+
+                <TextView
+                    android:id="@+id/value"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text=""
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/money"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text=""
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/owns"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.25"
+                    android:gravity="center"
+                    android:text=""
+                    android:textSize="20sp" />
+
+                <ImageView
+                    android:id="@+id/owner_pic"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="0.25"
+                    android:gravity="center" />
+            </TableRow>
+
+            <TableRow android:paddingTop="1dp" >
+
+                <TextView
+                    android:id="@+id/value_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/points"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/money_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/coins"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/owns_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/owned"
+                    android:textColor="@color/soft_grey" />
+
+                <TextView
+                    android:id="@+id/owner_title"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.25"
+                    android:gravity="center_horizontal"
+                    android:text="@string/owner"
+                    android:textColor="@color/soft_grey" />
+            </TableRow>
+        </TableLayout>
+
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/buttons"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="4dp" >
+
+            <TableRow android:layout_marginBottom="-1dp" >
+
+                <Button
+                    android:id="@+id/btn_achievements"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_top_selector"
+                    android:text="@string/achievements" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="-1dp" >
+
+                <Button
+                    android:id="@+id/btn_gifts"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_middle_selector"
+                    android:text="@string/gifts" />
+            </TableRow>
+
+            <TableRow android:layout_marginBottom="-1dp" >
+
+                <Button
+                    android:id="@+id/btn_action_history"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_middle_selector"
+                    android:text="@string/action_history" />
+            </TableRow>
+
+            <TableRow>
+
+                <Button
+                    android:id="@+id/btn_change_status"
+                    style="@style/LeftAlignedButtonText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bottom_selector"
+                    android:text="@string/change_status" />
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+
+</ScrollView>

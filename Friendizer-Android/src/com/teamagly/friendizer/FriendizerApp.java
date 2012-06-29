@@ -17,21 +17,6 @@ public class FriendizerApp extends Application {
 		instance = this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.app.Application#onCreate()
-	 */
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		ImageLoader imageLoader = ImageLoader.getInstance();
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
-		.threadPoolSize(5)
-		.threadPriority(Thread.MAX_PRIORITY)
-		.build();
-		imageLoader.init(config);
-	}
-
 	/**
 	 * @return the app's context
 	 */
@@ -39,4 +24,17 @@ public class FriendizerApp extends Application {
 		return instance;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see android.app.Application#onCreate()
+	 */
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		// Initialize the Image Loader
+		ImageLoader imageLoader = ImageLoader.getInstance();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).threadPoolSize(5)
+				.threadPriority(Thread.MAX_PRIORITY).build();
+		imageLoader.init(config);
+	}
 }
