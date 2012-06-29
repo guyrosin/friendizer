@@ -32,14 +32,13 @@
 
     <!-- Permission to check the user location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- For caching -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".FriendizerApp"
-        android:icon="@drawable/radar_icon"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:logo="@drawable/friendizer_white"
         android:screenOrientation="portrait"
@@ -71,7 +70,7 @@
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >
         </activity>
-
+        <!-- GCM -->
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >

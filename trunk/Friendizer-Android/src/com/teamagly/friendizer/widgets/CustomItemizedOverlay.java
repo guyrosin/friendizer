@@ -37,6 +37,9 @@ public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayI
 
 	public void addOverlay(CustomOverlayItem overlay) {
 		mOverlays.add(overlay);
+	}
+
+	public void populateNow() {
 		populate();
 	}
 

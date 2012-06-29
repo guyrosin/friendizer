@@ -44,8 +44,9 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	 */
 	protected void requestFriends() {
 		Bundle params = new Bundle();
-		// Query for the friends who are using Friendizer, ordered by name
-		String query = "select name, uid, pic_square, sex, birthday_date, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by name";
+		// Query for the friends who are using Friendizer, ordered by uid
+		// Note: must order by uid (same as ownList servlet) so the next for loop will work!
+		String query = "select name, uid, pic_square, sex, birthday_date, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by uid";
 		params.putString("method", "fql.query");
 		params.putString("query", query);
 		Utility.getInstance().mAsyncRunner.request(null, params, new FriendsRequestListener());

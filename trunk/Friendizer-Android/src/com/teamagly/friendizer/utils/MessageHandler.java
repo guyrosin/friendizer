@@ -4,17 +4,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.teamagly.friendizer.FriendizerApp;
+import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.activities.AchievementsActivity;
 import com.teamagly.friendizer.activities.ChatActivity;
 import com.teamagly.friendizer.activities.FriendizerActivity;
@@ -39,7 +44,7 @@ public class MessageHandler {
 	public void handleMessage(Intent intent) {
 		Context context = FriendizerApp.getContext();
 		NotificationType type = NotificationType.valueOf(intent.getStringExtra("type"));
-		String userIDStr = intent.getStringExtra(Util.USER_ID);
+		String userIDStr = intent.getStringExtra(Utility.USER_ID);
 		Long userID = Long.valueOf(userIDStr);
 		Log.d(TAG, "Got a message from" + userID + ", type=" + type);
 		if (type == NotificationType.CHAT) { // Chat message
@@ -55,7 +60,7 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			Util.generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
+			generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
 			playNotificationSound(context);
 		} else if (type == NotificationType.BUY) { // Bought by someone
 			User userInfo = new User();
@@ -73,6 +78,29 @@ public class MessageHandler {
 			params.putString("fields", "name");
 			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new GiftRequestListener(context, userInfo, giftName));
 		}
+	}
+
+	/**
+	 * Display a notification containing the given string.
+	 */
+	public static void generateNotification(Context context, String message, Intent intent) {
+		int icon = R.drawable.icon;
+		long when = System.currentTimeMillis();
+
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setContentTitle("friendizer")
+				.setContentText(message).setSmallIcon(icon).setWhen(when)
+				.setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT))
+				.setAutoCancel(true);
+
+		SharedPreferences settings = Utility.getSharedPreferences();
+		int notificatonID = settings.getInt("notificationID", 0);
+
+		NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.notify(notificatonID, builder.getNotification());
+
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putInt("notificationID", ++notificatonID % 32);
+		editor.commit();
 	}
 
 	private void playNotificationSound(Context context) {
@@ -119,8 +147,7 @@ public class MessageHandler {
 							// Show a status bar notification
 							Intent notificationIntent = new Intent(context, ChatActivity.class);
 							notificationIntent.putExtra("user", userInfo);
-							Util.generateNotification(context, "Message from " + userInfo.getName() + ": " + text,
-									notificationIntent);
+							generateNotification(context, "Message from " + userInfo.getName() + ": " + text, notificationIntent);
 							playNotificationSound(context);
 						}
 					}
@@ -155,7 +182,7 @@ public class MessageHandler {
 				// TODO: put the gift ID in the intent...
 				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				Util.generateNotification(context, "Received a " + giftName + " from " + userInfo.getName(), notificationIntent);
+				generateNotification(context, "Received a " + giftName + " from " + userInfo.getName(), notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);
@@ -185,7 +212,7 @@ public class MessageHandler {
 				// TODO: should redirect to the buyer's profile (problem is the user object is partial)
 				Intent notificationIntent = new Intent(context, FriendizerActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				Util.generateNotification(context, "You've been bought by " + userInfo.getName(), notificationIntent);
+				generateNotification(context, "You've been bought by " + userInfo.getName(), notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);

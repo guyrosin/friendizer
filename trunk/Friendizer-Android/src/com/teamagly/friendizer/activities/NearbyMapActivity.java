@@ -97,7 +97,7 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		meButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				zoomMyLoation();
+				zoomMyLocation();
 			}
 		});
 
@@ -141,7 +141,7 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		mAccelLast = SensorManager.GRAVITY_EARTH;
 	}
 
-	protected void zoomMyLoation() {
+	protected void zoomMyLocation() {
 		if (myLocationPoint != null) {
 			mapView.getController().animateTo(myLocationPoint);
 			mapView.getController().setZoom(17);
@@ -162,12 +162,12 @@ public class NearbyMapActivity extends SherlockMapActivity {
 
 		if (Utility.getInstance().location != null) {
 			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
-			CustomOverlayItem overlayitem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo, markerLayout);
-			myItemizedOverlay.addOverlay(overlayitem);
-			zoomMyLoation();
+			CustomOverlayItem myOverlayItem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo, markerLayout);
+			myItemizedOverlay.addOverlay(myOverlayItem);
+			zoomMyLocation();
 		}
-
-		mapView.postInvalidate();
+		myItemizedOverlay.populateNow();
+		mapView.invalidate();
 
 		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 				SensorManager.SENSOR_DELAY_NORMAL);
@@ -214,8 +214,9 @@ public class NearbyMapActivity extends SherlockMapActivity {
 							Bundle params = new Bundle();
 							try {
 								// Request the details of each nearby user
+								// Note: must order by uid (same as ownList servlet) so the next for loop will work!
 								String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
-										+ IDsBuilder.toString() + ") order by name";
+										+ IDsBuilder.toString() + ") order by uid";
 								params.putString("method", "fql.query");
 								params.putString("query", query);
 								String response = Utility.getInstance().facebook.request(params);
@@ -233,8 +234,10 @@ public class NearbyMapActivity extends SherlockMapActivity {
 										}
 									});
 								}
+								nearbyUsersItemizedOverlay.populateNow();
+								mapView.invalidate();
 							} catch (Exception e) {
-								Log.e(TAG, "ROFL" + e.getMessage());
+								Log.e(TAG, e.getMessage());
 							} finally {
 								runOnUiThread(new Runnable() {
 									@Override

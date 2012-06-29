@@ -37,7 +37,6 @@ import com.teamagly.friendizer.utils.SessionEvents;
 import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
 import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
 import com.teamagly.friendizer.utils.SessionStore;
-import com.teamagly.friendizer.utils.Util;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
@@ -80,6 +79,7 @@ public class SplashActivity extends SherlockActivity {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the
 																									// activity
 																									// stack
+				Utility.getInstance().initLocation(context);
 				startActivity(intent);
 				finish();
 			} else {
@@ -119,7 +119,7 @@ public class SplashActivity extends SherlockActivity {
 		}
 
 		// Register a receiver to provide register/unregister notifications
-		registerReceiver(mHandleMessageReceiver, new IntentFilter(Util.UPDATE_UI_INTENT));
+		registerReceiver(mHandleMessageReceiver, new IntentFilter(Utility.REGISTRATION_INTENT));
 
 		Intent intent = getIntent();
 		// Parse any incoming Facebook notifications and save
@@ -209,16 +209,6 @@ public class SplashActivity extends SherlockActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		Utility.getInstance().facebook.authorizeCallback(requestCode, resultCode, data);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.app.Activity#onBackPressed()
-	 */
-	// @Override
-	// public void onBackPressed() {
-	// // Quit the app
-	// finish();
-	// }
 
 	/*
 	 * Request user details from Facebook

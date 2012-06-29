@@ -9,7 +9,6 @@ import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
 import com.teamagly.friendizer.utils.MessageHandler;
 import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Util;
 import com.teamagly.friendizer.utils.Utility;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -52,11 +51,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 	@Override
 	protected void onRegistered(Context context, final String regId) {
 		// Store registration ID on shared preferences
-		SharedPreferences settings = Util.getSharedPreferences();
+		SharedPreferences settings = Utility.getSharedPreferences();
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString(GCMRegistrar.getRegistrationId(context), regId);
 		editor.commit();
-		getBaseContext().sendBroadcast(new Intent(Util.UPDATE_UI_INTENT));
+		getBaseContext().sendBroadcast(new Intent(Utility.REGISTRATION_INTENT));
 	}
 
 	/*
