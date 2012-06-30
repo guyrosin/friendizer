@@ -24,8 +24,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Permission to retrieve the list of accounts in the Accounts Service -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <!-- Permission to request authtokens from the AccountManager -->
-    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <!-- Necessary to check if the user has internet access -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -55,7 +53,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.DashboardActivity" />
-        <activity android:name=".activities.FriendizerActivity" />
+        <activity android:name=".activities.FriendizerActivity" android:launchMode="singleTop" />
         <activity android:name=".activities.FriendProfileActivity" />
         <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.ChatActivity" />

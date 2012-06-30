@@ -28,10 +28,11 @@ import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.User;
 
 /**
- * Handles incoming C2DM messages
+ * Handles incoming GCM messages
  */
 public class MessageHandler {
 	private final static String TAG = "MessageHandler";
+	private final static int APP_ICON_RES_ID = R.drawable.ic_launcher;
 
 	public static enum NotificationType {
 		CHAT,
@@ -46,7 +47,6 @@ public class MessageHandler {
 		NotificationType type = NotificationType.valueOf(intent.getStringExtra("type"));
 		String userIDStr = intent.getStringExtra(Utility.USER_ID);
 		Long userID = Long.valueOf(userIDStr);
-		Log.d(TAG, "Got a message from" + userID + ", type=" + type);
 		if (type == NotificationType.CHAT) { // Chat message
 			String chatMsg = intent.getStringExtra("text");
 			User userInfo = new User();
@@ -60,7 +60,7 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "You've reached an achievement: " + title, notificationIntent);
+			generateNotification(context, "Achievement Earned", title, APP_ICON_RES_ID, notificationIntent);
 			playNotificationSound(context);
 		} else if (type == NotificationType.BUY) { // Bought by someone
 			User userInfo = new User();
@@ -83,14 +83,16 @@ public class MessageHandler {
 	/**
 	 * Display a notification containing the given string.
 	 */
-	public static void generateNotification(Context context, String message, Intent intent) {
-		int icon = R.drawable.icon;
+	public static void generateNotification(Context context, String title, String message, int smallIconResID, Intent intent) {
 		long when = System.currentTimeMillis();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setContentTitle("friendizer")
-				.setContentText(message).setSmallIcon(icon).setWhen(when)
-				.setContentIntent(PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setContentTitle(title)
+				.setContentText(message).setWhen(when).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
 				.setAutoCancel(true);
+		if (smallIconResID > 0)
+			builder.setSmallIcon(smallIconResID);
+		// if (bigIconResID >0)
+		// builder.setLargeIcon(context.getResources().getDrawable(bigIconResID));
 
 		SharedPreferences settings = Utility.getSharedPreferences();
 		int notificatonID = settings.getInt("notificationID", 0);
@@ -147,7 +149,7 @@ public class MessageHandler {
 							// Show a status bar notification
 							Intent notificationIntent = new Intent(context, ChatActivity.class);
 							notificationIntent.putExtra("user", userInfo);
-							generateNotification(context, "Message from " + userInfo.getName() + ": " + text, notificationIntent);
+							generateNotification(context, userInfo.getName(), text, APP_ICON_RES_ID, notificationIntent);
 							playNotificationSound(context);
 						}
 					}
@@ -182,7 +184,8 @@ public class MessageHandler {
 				// TODO: put the gift ID in the intent...
 				Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				generateNotification(context, "Received a " + giftName + " from " + userInfo.getName(), notificationIntent);
+				generateNotification(context, "Received a " + giftName, "From " + userInfo.getName(), APP_ICON_RES_ID,
+						notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);
@@ -212,7 +215,8 @@ public class MessageHandler {
 				// TODO: should redirect to the buyer's profile (problem is the user object is partial)
 				Intent notificationIntent = new Intent(context, FriendizerActivity.class);
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-				generateNotification(context, "You've been bought by " + userInfo.getName(), notificationIntent);
+				generateNotification(context, "You've been bought in friendizer", "By " + userInfo.getName(), APP_ICON_RES_ID,
+						notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);

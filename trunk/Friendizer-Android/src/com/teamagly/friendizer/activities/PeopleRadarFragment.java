@@ -94,7 +94,6 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.d(TAG, "PeopleRadar onResume()");
 		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 				SensorManager.SENSOR_DELAY_NORMAL);
 	}
@@ -191,7 +190,10 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_map: // Move to the map activity
-			startActivity(new Intent(activity, NearbyMapActivity.class));
+			startActivity(new Intent(activity, NearbyMapActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+					| Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+			activity.overridePendingTransition(0, 0);
+			activity.finish();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

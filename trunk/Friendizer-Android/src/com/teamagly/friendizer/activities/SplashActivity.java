@@ -75,21 +75,13 @@ public class SplashActivity extends SherlockActivity {
 				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
 						.show();
 				// Continue to the main activity
-				Intent intent = new Intent(SplashActivity.this, FriendizerActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); // Clear the
-																									// activity
-																									// stack
+				Intent intent = new Intent(SplashActivity.this, NearbyMapActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				Utility.getInstance().initLocation(context);
 				startActivity(intent);
 				finish();
 			} else {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setMessage("An error occured. Please restart the app").setCancelable(false)
-						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								finish();
-							}
-						}).show();
+				showErrorDialog("Couldn't connect to friendizer");
 			}
 		}
 	};
@@ -170,6 +162,16 @@ public class SplashActivity extends SherlockActivity {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see android.app.Activity#onBackPressed()
+	 */
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		finish();
+	}
+
 	@Override
 	public void onDestroy() {
 		if (friendizerLoginTask != null)
@@ -177,6 +179,16 @@ public class SplashActivity extends SherlockActivity {
 		unregisterReceiver(mHandleMessageReceiver);
 		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
+	}
+
+	protected void showErrorDialog(String errorMsg) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(errorMsg + ". Please restart the app").setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						finish();
+					}
+				}).show();
 	}
 
 	/**
@@ -258,6 +270,12 @@ public class SplashActivity extends SherlockActivity {
 			} catch (Exception e) {
 				Log.w(TAG, "The response from Facebook: " + response);
 				Log.e(TAG, e.getMessage());
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						showErrorDialog("Couldn't connect to Facebook");
+					}
+				});
 			} finally {
 				completed = true;
 			}

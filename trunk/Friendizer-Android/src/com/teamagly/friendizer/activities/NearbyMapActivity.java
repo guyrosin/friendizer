@@ -1,5 +1,6 @@
 package com.teamagly.friendizer.activities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockMapActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -43,11 +46,12 @@ import com.teamagly.friendizer.utils.Utility;
 import com.teamagly.friendizer.widgets.CustomItemizedOverlay;
 import com.teamagly.friendizer.widgets.CustomOverlayItem;
 
-public class NearbyMapActivity extends SherlockMapActivity {
+public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.TabListener {
 
-	private final String TAG = "NearbyMapActivity";
+	private final String TAG = getClass().getName();
+
 	ActionBar actionBar;
-
+	ArrayList<Integer> tabs = new ArrayList<Integer>();
 	protected TapControlledMapView mapView;
 	protected List<Overlay> mapOverlays;
 	protected Drawable stub;
@@ -91,7 +95,8 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		setContentView(R.layout.map_layout);
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setDisplayHomeAsUpEnabled(true);
+		setTabs();
+		// Utility.getInstance().initMainActionBar(actionBar, tabs, getIntent(), ((SherlockFragmentActivity) getParent()));
 		stub = getResources().getDrawable(R.drawable.stub);
 		ImageView meButton = (ImageView) findViewById(R.id.meButton);
 		meButton.setOnClickListener(new OnClickListener() {
@@ -157,8 +162,10 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 
-		nearbyUsersItemizedOverlay.clear();
+		myItemizedOverlay.hideAllBalloons();
+		nearbyUsersItemizedOverlay.hideAllBalloons();
 		myItemizedOverlay.clear();
+		nearbyUsersItemizedOverlay.clear();
 
 		if (Utility.getInstance().location != null) {
 			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
@@ -175,6 +182,19 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		requestFriends();
 	}
 
+	private void setTabs() {
+		tabs = new ArrayList<Integer>();
+		tabs.add(R.string.nearby);
+		tabs.add(R.string.friends);
+		tabs.add(R.string.my_profile);
+
+		// Create the tabs
+		actionBar.addTab(actionBar.newTab().setText(R.string.nearby).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(R.string.friends).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(R.string.my_profile).setTabListener(this));
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.google.android.maps.MapActivity#onPause()
@@ -183,6 +203,18 @@ public class NearbyMapActivity extends SherlockMapActivity {
 	protected void onPause() {
 		super.onPause();
 		mSensorManager.unregisterListener(mSensorListener);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.FragmentActivity#onBackPressed()
+	 */
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		// Stop the location polling and quit
+		Utility.getInstance().stopLocation();
+		finish();
 	}
 
 	/**
@@ -235,13 +267,13 @@ public class NearbyMapActivity extends SherlockMapActivity {
 									});
 								}
 								nearbyUsersItemizedOverlay.populateNow();
-								mapView.invalidate();
 							} catch (Exception e) {
 								Log.e(TAG, e.getMessage());
 							} finally {
 								runOnUiThread(new Runnable() {
 									@Override
 									public void run() {
+										mapView.invalidate();
 										setSupportProgressBarIndeterminateVisibility(false);
 									}
 								});
@@ -274,15 +306,12 @@ public class NearbyMapActivity extends SherlockMapActivity {
 	 */
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case android.R.id.home: // Go home (up)
-			Intent intent = new Intent(this, FriendizerActivity.class).putExtra("tab", R.string.nearby);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			return true;
 		case R.id.menu_list: // Move to the nearby users list activity
-			intent = new Intent(this, FriendizerActivity.class).putExtra("tab", R.string.nearby);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			Intent intent = new Intent(this, FriendizerActivity.class).putExtra("nearby_list", true);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(intent);
+			overridePendingTransition(0, 0);
+			finish();
 			return true;
 		case R.id.menu_refresh:
 			onResume();
@@ -311,5 +340,39 @@ public class NearbyMapActivity extends SherlockMapActivity {
 		int lat = (int) (location.getLatitude() * 1E6);
 		int lng = (int) (location.getLongitude() * 1E6);
 		return new GeoPoint(lat, lng);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabSelected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		int selectedTabID = tabs.get(tab.getPosition());
+		if (selectedTabID != R.string.nearby) {
+			startActivity(new Intent(this, FriendizerActivity.class).putExtra("tab", selectedTabID).setFlags(
+					Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+			overridePendingTransition(0, 0);
+			finish();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabUnselected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabReselected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
 }
