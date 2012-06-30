@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.teamagly.friendizer"
+    android:installLocation="auto"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <!-- GCM requires Android SDK version 2.2 (API level 8) or above -->
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="15" />
+
+    <!-- Only this application can receive GCM messages -->
+    <permission
+        android:name="com.teamagly.friendizer.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.teamagly.friendizer.permission.C2D_MESSAGE" />
+    <!-- Permission to receive GCM messages -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- Permission for internet access -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permission to keep the processor from sleeping -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Permission to retrieve the list of accounts in the Accounts Service -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!-- Permission to request authtokens from the AccountManager -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+
+    <!-- Necessary to check if the user has internet access -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Permission to check the user location -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- For caching -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".FriendizerApp"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:logo="@drawable/friendizer_white"
+        android:screenOrientation="portrait"
+        android:theme="@style/Theme.friendizer" >
+        <uses-library android:name="com.google.android.maps" />
+
+        <activity
+            android:name=".activities.SplashActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".activities.DashboardActivity" />
+        <activity android:name=".activities.FriendizerActivity" />
+        <activity android:name=".activities.FriendProfileActivity" />
+        <activity android:name=".activities.FBFriendsActivity" />
+        <activity android:name=".activities.ChatActivity" />
+        <activity android:name=".activities.AchievementsActivity" />
+        <activity android:name=".activities.FriendAchievementsActivity" />
+        <activity android:name=".activities.NearbyMapActivity" />
+        <activity android:name=".activities.GiftsSendActivity" />
+        <activity android:name=".activities.GiftsUserActivity" />
+        <activity android:name=".activities.ActionHistoryActivity" />
+        <activity android:name=".activities.AccountsActivity" />
+        <activity
+            android:name=".activities.FriendsPrefs"
+            android:label="@string/settings_title" >
+        </activity>
+        <!-- GCM -->
+        <receiver
+            android:name="com.google.android.gcm.GCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="com.teamagly.friendizer" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".GCMIntentService" />
+    </application>
+
+</manifest>
