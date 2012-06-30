@@ -18,7 +18,8 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Utility;
 
-public class FriendizerActivity extends SherlockFragmentActivity {
+public class FriendizerActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
+	@SuppressWarnings("unused")
 	private final String TAG = getClass().getName();
 	ActionBar actionBar;
 	ArrayList<Integer> tabs;
@@ -30,29 +31,60 @@ public class FriendizerActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.main);
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
-
-		setTabs();
+		// Try to restore the previous selected tab from the state/intent
+		int selectedTab = 0;
+		if (savedInstanceState != null)
+			selectedTab = savedInstanceState.getInt("tab");
+		selectedTab = getIntent().getIntExtra("tab", selectedTab);
+		if (getIntent().getBooleanExtra("nearby_list", false))
+			selectedTab = -1;
+		setTabs(selectedTab);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see android.app.ActivityGroup#onResume()
+	 * @see android.support.v4.app.FragmentActivity#onResume()
 	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
 
-		int tab = getIntent().getIntExtra("tab", 0);
-		if (tab > 0) { // Move to the given tab
-			for (int i = 0; i < tabs.size(); i++)
-				if (tabs.get(i) == tab)
-					actionBar.setSelectedNavigationItem(i);
+		if (getIntent().getBooleanExtra("nearby_list", false)) {
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+			ft.replace(android.R.id.content, Fragment.instantiate(this, PeopleRadarFragment.class.getName()));
+			ft.commit();
+		} else {
+			int tab = getIntent().getIntExtra("tab", 0);
+			if (tab > 0) // Move to the given tab
+				actionBar.setSelectedNavigationItem(tabs.indexOf(tab));
 		}
-
 		// TODO use in the background (and not here)
 		// if (!Utility.getInstance().facebook.isSessionValid()) {
 		// Util.showAlert(this, "Warning", "You must first log in.");
 		// }
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.app.Activity#onNewIntent(android.content.Intent)
+	 */
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		setIntent(intent);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
+	 */
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		// Save the current tab
+		int selectedIndex = actionBar.getSelectedNavigationIndex();
+		if ((selectedIndex >= 0) && (selectedIndex < tabs.size()))
+			outState.putInt("tab", tabs.get(selectedIndex));
 	}
 
 	/*
@@ -67,37 +99,30 @@ public class FriendizerActivity extends SherlockFragmentActivity {
 		finish();
 	}
 
-	private void setTabs() {
+	private void setTabs(int selectedTab) {
 		tabs = new ArrayList<Integer>();
 		tabs.add(R.string.nearby);
 		tabs.add(R.string.friends);
 		tabs.add(R.string.my_profile);
-		int tab = getIntent().getIntExtra("tab", 0); // Get the selected tab (if exists)
-		if (tab == 0) // Set the default tab
-			tab = R.string.nearby;
+		if (selectedTab == 0) // Set the default tab
+			selectedTab = R.string.nearby;
 
 		// Create the tabs
-		actionBar.addTab(
-				actionBar
-						.newTab()
-						.setText(R.string.nearby)
-						.setTabListener(
-								new TabListener<PeopleRadarFragment>(this, getResources().getString(R.string.nearby),
-										PeopleRadarFragment.class)), (tab == R.string.nearby));
+		actionBar.addTab(actionBar.newTab().setText(R.string.nearby).setTabListener(this), (selectedTab == R.string.nearby));
 		actionBar.addTab(
 				actionBar
 						.newTab()
 						.setText(R.string.friends)
 						.setTabListener(
 								new TabListener<ConnectionsFragment>(this, getResources().getString(R.string.friends),
-										ConnectionsFragment.class)), (tab == R.string.friends));
+										ConnectionsFragment.class)), (selectedTab == R.string.friends));
 		actionBar.addTab(
 				actionBar
 						.newTab()
 						.setText(R.string.my_profile)
 						.setTabListener(
 								new TabListener<MyProfileFragment>(this, getResources().getString(R.string.my_profile),
-										MyProfileFragment.class)), (tab == R.string.my_profile));
+										MyProfileFragment.class)), (selectedTab == R.string.my_profile));
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 	}
 
@@ -177,6 +202,39 @@ public class FriendizerActivity extends SherlockFragmentActivity {
 
 		public void onTabReselected(Tab tab, FragmentTransaction ft) {
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabSelected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabSelected(Tab tab, FragmentTransaction ft) {
+		// Important: we use this listener only for the nearby tab!
+		// (It's a necessary hack, since a MapFragment isn't possible ATM...)
+		startActivity(new Intent(this, NearbyMapActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+				| Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+		overridePendingTransition(0, 0);
+		finish();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabUnselected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.actionbarsherlock.app.ActionBar.TabListener#onTabReselected(com.actionbarsherlock.app.ActionBar.Tab,
+	 * android.support.v4.app.FragmentTransaction)
+	 */
+	@Override
+	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
 
 }

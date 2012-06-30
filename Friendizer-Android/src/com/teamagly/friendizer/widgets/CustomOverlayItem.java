@@ -3,7 +3,6 @@ package com.teamagly.friendizer.widgets;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -65,7 +64,6 @@ public class CustomOverlayItem extends OverlayItem {
 
 				@Override
 				public void onLoadingFailed(FailReason arg0) {
-					Log.e("lolz",arg0.toString());
 				}
 
 				@Override

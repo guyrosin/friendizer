@@ -16,6 +16,7 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 
 public class FriendsImageAdapter extends FriendsAdapter {
+	@SuppressWarnings("unused")
 	private final String TAG = getClass().getName();
 
 	public FriendsImageAdapter(Context context, int textViewResourceId, List<User> objects) {

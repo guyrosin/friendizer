@@ -92,7 +92,7 @@ public class Utility extends Application {
 		// Acquire a reference to the system Location Manager
 		locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-			buildAlertMessageNoGps(context);
+			buildAlertMessageNoGPS(context);
 		Location gpsLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 		Location networkLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		if (isBetterLocation(gpsLastLocation, networkLastLocation))
@@ -101,9 +101,9 @@ public class Utility extends Application {
 			updateLocation(networkLastLocation);
 
 		// Create a location listener that get updated by the network provider
-		networkLocationListener = new ProviderLocationListener(LocationManager.NETWORK_PROVIDER);
+		networkLocationListener = new ProviderLocationListener();
 		// Create a location listener that get updated by the GPS provider
-		gpsLocationListener = new ProviderLocationListener(LocationManager.GPS_PROVIDER);
+		gpsLocationListener = new ProviderLocationListener();
 
 		try {
 			// Register the listener with the Location Manager to receive location updates from the network provider
@@ -116,7 +116,6 @@ public class Utility extends Application {
 	}
 
 	public void stopLocation() {
-
 		try {
 			// Unregister the location listeners
 			locationManager.removeUpdates(networkLocationListener);
@@ -127,29 +126,9 @@ public class Utility extends Application {
 	}
 
 	/**
-	 * 
-	 * Describe a ProviderLocationListener object: Used for receiving notifications from the LocationManager when the location has
-	 * changed. provider - the provider of the location updates
-	 * 
-	 * @author Yarden Ron
-	 * 
+	 * Receives notifications from the LocationManager when the location has changed.
 	 */
 	private class ProviderLocationListener implements LocationListener {
-
-		private String provider;
-
-		/**
-		 * 
-		 * The constructor creates a ProviderLocationListener object
-		 * 
-		 * @param provider
-		 *            - the provider of the location updates
-		 */
-		public ProviderLocationListener(String provider) {
-
-			this.provider = provider;
-
-		}
 
 		@Override
 		public void onLocationChanged(final Location newLocation) {
@@ -231,10 +210,6 @@ public class Utility extends Application {
 					} catch (Exception e) {
 						Log.e("", "Can't update the server with the new location", e);
 					}
-
-					// Display the new location information on the screen
-					// Toast.makeText(getBaseContext(),"Location changed : (" + curLocation.getLatitude() + "," +
-					// curLocation.getLongitude()+ ")	Provided by " + provider, Toast.LENGTH_SHORT).show();
 				}
 			}).start();
 			// Save the new location
@@ -250,7 +225,7 @@ public class Utility extends Application {
 		return provider1.equals(provider2);
 	}
 
-	private void buildAlertMessageNoGps(Context context) {
+	private void buildAlertMessageNoGPS(Context context) {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
 				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {

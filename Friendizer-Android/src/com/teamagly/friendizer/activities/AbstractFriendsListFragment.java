@@ -37,6 +37,7 @@ import com.teamagly.friendizer.utils.Utility;
  * data in order to stop the loading indicator
  */
 public abstract class AbstractFriendsListFragment extends SherlockListFragment implements OnItemClickListener {
+	@SuppressWarnings("unused")
 	private final String TAG = "AbstractFriendsListFragment";
 	protected boolean list_type;
 	protected GridView gridView;

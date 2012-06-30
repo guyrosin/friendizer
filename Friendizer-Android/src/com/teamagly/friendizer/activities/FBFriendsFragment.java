@@ -84,6 +84,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 			final int len = jsonArray.length();
 			handler.post(new Runnable() {
 				public void run() {
+					friendsAdapter.notifyDataSetChanged();
 					if (len == 0)
 						empty.setVisibility(View.VISIBLE);
 					else
@@ -97,14 +98,9 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 					userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
 					usersList.add(userInfo);
 					FriendizerUser fzUser = ServerFacade.userDetails(userInfo.getId());
-					if (fzUser != null) {
+					if (fzUser != null)
 						userInfo.updateFriendizerData(fzUser);
-						handler.post(new Runnable() {
-							public void run() {
-								friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-							}
-						});
-					} else
+					else
 						usersList.remove(userInfo);
 				} catch (Exception e) {
 					usersList.remove(userInfo);
@@ -113,6 +109,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 			}
 			handler.post(new Runnable() {
 				public void run() {
+					friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 					activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 				}
 			});

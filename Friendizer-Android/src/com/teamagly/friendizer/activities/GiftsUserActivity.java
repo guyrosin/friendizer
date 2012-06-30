@@ -113,7 +113,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 			Intent intent;
 			if (user.getId() == Utility.getInstance().userInfo.getId()) { // If the user is the current one
 				intent = new Intent(this, FriendizerActivity.class);
-				// intent.putExtra("tab", R.string.my_profile);
+				intent.putExtra("tab", R.string.my_profile);
 			} else {
 				intent = new Intent(this, FriendProfileActivity.class);
 				intent.putExtra("user", user);

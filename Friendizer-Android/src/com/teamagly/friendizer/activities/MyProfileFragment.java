@@ -71,7 +71,6 @@ public class MyProfileFragment extends SherlockFragment {
 		activity = getSherlockActivity();
 		activity.setContentView(R.layout.profile_info_layout);
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(true);
 		actionBar.setDisplayShowTitleEnabled(false);
 
 		userPic = (ImageView) activity.findViewById(R.id.user_pic);
@@ -285,7 +284,7 @@ public class MyProfileFragment extends SherlockFragment {
 					}
 				});
 			} catch (Exception e) {
-				Log.w(TAG, "", e);
+				Log.w(TAG, "Got response from Facebook: " + response, e);
 			}
 		}
 	}
