@@ -31,6 +31,7 @@ import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.Message;
 
 public final class ServerFacade {
@@ -301,14 +302,14 @@ public final class ServerFacade {
 		return giftsArray;
 	}
 
-	public static Gift[] getUserGifts(long userID) throws IOException, JSONException {
+	public static GiftCount[] getUserGifts(long userID) throws IOException, JSONException {
 		URL url = new URL(fullServerAddress + "userGifts?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		JSONArray gifts = new JSONArray(in.readLine());
 		in.close();
-		Gift[] giftsArray = new Gift[gifts.length()];
+		GiftCount[] giftsArray = new GiftCount[gifts.length()];
 		for (int i = 0; i < gifts.length(); i++)
-			giftsArray[i] = new Gift(gifts.getJSONObject(i));
+			giftsArray[i] = new GiftCount(gifts.getJSONObject(i));
 		return giftsArray;
 	}
 

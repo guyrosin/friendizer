@@ -14,15 +14,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
 
-public class GiftsAdapter extends ArrayAdapter<Gift> {
+public class GiftsUserAdapter extends ArrayAdapter<GiftCount> {
 	private final String TAG = getClass().getName();
 
 	protected LayoutInflater inflater;
-	protected List<Gift> giftsList;
+	protected List<GiftCount> giftsList;
 
-	public GiftsAdapter(Context context, int textViewResourceId, List<Gift> objects) {
+	public GiftsUserAdapter(Context context, int textViewResourceId, List<GiftCount> objects) {
 		super(context, textViewResourceId, objects);
 		giftsList = objects;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -35,14 +35,14 @@ public class GiftsAdapter extends ArrayAdapter<Gift> {
 			hView = inflater.inflate(R.layout.gift_item_layout, null);
 			ViewHolder holder = new ViewHolder();
 			holder.icon = (ImageView) hView.findViewById(R.id.gift_icon);
-			holder.value = (TextView) hView.findViewById(R.id.gift_value);
+			holder.count = (TextView) hView.findViewById(R.id.gift_value);
 			hView.setTag(holder);
 		}
-		Gift gift = getItem(position);
+		GiftCount gift = getItem(position);
 		ViewHolder holder = (ViewHolder) hView.getTag();
 
 		// Load the image resource
-		String uri = "drawable/" + gift.getIconRes();
+		String uri = "drawable/" + gift.getGift().getIconRes();
 		int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
 		try {
 			Drawable image = getContext().getResources().getDrawable(imageResource);
@@ -51,13 +51,13 @@ public class GiftsAdapter extends ArrayAdapter<Gift> {
 			Log.e(TAG, e.getMessage());
 		}
 
-		holder.value.setText(String.valueOf(gift.getValue()));
+		holder.count.setText(String.valueOf(gift.getCount()));
 		return hView;
 	}
 
 	class ViewHolder {
 		ImageView icon;
 		TextView name;
-		TextView value;
+		TextView count;
 	}
 }

@@ -253,10 +253,18 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					startActivity(intent);
 				}
 			});
-			// Define the gift button
-			findViewById(R.id.btn_friend_gift).setOnClickListener(new View.OnClickListener() {
+			// Define the send gift button
+			findViewById(R.id.btn_friend_send_gift).setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsSendActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
+			// Define the gifts button
+			findViewById(R.id.btn_friend_gifts).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsUserActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}
@@ -286,6 +294,14 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				public void onClick(View v) {
 					// Move to the chat activity
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, ChatActivity.class);
+					intent.putExtra("user", userInfo);
+					startActivity(intent);
+				}
+			});
+			// Define the gifts button
+			findViewById(R.id.btn_stranger_gifts).setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsUserActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}

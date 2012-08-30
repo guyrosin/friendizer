@@ -144,7 +144,7 @@ public class DashboardLayout extends ViewGroup {
                     break;
                 }
             } else {
-                // This is a worse whitespace ratio, use the previous value of cols and exit.
+                // This is a worse whitespace ratio, use the previous count of cols and exit.
                 --cols;
                 rows = (visibleCount - 1) / cols + 1;
                 hSpace = ((width - mMaxChildWidth * cols) / (cols + 1));

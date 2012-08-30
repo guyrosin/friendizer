@@ -12,8 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -22,8 +22,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.adapters.GiftsAdapter;
-import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.adapters.GiftsUserAdapter;
+import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -32,9 +32,9 @@ import com.teamagly.friendizer.utils.Utility;
 public class GiftsUserActivity extends SherlockActivity implements OnItemClickListener {
 
 	private final String TAG = getClass().getName();
-	GiftsAdapter adapter;
+	GiftsUserAdapter adapter;
 	protected GridView gridView;
-	protected List<Gift> giftsList;
+	protected List<GiftCount> giftsList;
 	protected User user;
 	protected GiftsUserActivity activity;
 
@@ -57,7 +57,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.gifts_layout);
 		gridView = (GridView) findViewById(R.id.gridview);
-		giftsList = new ArrayList<Gift>();
+		giftsList = new ArrayList<GiftCount>();
 		activity = this;
 	}
 
@@ -72,7 +72,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Gift[] gifts = ServerFacade.getUserGifts(user.getId());
+					GiftCount[] gifts = ServerFacade.getUserGifts(user.getId());
 					giftsList = Arrays.asList(gifts);
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage());
@@ -80,7 +80,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						adapter = new GiftsAdapter(activity, 0, giftsList);
+						adapter = new GiftsUserAdapter(activity, 0, giftsList);
 						gridView.setAdapter(adapter);
 						gridView.setOnItemClickListener(activity);
 						setSupportProgressBarIndeterminateVisibility(false);

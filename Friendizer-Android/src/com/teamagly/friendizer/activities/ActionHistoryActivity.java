@@ -20,7 +20,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.ActionsAdapter;
-import com.teamagly.friendizer.adapters.GiftsAdapter;
+import com.teamagly.friendizer.adapters.GiftsSendAdapter;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.User;
