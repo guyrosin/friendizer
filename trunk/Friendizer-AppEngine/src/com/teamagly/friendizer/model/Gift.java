@@ -11,16 +11,16 @@ import com.google.appengine.labs.repackaged.org.json.JSONObject;
 public class Gift {
 	@PrimaryKey
 	@Persistent
-	private Long id;
-	
+	Long id;
+
 	@Persistent
-    private String name;
-	
+	String name;
+
 	@Persistent
-    private String iconRes;
-    
+	String iconRes;
+
 	@Persistent
-	private int value;
+	int value;
 
 	public Gift(long id, String name, String iconRes, int value) {
 		this.id = id;
@@ -28,7 +28,7 @@ public class Gift {
 		this.iconRes = iconRes;
 		this.value = value;
 	}
-	
+
 	public Gift(JSONObject obj) throws JSONException {
 		id = obj.getLong("id");
 		name = obj.getString("name");
@@ -67,19 +67,19 @@ public class Gift {
 	public void setValue(int value) {
 		this.value = value;
 	}
-	
+
 	public JSONObject toJSONObject() {
 		JSONObject obj = new JSONObject();
 		try {
 			obj.put("id", id);
 			obj.put("name", name);
 			obj.put("iconRes", iconRes);
-		    obj.put("value", value);
+			obj.put("value", value);
 		} catch (JSONException e) {
 		}
 		return obj;
 	}
-	
+
 	@Override
 	public String toString() {
 		return toJSONObject().toString();

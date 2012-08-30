@@ -1,6 +1,8 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
@@ -14,6 +16,7 @@ import com.google.android.gcm.server.Message;
 import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.UserGift;
 
@@ -47,6 +50,7 @@ public class GiftsManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void userGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
+		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
@@ -56,23 +60,34 @@ public class GiftsManager extends HttpServlet {
 			throw new ServletException("This user doesn't exist");
 		query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
-		List<UserGift> userGiftsID = (List<UserGift>) query.execute();
+		List<UserGift> userGifts = (List<UserGift>) query.execute();
 		query.closeAll();
-		if (userGiftsID.isEmpty()) {
+		if (userGifts.isEmpty()) {
 			response.getWriter().println(new JSONArray());
 			pm.close();
 			return;
 		}
 		StringBuilder giftsFilter = new StringBuilder();
-		for (UserGift userGift : userGiftsID)
+		for (UserGift userGift : userGifts)
 			giftsFilter.append("id == " + userGift.getGiftID() + " || ");
-		giftsFilter.delete(giftsFilter.length() - 4, giftsFilter.length());
+		giftsFilter.delete(giftsFilter.length() - 4, giftsFilter.length()); // Delete the last "or" sign
 		query = pm.newQuery(Gift.class);
 		query.setFilter(giftsFilter.toString());
-		List<Gift> userGifts = (List<Gift>) query.execute();
+		List<Gift> gifts = (List<Gift>) query.execute();
 		query.closeAll();
+		HashMap<Long, Integer> counters = new HashMap<Long, Integer>();
+		for (Gift gift : gifts)
+			counters.put(gift.getId(), 0);
+		// Update the counters
+		for (UserGift userGift : userGifts)
+			counters.put(userGift.getGiftID(), counters.get(userGift.getGiftID()) + 1);
+		// Create the GiftCount objects
+		ArrayList<GiftCount> giftCounts = new ArrayList<GiftCount>();
+		for (Long giftID : counters.keySet())
+			giftCounts.add(new GiftCount(getGift(gifts, giftID), counters.get(giftID)));
+
 		JSONArray giftsArray = new JSONArray();
-		for (Gift gift : userGifts)
+		for (GiftCount gift : giftCounts)
 			giftsArray.put(gift.toJSONObject());
 		pm.close();
 		response.getWriter().println(giftsArray);
@@ -125,5 +140,12 @@ public class GiftsManager extends HttpServlet {
 				.addData(Util.USER_ID, String.valueOf(senderID)).addData("giftID", String.valueOf(userGift.getGiftID()))
 				.addData("giftName", String.valueOf(gift.getName())).build();
 		SendMessage.sendMessage(receiverID, msg);
+	}
+
+	public Gift getGift(List<Gift> gifts, long giftID) {
+		for (Gift gift : gifts)
+			if (gift.getId() == giftID)
+				return gift;
+		return null;
 	}
 }
