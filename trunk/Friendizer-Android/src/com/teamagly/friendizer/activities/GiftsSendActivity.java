@@ -26,7 +26,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.adapters.GiftsAdapter;
+import com.teamagly.friendizer.adapters.GiftsSendAdapter;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
@@ -36,7 +36,7 @@ import com.teamagly.friendizer.utils.Utility;
 public class GiftsSendActivity extends SherlockActivity implements OnItemClickListener {
 
 	private final String TAG = getClass().getName();
-	GiftsAdapter adapter;
+	GiftsSendAdapter adapter;
 	protected GridView gridView;
 	protected List<Gift> giftsList;
 	protected User destUser;
@@ -79,7 +79,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						adapter = new GiftsAdapter(activity, 0, giftsList);
+						adapter = new GiftsSendAdapter(activity, 0, giftsList);
 						gridView.setAdapter(adapter);
 						gridView.setOnItemClickListener(activity);
 						setSupportProgressBarIndeterminateVisibility(false);
