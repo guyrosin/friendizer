@@ -299,8 +299,8 @@ public class MyProfileFragment extends SherlockFragment {
 			JSONObject jsonObject;
 			try {
 				jsonObject = new JSONObject(response);
-				final String picURL = jsonObject.getString("picture");
-
+				final String picURL = jsonObject.optJSONObject("picture").optJSONObject("data").optString("url");
+				
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {

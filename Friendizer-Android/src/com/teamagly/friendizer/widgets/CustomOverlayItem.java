@@ -67,12 +67,12 @@ public class CustomOverlayItem extends OverlayItem {
 				}
 
 				@Override
-				public void onLoadingComplete() {
-					setMarker(generateMarker());
+				public void onLoadingCancelled() {
 				}
 
 				@Override
-				public void onLoadingCancelled() {
+				public void onLoadingComplete(Bitmap arg0) {
+					setMarker(generateMarker());
 				}
 			});
 		}

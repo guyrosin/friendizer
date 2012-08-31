@@ -6,6 +6,7 @@ package com.teamagly.friendizer;
 import android.app.Application;
 import android.content.Context;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
@@ -32,9 +33,10 @@ public class FriendizerApp extends Application {
 	public void onCreate() {
 		super.onCreate();
 		// Initialize the Image Loader
-		ImageLoader imageLoader = ImageLoader.getInstance();
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).threadPoolSize(5)
-				.threadPriority(Thread.MAX_PRIORITY).build();
-		imageLoader.init(config);
+		// Create default options which will be used for every displayImage() call
+		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory().cacheOnDisc().build();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
+				.defaultDisplayImageOptions(defaultOptions).build();
+		ImageLoader.getInstance().init(config);
 	}
 }
