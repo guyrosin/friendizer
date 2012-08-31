@@ -386,7 +386,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		public void onComplete(final String response, final Object state) {
 			try {
 				JSONObject jsonObject = new JSONObject(response);
-				final String picURL = jsonObject.getString("picture");
+				final String picURL = jsonObject.optJSONObject("picture").optJSONObject("data").optString("url");
 
 				handler.post(new Runnable() {
 					@Override

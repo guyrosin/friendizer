@@ -162,10 +162,11 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 
-		myItemizedOverlay.hideAllBalloons();
-		nearbyUsersItemizedOverlay.hideAllBalloons();
+		// myItemizedOverlay.hideAllBalloons();
+		// nearbyUsersItemizedOverlay.hideAllBalloons();
 		myItemizedOverlay.clear();
 		nearbyUsersItemizedOverlay.clear();
+		mapView.invalidate();
 
 		if (Utility.getInstance().location != null) {
 			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
@@ -173,7 +174,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 			myItemizedOverlay.addOverlay(myOverlayItem);
 			zoomMyLocation();
 		}
-		myItemizedOverlay.populateNow();
 		mapView.invalidate();
 
 		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
@@ -221,65 +221,57 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	 * Clears the current users list and request the information from Facebook
 	 */
 	protected void requestFriends() {
-		class NearbyUsersTask extends AsyncTask<Long, Void, FriendizerUser[]> {
+		class NearbyUsersTask extends AsyncTask<Long, Void, JSONArray> {
+			FriendizerUser[] nearbyUsers;
 
-			protected FriendizerUser[] doInBackground(Long... userIDs) {
+			protected JSONArray doInBackground(Long... userIDs) {
 				try {
-					return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+					nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+					// Build a comma separated string of all the users' IDs
+					StringBuilder IDsBuilder = new StringBuilder();
+					for (int i = 0; i < nearbyUsers.length - 1; i++)
+						IDsBuilder.append(nearbyUsers[i].getId() + ",");
+					IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
+					Bundle params = new Bundle();
+					// Request the details of each nearby user
+					// Note: must order by uid (same as ownList servlet) so the next for loop will work!
+					String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
+							+ IDsBuilder.toString() + ") order by uid";
+					params.putString("method", "fql.query");
+					params.putString("query", query);
+					try {
+						String response = Utility.getInstance().facebook.request(params);
+						return new JSONArray(response);
+					} catch (Exception e) {
+						Log.e(TAG, e.getMessage());
+					}
 				} catch (Exception e) {
-					return new FriendizerUser[] {};
+					return new JSONArray();
 				}
+				return new JSONArray();
 			}
 
-			protected void onPostExecute(final FriendizerUser[] nearbyUsers) {
-				if (nearbyUsers.length == 0) {
+			protected void onPostExecute(final JSONArray jsonArray) {
+				if (jsonArray.length() == 0)
 					setSupportProgressBarIndeterminateVisibility(false);
-				} else {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							// Build a comma separated string of all the users' IDs
-							StringBuilder IDsBuilder = new StringBuilder();
-							for (int i = 0; i < nearbyUsers.length - 1; i++)
-								IDsBuilder.append(nearbyUsers[i].getId() + ",");
-							IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
-							Bundle params = new Bundle();
-							try {
-								// Request the details of each nearby user
-								// Note: must order by uid (same as ownList servlet) so the next for loop will work!
-								String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
-										+ IDsBuilder.toString() + ") order by uid";
-								params.putString("method", "fql.query");
-								params.putString("query", query);
-								String response = Utility.getInstance().facebook.request(params);
-								JSONArray jsonArray = new JSONArray(response);
-								int len = jsonArray.length();
-								for (int i = 0; i < len; i++) {
-									final User userInfo = new User(nearbyUsers[i], new FacebookUser(jsonArray.getJSONObject(i),
-											FBQueryType.FQL));
-									runOnUiThread(new Runnable() {
-										@Override
-										public void run() {
-											CustomOverlayItem overlayitem = new CustomOverlayItem(userInfo.getGeoPoint(),
-													userInfo, markerLayout);
-											nearbyUsersItemizedOverlay.addOverlay(overlayitem);
-										}
-									});
-								}
-								nearbyUsersItemizedOverlay.populateNow();
-							} catch (Exception e) {
-								Log.e(TAG, e.getMessage());
-							} finally {
-								runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										mapView.invalidate();
-										setSupportProgressBarIndeterminateVisibility(false);
-									}
-								});
-							}
+				else {
+					try {
+						int len = jsonArray.length();
+						for (int i = 0; i < len; i++) {
+							User userInfo = new User(nearbyUsers[i],
+									new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
+							CustomOverlayItem overlayItem = new CustomOverlayItem(userInfo.getGeoPoint(), userInfo, markerLayout);
+							nearbyUsersItemizedOverlay.addOverlay(overlayItem);
 						}
-					}).start();
+					} catch (Exception e) {
+						Log.e(TAG, e.getMessage());
+					} finally {
+						mapView.invalidate();
+						setSupportProgressBarIndeterminateVisibility(false);
+					}
+					// for (int i = 0; i < nearbyUsersItemizedOverlay.size(); i++)
+					// Log.e(TAG, "yo: " + nearbyUsersItemizedOverlay.getItem(i).getTitle() + ", "
+					// + nearbyUsersItemizedOverlay.getItem(i).getPoint());
 				}
 			}
 		}

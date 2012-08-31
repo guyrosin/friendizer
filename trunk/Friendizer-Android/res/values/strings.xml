@@ -36,6 +36,7 @@
     <string name="view_by">View by</string>
     <string name="facebook_login">Login with Facebook</string>
     <string name="send">Send</string>
-    <string name="mapAPIKey">0R54sIbhKTeZ9hTY5ntHtWV1qgbbPY1g_UI3K8A</string>
+    <!-- <string name="mapAPIKey">0R54sIbhKTeZ9hTY5ntHtWV1qgbbPY1g_UI3K8A</string> Debug Key -->
+    <string name="mapAPIKey">0R54sIbhKTebUajgWnmRKsumHCNs3WatIRTkshg</string> <!-- Release Key -->
 
 </resources>

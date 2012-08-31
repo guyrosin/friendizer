@@ -22,6 +22,7 @@ import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.activities.AchievementsActivity;
 import com.teamagly.friendizer.activities.ChatActivity;
+import com.teamagly.friendizer.activities.FriendProfileActivity;
 import com.teamagly.friendizer.activities.FriendizerActivity;
 import com.teamagly.friendizer.activities.GiftsUserActivity;
 import com.teamagly.friendizer.model.FacebookUser;
@@ -39,7 +40,8 @@ public class MessageHandler {
 		BUY,
 		GFT,
 		UPD,
-		ACH;
+		ACH,
+		NEARBY
 	}
 
 	public void handleMessage(Intent intent) {
@@ -77,6 +79,14 @@ public class MessageHandler {
 			Bundle params = new Bundle();
 			params.putString("fields", "name");
 			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new GiftRequestListener(context, userInfo, giftName));
+		} else if (type == NotificationType.NEARBY) { // There's a nearby friend
+			String text = intent.getStringExtra("text");
+			User userInfo = new User();
+			userInfo.setId(userID);
+			// Load the user's details from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name");
+			Utility.getInstance().mAsyncRunner.request(userIDStr, params, new NearbyRequestListener(context, userInfo, text));
 		}
 	}
 
@@ -186,6 +196,37 @@ public class MessageHandler {
 				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
 				generateNotification(context, "Received a " + giftName, "From " + userInfo.getName(), APP_ICON_RES_ID,
 						notificationIntent);
+				playNotificationSound(context);
+			} catch (JSONException e) {
+				Log.e(TAG, "", e);
+			}
+		}
+	}
+
+	public class NearbyRequestListener extends BaseRequestListener {
+		User userInfo;
+		Context context;
+		String text;
+
+		public NearbyRequestListener(Context context, User userInfo, String text) {
+			this.userInfo = userInfo;
+			this.context = context;
+			this.text = text;
+		}
+
+		@Override
+		public void onComplete(final String response, final Object state) {
+			JSONObject jsonObject;
+			try {
+				jsonObject = new JSONObject(response);
+				final FacebookUser newUserInfo = new FacebookUser(jsonObject);
+				// Update the user's details from Facebook
+				userInfo.updateFacebookData(newUserInfo);
+
+				// Show a status bar notification
+				Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
+				notificationIntent.putExtra("user", Utility.getInstance().userInfo);
+				generateNotification(context, userInfo.getName(), text, APP_ICON_RES_ID, notificationIntent);
 				playNotificationSound(context);
 			} catch (JSONException e) {
 				Log.e(TAG, "", e);

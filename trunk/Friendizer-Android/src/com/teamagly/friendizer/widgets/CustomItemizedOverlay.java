@@ -33,10 +33,13 @@ public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayI
 	public CustomItemizedOverlay(Drawable defaultMarker, MapView mapView) {
 		super(boundCenter(defaultMarker), mapView);
 		c = mapView.getContext();
+		populate();
 	}
 
 	public void addOverlay(CustomOverlayItem overlay) {
 		mOverlays.add(overlay);
+		setLastFocusedIndex(-1);
+		populate();
 	}
 
 	public void populateNow() {
@@ -55,6 +58,7 @@ public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayI
 
 	public void clear() {
 		mOverlays.clear();
+		setLastFocusedIndex(-1);
 		populate();
 	}
 

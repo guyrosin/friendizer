@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.teamagly.friendizer"
     android:installLocation="auto"
-    android:versionCode="4"
+    android:versionCode="5"
     android:versionName="1.0.2" >
 
     <!-- GCM requires Android SDK version 2.2 (API level 8) or above -->
@@ -28,8 +28,9 @@
     <!-- Necessary to check if the user has internet access -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Permission to check the user location -->
+    <!-- Permissions to check the user location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- For caching -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
