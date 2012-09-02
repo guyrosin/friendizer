@@ -6,7 +6,9 @@ import org.json.JSONException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -31,12 +33,19 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		activity.setContentView(R.layout.friends_layout);
 
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you have no Facebook friends)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-		updateListType(list_type);
+	}
+	
+	/* (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+	 */
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.connections_layout, container, false);
 	}
 
 	/**

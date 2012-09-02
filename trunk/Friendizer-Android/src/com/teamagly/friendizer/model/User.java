@@ -265,7 +265,7 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * @return the user's location as a GeoPoint
+	 * @return the user's locationInfo as a GeoPoint
 	 */
 	public GeoPoint getGeoPoint() {
 		return fz.getGeoPoint();

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.teamagly.friendizer"
     android:installLocation="auto"
-    android:versionCode="5"
-    android:versionName="1.0.2" >
+    android:versionCode="6"
+    android:versionName="1.0.3" >
 
     <!-- GCM requires Android SDK version 2.2 (API level 8) or above -->
     <uses-sdk
@@ -28,12 +28,21 @@
     <!-- Necessary to check if the user has internet access -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Permissions to check the user location -->
+    <!-- Permission to check the user location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!-- For caching -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- To start getting location updates right after boot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
 
     <application
         android:name=".FriendizerApp"
@@ -54,7 +63,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".activities.DashboardActivity" />
-        <activity android:name=".activities.FriendizerActivity" android:launchMode="singleTop" />
+        <activity
+            android:name=".activities.FriendizerActivity"
+            android:launchMode="singleTop" />
         <activity android:name=".activities.FriendProfileActivity" />
         <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.ChatActivity" />
@@ -69,6 +80,7 @@
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >
         </activity>
+
         <!-- GCM -->
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
@@ -82,6 +94,24 @@
         </receiver>
 
         <service android:name=".GCMIntentService" />
+        <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
+
+        <!-- Little Fluffy Location Library -->
+        <receiver
+            android:name="com.littlefluffytoys.littlefluffylocationlibrary.StartupBroadcastReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.littlefluffytoys.littlefluffylocationlibrary.PassiveLocationChangedReceiver"
+            android:exported="true" />
+        <receiver android:name=".LocationBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.teamagly.friendizer.littlefluffylocationlibrary.LOCATION_CHANGED" android:exported="false"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

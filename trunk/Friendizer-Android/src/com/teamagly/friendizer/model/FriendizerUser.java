@@ -96,7 +96,7 @@ public class FriendizerUser implements Serializable {
 	}
 
 	/**
-	 * @return the user's location as a GeoPoint
+	 * @return the user's locationInfo as a GeoPoint
 	 */
 	public GeoPoint getGeoPoint() {
 		int lat = (int) (latitude * 1E6);

@@ -78,7 +78,6 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (no people nearby)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-		updateListType(list_type);
 
 		// Shake to reload functionality
 		mSensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);

@@ -29,7 +29,6 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you have no connections)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-		updateListType(list_type);
 	}
 
 	/**
