@@ -9,24 +9,21 @@ import java.util.Collections;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.FriendsAdapter;
 import com.teamagly.friendizer.adapters.FriendsImageAdapter;
-import com.teamagly.friendizer.adapters.FriendsListAdapter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Comparators;
@@ -36,16 +33,16 @@ import com.teamagly.friendizer.utils.Utility;
  * Note: the child class has to call activity.setSupportProgressBarIndeterminateVisibility(false) after it's done reloading the
  * data in order to stop the loading indicator
  */
-public abstract class AbstractFriendsListFragment extends SherlockListFragment implements OnItemClickListener {
+public abstract class AbstractFriendsListFragment extends SherlockFragment implements OnItemClickListener {
 	@SuppressWarnings("unused")
 	private final String TAG = "AbstractFriendsListFragment";
-	protected boolean list_type;
 	protected GridView gridView;
 	protected FriendsAdapter friendsAdapter;
 	protected ArrayList<User> usersList = new ArrayList<User>();
 	protected int sortBy = 0;
 	final Handler handler = new Handler();
 	protected SherlockFragmentActivity activity;
+	int savedPosition = -1;
 
 	/*
 	 * (non-Javadoc)
@@ -65,8 +62,13 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
-		boolean type = PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("friends_list_type", false);
-		list_type = type;
+
+		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
+
+		// Restore scroll position
+		if (savedInstanceState != null)
+			savedPosition = savedInstanceState.getInt("savedPosition");
+		// int savedListTop = savedInstanceState.getInt("savedListTop");
 	}
 
 	/*
@@ -77,36 +79,32 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
+		gridView.setAdapter(friendsAdapter);
+		gridView.setOnItemClickListener(this);
+		if (savedPosition >= 0) // initialized to -1
+			gridView.setSelection(savedPosition);
 		requestFriends();
-		boolean type = PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("friends_list_type", false);
-		if (type != list_type) { // A change occurred -> redraw the view
-			list_type = type;
-			updateListType(type);
-		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onSaveInstanceState(android.os.Bundle)
+	 */
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		// Save scroll position
+		int savedPosition = gridView.getFirstVisiblePosition();
+		View firstVisibleView = gridView.getChildAt(0);
+		int savedListTop = (firstVisibleView == null) ? 0 : firstVisibleView.getTop();
+		outState.putInt("savedListTop", savedListTop);
+		outState.putInt("savedPosition", savedPosition);
 	}
 
 	/**
 	 * Clears the current users list and request the information from Facebook
 	 */
 	protected abstract void requestFriends();
-
-	protected void updateListType(boolean type) {
-		if (list_type) { // => show in a list
-			gridView.setAdapter(null);
-			gridView.setVisibility(View.GONE);
-			getListView().setVisibility(View.VISIBLE);
-			friendsAdapter = new FriendsListAdapter(activity, 0, usersList);
-			getListView().setAdapter(friendsAdapter);
-			getListView().setOnItemClickListener(this);
-		} else { // => show in a GridView
-			getListView().setAdapter(null);
-			gridView.setVisibility(View.VISIBLE);
-			getListView().setVisibility(View.GONE);
-			friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
-			gridView.setAdapter(friendsAdapter);
-			gridView.setOnItemClickListener(this);
-		}
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -154,33 +152,6 @@ public abstract class AbstractFriendsListFragment extends SherlockListFragment i
 						sortBy = item;
 						// TODO
 						// friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-					}
-					dialog.dismiss();
-				}
-			});
-			builder.show();
-			return true;
-		case R.id.menu_view_by:
-			// Show a dialog
-			final String[] items = { "Grid", "List" };
-			builder = new AlertDialog.Builder(activity);
-			builder.setTitle("View by");
-			int i_list_type = 0;
-			if (list_type)
-				i_list_type = 1;
-			builder.setSingleChoiceItems(items, i_list_type, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int item) {
-					SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(activity.getBaseContext())
-							.edit();
-					boolean choice = false; // Default is grid
-					if (item == 1) // The user chose list
-						choice = true;
-					if (list_type != choice) { // If the user changed the type, redraw the view
-						list_type = choice;
-						updateListType(choice);
-						// Update the preference
-						editor.putBoolean("friends_list_type", choice);
-						editor.commit();
 					}
 					dialog.dismiss();
 				}

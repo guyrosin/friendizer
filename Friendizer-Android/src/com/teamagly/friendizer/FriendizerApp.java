@@ -6,6 +6,7 @@ package com.teamagly.friendizer;
 import android.app.Application;
 import android.content.Context;
 
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -32,6 +33,12 @@ public class FriendizerApp extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+
+		// Initialize Little Fluffy Location Library
+		// LocationLibrary.showDebugOutput(true); // For debugging
+		LocationLibrary.initialiseLibrary(getContext(), getPackageName());
+		LocationLibrary.forceLocationUpdate(getContext()); // Force a location update
+
 		// Initialize the Image Loader
 		// Create default options which will be used for every displayImage() call
 		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory().cacheOnDisc().build();

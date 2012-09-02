@@ -3,11 +3,6 @@
 
     <!-- Note the category is "secondary" (low priority) -->
     <item
-        android:id="@+id/menu_view_by"
-        android:icon="@drawable/ic_menu_friendslist"
-        android:menuCategory="secondary"
-        android:title="@string/view_by"/>
-    <item
         android:id="@+id/menu_sort"
         android:icon="@android:drawable/ic_menu_agenda"
         android:menuCategory="secondary"

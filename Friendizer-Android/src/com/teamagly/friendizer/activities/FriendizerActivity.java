@@ -56,7 +56,10 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 		} else {
 			int tab = getIntent().getIntExtra("tab", 0);
 			if (tab > 0) // Move to the given tab
-				actionBar.setSelectedNavigationItem(tabs.indexOf(tab));
+				try {
+					actionBar.setSelectedNavigationItem(tabs.indexOf(tab));
+				} catch (ArrayIndexOutOfBoundsException e) {
+				}
 		}
 		// TODO use in the background (and not here)
 		// if (!Utility.getInstance().facebook.isSessionValid()) {
@@ -94,9 +97,7 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		// Stop the location polling and quit
-		Utility.getInstance().stopLocation();
-		finish();
+		finish(); // Quit
 	}
 
 	private void setTabs(int selectedTab) {

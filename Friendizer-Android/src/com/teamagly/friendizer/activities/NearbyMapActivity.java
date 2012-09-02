@@ -5,16 +5,21 @@ import java.util.List;
 
 import org.json.JSONArray;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.FragmentTransaction;
 import android.util.FloatMath;
 import android.util.Log;
@@ -23,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -31,8 +37,8 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
-import com.google.android.maps.GeoPoint;
 import com.google.android.maps.Overlay;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.readystatesoftware.maps.OnSingleTapListener;
 import com.readystatesoftware.maps.TapControlledMapView;
 import com.teamagly.friendizer.R;
@@ -49,6 +55,7 @@ import com.teamagly.friendizer.widgets.CustomOverlayItem;
 public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.TabListener {
 
 	private final String TAG = getClass().getName();
+	public static final String ACTION_UPDATE_LOCATION = "com.teamagly.friendizer.UPDATE_LOCATION";
 
 	ActionBar actionBar;
 	ArrayList<Integer> tabs = new ArrayList<Integer>();
@@ -58,14 +65,13 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	protected CustomItemizedOverlay myItemizedOverlay;
 	protected CustomItemizedOverlay nearbyUsersItemizedOverlay;
 	LinearLayout markerLayout;
-	GeoPoint myLocationPoint;
 
 	// Variables for the "shake to reload" feature
 	private SensorManager mSensorManager;
 	private float mAccel; // acceleration apart from gravity
 	private float mAccelCurrent; // current acceleration including gravity
 	private float mAccelLast; // last acceleration including gravity
-	private final SensorEventListener mSensorListener = new SensorEventListener() {
+	private final SensorEventListener accelerometerListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent se) {
 			float x = se.values[0];
 			float y = se.values[1];
@@ -96,7 +102,12 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		setTabs();
-		// Utility.getInstance().initMainActionBar(actionBar, tabs, getIntent(), ((SherlockFragmentActivity) getParent()));
+
+		// Acquire a reference to the system Location Manager
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+			buildAlertMessageNoGPS();
+
 		stub = getResources().getDrawable(R.drawable.stub);
 		ImageView meButton = (ImageView) findViewById(R.id.meButton);
 		meButton.setOnClickListener(new OnClickListener() {
@@ -122,7 +133,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 
 		mapOverlays = mapView.getOverlays();
 		markerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.map_marker_layout, null);
-		// Create an overlay for my location
+		// Create an overlay for my locationInfo
 		myItemizedOverlay = new CustomItemizedOverlay(stub, mapView);
 		// set iOS behavior attributes for overlay
 		myItemizedOverlay.setShowClose(false);
@@ -147,10 +158,11 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	}
 
 	protected void zoomMyLocation() {
-		if (myLocationPoint != null) {
-			mapView.getController().animateTo(myLocationPoint);
+		if (Utility.getInstance().getLocation() != null) {
+			mapView.getController().animateTo(Utility.getInstance().getLocation());
 			mapView.getController().setZoom(17);
-		}
+		} else
+			Toast.makeText(this, "Waiting for location...", Toast.LENGTH_SHORT).show();
 	}
 
 	/*
@@ -162,25 +174,33 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 
-		// myItemizedOverlay.hideAllBalloons();
-		// nearbyUsersItemizedOverlay.hideAllBalloons();
 		myItemizedOverlay.clear();
 		nearbyUsersItemizedOverlay.clear();
 		mapView.invalidate();
 
-		if (Utility.getInstance().location != null) {
-			myLocationPoint = locationToGeoPoint(Utility.getInstance().location);
-			CustomOverlayItem myOverlayItem = new CustomOverlayItem(myLocationPoint, Utility.getInstance().userInfo, markerLayout);
+		if (Utility.getInstance().getLocation() != null) {
+			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().getLocation(),
+					Utility.getInstance().userInfo, markerLayout);
 			myItemizedOverlay.addOverlay(myOverlayItem);
 			zoomMyLocation();
 		}
 		mapView.invalidate();
 
-		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+		mSensorManager.registerListener(accelerometerListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
 				SensorManager.SENSOR_DELAY_NORMAL);
+
+		registerReceiver(locationReceiver, new IntentFilter(ACTION_UPDATE_LOCATION));
 
 		requestFriends();
 	}
+
+	public BroadcastReceiver locationReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(TAG, "Got a location update");
+			onResume();
+		}
+	};
 
 	private void setTabs() {
 		tabs = new ArrayList<Integer>();
@@ -202,7 +222,8 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mSensorManager.unregisterListener(mSensorListener);
+		mSensorManager.unregisterListener(accelerometerListener);
+		unregisterReceiver(locationReceiver);
 	}
 
 	/*
@@ -212,9 +233,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		// Stop the location polling and quit
-		Utility.getInstance().stopLocation();
-		finish();
+		finish(); // Quit
 	}
 
 	/**
@@ -279,6 +298,25 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		new NearbyUsersTask().execute(Utility.getInstance().userInfo.getId());
 	}
 
+	/**
+	 * Shows an alert dialog in case the GPS is disabled
+	 */
+	private void buildAlertMessageNoGPS() {
+		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					public void onClick(final DialogInterface dialog, final int id) {
+						startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+					}
+				}).setNegativeButton("Skip", new DialogInterface.OnClickListener() {
+					public void onClick(final DialogInterface dialog, final int id) {
+						dialog.cancel();
+					}
+				});
+		final AlertDialog alert = builder.create();
+		alert.show();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.actionbarsherlock.app.SherlockMapActivity#onCreateOptionsMenu(com.actionbarsherlock.view.Menu)
@@ -306,7 +344,9 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 			finish();
 			return true;
 		case R.id.menu_refresh:
-			onResume();
+			LocationLibrary.forceLocationUpdate(this); // Force a locationInfo update
+			Toast.makeText(this, "Waiting for location...", Toast.LENGTH_LONG).show();
+			setSupportProgressBarIndeterminateVisibility(true); // Show a loading indicator
 			return true;
 		case R.id.menu_feedback:
 			return Utility.startFeedback(this);
@@ -326,12 +366,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
-	}
-
-	protected GeoPoint locationToGeoPoint(Location location) {
-		int lat = (int) (location.getLatitude() * 1E6);
-		int lng = (int) (location.getLongitude() * 1E6);
-		return new GeoPoint(lat, lng);
 	}
 
 	/*

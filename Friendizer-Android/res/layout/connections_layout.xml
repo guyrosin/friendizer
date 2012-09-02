@@ -19,12 +19,6 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="5dp" />
 
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:drawSelectorOnTop="false" />
-
     <TextView
         android:id="@+id/empty"
         android:layout_width="wrap_content"
