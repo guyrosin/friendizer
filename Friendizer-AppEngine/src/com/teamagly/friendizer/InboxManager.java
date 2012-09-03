@@ -51,7 +51,7 @@ public class InboxManager extends HttpServlet {
 		out.println(message);
 
 		Message msg = new Message.Builder().addData("type", NotificationType.CHAT.toString())
-				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).build();
+				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).collapseKey("NEARBY").build();
 		SendMessage.sendMessage(destination, msg);
 	}
 
