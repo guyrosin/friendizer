@@ -148,9 +148,12 @@ public class Utility extends Application {
 		}
 	}
 
-	public static String calcAge(Date birthday) {
+	@SuppressWarnings("deprecation")
+	public static String calcAge(String birthdayStr) {
+		if (birthdayStr == null)
+			return "";
 		Calendar dob = Calendar.getInstance();
-		dob.setTime(birthday);
+		dob.setTime(new Date(birthdayStr));
 		Calendar today = Calendar.getInstance();
 		int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
 		if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR))

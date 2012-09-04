@@ -45,8 +45,8 @@ public class CustomOverlayItem extends OverlayItem {
 	 * @param userInfo
 	 * @param markerLayout
 	 */
-	public CustomOverlayItem(GeoPoint point, User userInfo, ViewGroup markerLayout) {
-		super(point, "", "");
+	public CustomOverlayItem(User userInfo, ViewGroup markerLayout) {
+		super(userInfo.getGeoPoint(), "", "");
 		title = userInfo.getName();
 		snippet = "";
 		imageURL = userInfo.getPicURL();

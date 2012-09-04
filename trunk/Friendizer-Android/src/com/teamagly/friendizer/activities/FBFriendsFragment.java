@@ -14,10 +14,7 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
@@ -38,14 +35,15 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 		empty.setText("Forever Alone! (you have no Facebook friends)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.connections_layout, container, false);
+		// Inflate the layout for this fragment
+		return inflater.inflate(R.layout.connections_layout, container, false);
 	}
 
 	/**
@@ -55,7 +53,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 		Bundle params = new Bundle();
 		// Query for the friends who are using Friendizer, ordered by uid
 		// Note: must order by uid (same as ownList servlet) so the next for loop will work!
-		String query = "select name, uid, pic_square, sex, birthday_date, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by uid";
+		String query = "select uid, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by uid";
 		params.putString("method", "fql.query");
 		params.putString("query", query);
 		Utility.getInstance().mAsyncRunner.request(null, params, new FriendsRequestListener());
@@ -78,7 +76,6 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	 * Callback for fetching current user's name, picture, uid.
 	 */
 	public class FriendsRequestListener extends BaseRequestListener {
-		FBFriendsFragment curActivity;
 
 		@Override
 		public void onComplete(final String response, final Object state) {
@@ -97,29 +94,26 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 					if (len == 0)
 						empty.setVisibility(View.VISIBLE);
 					else
-						empty.setVisibility(View.GONE);
+						empty.setVisibility(View.VISIBLE);
 				}
 			});
 
-			for (int i = 0; i < len; i++) {
-				User userInfo = null;
+			for (int i = 0; i < len; i++)
 				try {
-					userInfo = new User(new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
-					usersList.add(userInfo);
-					FriendizerUser fzUser = ServerFacade.userDetails(userInfo.getId());
-					if (fzUser != null)
-						userInfo.updateFriendizerData(fzUser);
-					else
-						usersList.remove(userInfo);
+					long userID = jsonArray.getJSONObject(i).optLong("uid");
+					if (userID > 0) {
+						User user = ServerFacade.userDetails(userID);
+						if (user != null)
+							usersList.add(user);
+					}
 				} catch (Exception e) {
-					usersList.remove(userInfo);
-					Log.w(TAG, "", e);
+					Log.w(TAG, e.getMessage());
 				}
-			}
-			handler.post(new Runnable() {
+			activity.runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
 					friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-					activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
+					activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
 				}
 			});
 		}

@@ -3,11 +3,12 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -59,6 +60,9 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		gridView = (GridView) findViewById(R.id.gridview);
 		giftsList = new ArrayList<GiftCount>();
 		activity = this;
+		adapter = new GiftsUserAdapter(activity, 0, giftsList);
+		gridView.setAdapter(adapter);
+		gridView.setOnItemClickListener(activity);
 	}
 
 	/*
@@ -69,25 +73,24 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		new Thread(new Runnable() {
-			public void run() {
+		giftsList.clear();
+		new AsyncTask<Void, Void, List<GiftCount>>() {
+			@Override
+			protected List<GiftCount> doInBackground(Void... params) {
 				try {
-					GiftCount[] gifts = ServerFacade.getUserGifts(user.getId());
-					giftsList = Arrays.asList(gifts);
-				} catch (Exception e) {
+					return ServerFacade.getUserGifts(user.getId());
+				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						adapter = new GiftsUserAdapter(activity, 0, giftsList);
-						gridView.setAdapter(adapter);
-						gridView.setOnItemClickListener(activity);
-						setSupportProgressBarIndeterminateVisibility(false);
-					}
-				});
+				return new ArrayList<GiftCount>();
 			}
-		}).start();
+
+			@Override
+			protected void onPostExecute(List<GiftCount> gifts) {
+				giftsList.addAll(gifts);
+				setSupportProgressBarIndeterminateVisibility(false);
+			}
+		}.execute();
 	}
 
 	/*

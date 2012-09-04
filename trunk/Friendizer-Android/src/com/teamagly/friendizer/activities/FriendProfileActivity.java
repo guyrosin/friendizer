@@ -3,6 +3,8 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,8 +31,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -111,16 +111,13 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		// Reload the user's details from Facebook
-		Bundle params = new Bundle();
-		params.putString("fields", "name, first_name, picture, birthday, gender");
-		Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getId()), params, new UserRequestListener());
 
 		// Reload the mutual friends number
-		params = new Bundle();
+		Bundle params = new Bundle();
 		Utility.getInstance().mAsyncRunner.request("me/mutualfriends/" + String.valueOf(userInfo.getId()), params,
 				new MutualFriendsListener());
 
+		updateViews();
 		// Reload the user's details from our servers (in the background)
 		new FriendizerTask().execute(userInfo.getId());
 		// Get the matching with this user (in the background)
@@ -181,7 +178,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		protected Boolean doInBackground(Void... v) {
 			try {
 				ServerFacade.block(Utility.getInstance().userInfo.getId(), userInfo.getId());
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 				return false;
 			}
@@ -197,11 +194,6 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	}
 
 	protected void updateViews() {
-		updateFriendizerViews();
-		updateFacebookViews();
-	}
-
-	protected void updateFriendizerViews() {
 		txtLevel.setText("Level " + userInfo.getLevel());
 		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
 		int currentLevelPoints = userInfo.getLevelPoints();
@@ -211,16 +203,15 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 		txtValue.setText(String.valueOf(userInfo.getPoints()));
 		if (userInfo.getOwnsList() != null)
-			txtOwns.setText(String.valueOf(userInfo.getOwnsList().length));
+			txtOwns.setText(String.valueOf(userInfo.getOwnsList().size()));
 		if (userInfo.getStatus().length() > 0) {
 			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
 			txtStatus.setVisibility(View.VISIBLE);
 		} else
 			txtStatus.setVisibility(View.GONE);
-	}
 
-	protected void updateFacebookViews() {
-		ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
+		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
+			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
 		txtName.setText(userInfo.getName());
 		txtAge.setText(userInfo.getAge());
 		if (userInfo.getGender().length() > 0) {
@@ -314,7 +305,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		protected Void doInBackground(Void... v) {
 			try {
 				ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Log.w(TAG, "", e);
 				Toast.makeText(getBaseContext(), "Couldn't buy", Toast.LENGTH_SHORT).show();
 			}
@@ -342,33 +333,6 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					@Override
 					public void run() {
 						txtMutualFriends.setText(String.valueOf(friends.length()));
-					}
-				});
-			} catch (JSONException e) {
-				Log.e(TAG, "", e);
-			}
-		}
-	}
-
-	/*
-	 * Callback for fetching user's details from Facebook
-	 */
-	public class UserRequestListener extends BaseRequestListener {
-
-		@Override
-		public void onComplete(final String response, final Object state) {
-			JSONObject jsonObject;
-			try {
-				jsonObject = new JSONObject(response);
-				final FacebookUser newUserInfo = new FacebookUser(jsonObject);
-				// Update the user's details from Facebook
-				userInfo.updateFacebookData(newUserInfo);
-				// Update the views (has to be done from the main thread)
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						// actionBar.setTitle(userInfo.getName());
-						updateFacebookViews();
 					}
 				});
 			} catch (JSONException e) {
@@ -417,21 +381,21 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	class FriendizerTask extends AsyncTask<Long, Void, FriendizerUser> {
+	class FriendizerTask extends AsyncTask<Long, Void, User> {
 
-		protected FriendizerUser doInBackground(Long... userIDs) {
+		protected User doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.userDetails(userIDs[0]);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 				return null;
 			}
 		}
 
-		protected void onPostExecute(final FriendizerUser newUserInfo) {
+		protected void onPostExecute(final User newUserInfo) {
 			// Request the user's details from friendizer and update the views accordingly
 			try {
-				userInfo.updateFriendizerData(newUserInfo);
+				userInfo = newUserInfo;
 				if (userInfo.getOwnerID() > 0) {
 					// Get the owner's name and picture from Facebook
 					Bundle params = new Bundle();
@@ -447,7 +411,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					|| (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID()))
 				connectedFlag = true;
 			// Update the views
-			updateFriendizerViews();
+			updateViews();
 			updateButtons();
 		}
 	}
@@ -457,7 +421,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		protected Integer doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.matching(userIDs[0], userIDs[1]);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 				return 0;
 			}

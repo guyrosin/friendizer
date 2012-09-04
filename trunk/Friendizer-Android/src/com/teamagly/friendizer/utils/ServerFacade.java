@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -19,20 +20,21 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.util.Log;
 
 import com.google.android.gcm.GCMRegistrar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.Message;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserMatching;
 
 public final class ServerFacade {
 	private final static String TAG = "ServerFacade";
@@ -98,7 +100,7 @@ public final class ServerFacade {
 		return response;
 	}
 
-	public static FriendizerUser login(long userID, String accessToken, String regID) {
+	public static User login(long userID, String accessToken, String regID) {
 
 		String serverUrl = fullServerAddress + "login";
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -112,7 +114,7 @@ public final class ServerFacade {
 			try {
 				res = post(serverUrl, params);
 				GCMRegistrar.setRegisteredOnServer(FriendizerApp.getContext(), true);
-				FriendizerUser user = new FriendizerUser(new JSONObject(res));
+				User user = new Gson().fromJson(res, User.class);
 				user.setOwnsList(ownList(userID));
 				return user;
 			} catch (IOException e) {
@@ -134,34 +136,29 @@ public final class ServerFacade {
 				}
 				// Increase backoff exponentially
 				backoff *= 2;
-			} catch (JSONException e) {
-				Log.e(TAG, "JSON exception while logging in", e);
-				return null;
 			}
 		}
 		return null;
 	}
 
-	public static FriendizerUser userDetails(long userID) throws IOException, JSONException {
+	public static User userDetails(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		FriendizerUser user = new FriendizerUser(new JSONObject(in.readLine()));
+		UserMatching userMatching = new Gson().fromJson(in.readLine(), UserMatching.class);
+		User user = userMatching.getUser();
+		user.setMatching(userMatching.getMatching());
 		in.close();
 		user.setOwnsList(ownList(userID));
 		return user;
 	}
 
-	public static FriendizerUser[] ownList(long userID) throws JSONException, IOException {
+	public static List<User> ownList(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "ownList?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray users = new JSONArray(in.readLine());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		}.getType());
 		in.close();
-		FriendizerUser[] fzUsers = new FriendizerUser[users.length()];
-		for (int i = 0; i < users.length(); i++) {
-			FriendizerUser user = new FriendizerUser(users.getJSONObject(i));
-			fzUsers[i] = user;
-		}
-		return fzUsers;
+		return users;
 	}
 
 	public static void buy(long userID, long buyID) throws IOException {
@@ -185,17 +182,13 @@ public final class ServerFacade {
 		return matching;
 	}
 
-	public static FriendizerUser[] nearbyUsers(long userID) throws JSONException, IOException {
+	public static List<User> nearbyUsers(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "nearbyUsers?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray users = new JSONArray(in.readLine());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		}.getType());
 		in.close();
-		FriendizerUser[] fzUsers = new FriendizerUser[users.length()];
-		for (int i = 0; i < users.length(); i++) {
-			FriendizerUser user = new FriendizerUser(users.getJSONObject(i));
-			fzUsers[i] = user;
-		}
-		return fzUsers;
+		return users;
 	}
 
 	public static void sendMessage(Message msg) throws IOException, URISyntaxException {
@@ -214,20 +207,12 @@ public final class ServerFacade {
 	 * @throws JSONException
 	 * @throws Exception
 	 */
-	public static Message[] getUnread() throws IOException, JSONException {
+	public static List<Message> getUnread() throws IOException {
 		URL url = new URL(fullServerAddress + "getUnread?userID=" + Utility.getInstance().userInfo.getId());
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-
-		JSONArray JsonMessages = new JSONArray(in.readLine());
+		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
+		}.getType());
 		in.close();
-
-		Message[] messages = new Message[JsonMessages.length()];
-
-		for (int i = 0; i < JsonMessages.length(); i++) {
-			Message message = new Message(JsonMessages.getJSONObject(i));
-			messages[i] = message;
-		}
-
 		return messages;
 	}
 
@@ -241,33 +226,24 @@ public final class ServerFacade {
 	 * @throws JSONException
 	 * @throws Exception
 	 */
-	public static ArrayList<Message> getConversation(long userID, long from, long to) throws IOException, JSONException {
+	public static List<Message> getConversation(long userID, long from, long to) throws IOException {
 		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2="
 				+ userID + "&from=" + from + "&to=" + to);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-
-		JSONArray JsonMessages = new JSONArray(in.readLine());
+		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
+		}.getType());
 		in.close();
-
-		ArrayList<Message> messages = new ArrayList<Message>(JsonMessages.length());
-
-		for (int i = JsonMessages.length() - 1; i >= 0; i--) {
-			Message message = new Message(JsonMessages.getJSONObject(i));
-			messages.add(message);
-		}
-
+		Collections.reverse(messages);
 		return messages;
 
 	}
 
-	public static Achievement[] getAchievements(long userID) throws IOException, JSONException {
+	public static List<Achievement> getAchievements(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "achievements?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray userAchvs = new JSONArray(in.readLine());
+		List<Achievement> achvs = new Gson().fromJson(in.readLine(), new TypeToken<List<Achievement>>() {
+		}.getType());
 		in.close();
-		Achievement[] achvs = new Achievement[userAchvs.length()];
-		for (int i = 0; i < userAchvs.length(); i++)
-			achvs[i] = new Achievement(userAchvs.getJSONObject(i));
 		return achvs;
 	}
 
@@ -280,59 +256,51 @@ public final class ServerFacade {
 		in.close();
 	}
 
-	public static Action[] actionHistory(long userID) throws IOException, JSONException {
+	public static List<Action> actionHistory(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "actionHistory?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray actions = new JSONArray(in.readLine());
+		List<Action> actions = new Gson().fromJson(in.readLine(), new TypeToken<List<Action>>() {
+		}.getType());
 		in.close();
-		Action[] actionsArray = new Action[actions.length()];
-		for (int i = 0; i < actions.length(); i++)
-			actionsArray[i] = new Action(actions.getJSONObject(i));
-		return actionsArray;
+		return actions;
 	}
 
-	public static Gift[] getAllGifts() throws IOException, JSONException {
+	public static List<Gift> getAllGifts() throws IOException {
 		URL url = new URL(fullServerAddress + "allGifts");
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray gifts = new JSONArray(in.readLine());
+		List<Gift> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<Gift>>() {
+		}.getType());
 		in.close();
-		Gift[] giftsArray = new Gift[gifts.length()];
-		for (int i = 0; i < gifts.length(); i++)
-			giftsArray[i] = new Gift(gifts.getJSONObject(i));
-		return giftsArray;
+		return gifts;
 	}
 
-	public static GiftCount[] getUserGifts(long userID) throws IOException, JSONException {
+	public static List<GiftCount> getUserGifts(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "userGifts?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray gifts = new JSONArray(in.readLine());
+		List<GiftCount> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<GiftCount>>() {
+		}.getType());
 		in.close();
-		GiftCount[] giftsArray = new GiftCount[gifts.length()];
-		for (int i = 0; i < gifts.length(); i++)
-			giftsArray[i] = new GiftCount(gifts.getJSONObject(i));
-		return giftsArray;
+		return gifts;
 	}
 
-	public static void sendGift(long senderID, long receiverID, long giftID) throws IOException, JSONException {
+	public static void sendGift(long senderID, long receiverID, long giftID) throws IOException {
 		URL url = new URL(fullServerAddress + "sendGift?senderID=" + senderID + "&receiverID=" + receiverID + "&giftID=" + giftID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}
 
-	public static void block(long userID, long blockedID) throws IOException, JSONException {
+	public static void block(long userID, long blockedID) throws IOException {
 		URL url = new URL(fullServerAddress + "block?userID=" + userID + "&blockedID=" + blockedID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}
 
-	public static FriendizerUser[] blockList(long userID) throws IOException, JSONException {
+	public static List<User> blockList(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "blockList?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		JSONArray blocked = new JSONArray(in.readLine());
+		List<User> blockedUsers = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		}.getType());
 		in.close();
-		FriendizerUser[] blockedArray = new FriendizerUser[blocked.length()];
-		for (int i = 0; i < blocked.length(); i++)
-			blockedArray[i] = new FriendizerUser(blocked.getJSONObject(i));
-		return blockedArray;
+		return blockedUsers;
 	}
 }

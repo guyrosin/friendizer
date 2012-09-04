@@ -3,6 +3,8 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
+
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
@@ -28,7 +30,6 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -101,43 +102,11 @@ public class MyProfileFragment extends SherlockFragment {
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
-		// Reload the user's details from Facebook
-		Bundle params = new Bundle();
-		params.putString("fields", "name, first_name, picture, birthday, gender");
-		Utility.getInstance().mAsyncRunner.request("me", params, new UserRequestListener());
-		// Reload the user's details from our servers (in the background)
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					Utility.getInstance().userInfo.updateFriendizerData(ServerFacade.userDetails(Utility.getInstance().userInfo
-							.getId()));
-					// Update the view from the main thread
-					activity.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							updateFriendizerViews();
-						}
-					});
-				} catch (Exception e) {
-					Log.w(TAG, "", e);
-				}
-			}
-		}).start();
 
-		if (Utility.getInstance().userInfo.getOwnerID() > 0) {
-			// Get the owner's name and picture from Facebook
-			params = new Bundle();
-			params.putString("fields", "name, picture");
-			Utility.getInstance().mAsyncRunner.request(String.valueOf(Utility.getInstance().userInfo.getOwnerID()), params,
-					new OwnerRequestListener());
-		}
-		// Initialize the buttons
+		updateViews();
 		initButtons();
-	}
-
-	protected void updateViews() {
-		updateFriendizerViews();
-		updateFacebookViews();
+		// Reload the user's details from our servers (in the background)
+		new FriendizerTask().execute(Utility.getInstance().userInfo.getId());
 	}
 
 	protected void initButtons() {
@@ -175,7 +144,7 @@ public class MyProfileFragment extends SherlockFragment {
 		});
 	}
 
-	protected void updateFriendizerViews() {
+	protected void updateViews() {
 		User userInfo = Utility.getInstance().userInfo;
 		txtLevel.setText("Level " + userInfo.getLevel());
 		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
@@ -186,19 +155,17 @@ public class MyProfileFragment extends SherlockFragment {
 
 		value.setText(String.valueOf(userInfo.getPoints()));
 		money.setText(String.valueOf(userInfo.getMoney()));
-		if (userInfo.getStatus().length() > 0) {
+		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0) {
 			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
 			txtStatus.setVisibility(View.VISIBLE);
 		} else
 			txtStatus.setVisibility(View.GONE);
 		if (userInfo.getOwnsList() != null)
-			owns.setText(String.valueOf(userInfo.getOwnsList().length));
+			owns.setText(String.valueOf(userInfo.getOwnsList().size()));
 		activity.setSupportProgressBarIndeterminateVisibility(false);
-	}
 
-	protected void updateFacebookViews() {
-		User userInfo = Utility.getInstance().userInfo;
-		ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
+		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
+			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
 		name.setText(userInfo.getName());
 		age.setText(userInfo.getAge());
 		gender.setText(userInfo.getGender());
@@ -264,32 +231,6 @@ public class MyProfileFragment extends SherlockFragment {
 	}
 
 	/*
-	 * Callback for fetching user's details from Facebook
-	 */
-	public class UserRequestListener extends BaseRequestListener {
-
-		@Override
-		public void onComplete(final String response, final Object state) {
-			JSONObject jsonObject;
-			try {
-				jsonObject = new JSONObject(response);
-				final FacebookUser fbUserInfo = new FacebookUser(jsonObject);
-				// Update the user's details from Facebook
-				Utility.getInstance().userInfo.updateFacebookData(fbUserInfo);
-				// Update the views (has to be done from the main thread)
-				activity.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						updateFacebookViews();
-					}
-				});
-			} catch (Exception e) {
-				Log.w(TAG, "Got response from Facebook: " + response, e);
-			}
-		}
-	}
-
-	/*
 	 * Callback for fetching owner's details from Facebook
 	 */
 	public class OwnerRequestListener extends BaseRequestListener {
@@ -300,7 +241,7 @@ public class MyProfileFragment extends SherlockFragment {
 			try {
 				jsonObject = new JSONObject(response);
 				final String picURL = jsonObject.optJSONObject("picture").optJSONObject("data").optString("url");
-				
+
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -319,6 +260,36 @@ public class MyProfileFragment extends SherlockFragment {
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
 			}
+		}
+	}
+
+	class FriendizerTask extends AsyncTask<Long, Void, User> {
+
+		protected User doInBackground(Long... userIDs) {
+			try {
+				return ServerFacade.userDetails(userIDs[0]);
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+				return null;
+			}
+		}
+
+		protected void onPostExecute(final User newUserInfo) {
+			// Request the user's details from friendizer and update the views accordingly
+			try {
+				Utility.getInstance().userInfo = newUserInfo;
+				if (newUserInfo.getOwnerID() > 0) {
+					// Get the owner's name and picture from Facebook
+					Bundle params = new Bundle();
+					params.putString("fields", "name, picture");
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(newUserInfo.getOwnerID()), params,
+							new OwnerRequestListener());
+				}
+			} catch (Exception e) {
+				Log.w(TAG, "", e);
+			}
+			// Update the views
+			updateViews();
 		}
 	}
 

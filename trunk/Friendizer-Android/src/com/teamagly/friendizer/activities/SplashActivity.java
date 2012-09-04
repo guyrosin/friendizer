@@ -1,5 +1,6 @@
 package com.teamagly.friendizer.activities;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
@@ -9,14 +10,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,8 +29,6 @@ import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.google.android.gcm.GCMRegistrar;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -52,6 +49,7 @@ public class SplashActivity extends SherlockActivity {
 	private String requestID;
 	private Context context = this;
 	private ProgressDialog dialogFriendizer;
+	private long userID;
 
 	// After GCM registration, login to friendizer
 	AsyncTask<Void, Void, Boolean> friendizerLoginTask = new AsyncTask<Void, Void, Boolean>() {
@@ -61,12 +59,11 @@ public class SplashActivity extends SherlockActivity {
 			String regID = GCMRegistrar.getRegistrationId(context);
 			if (regID == null || regID.length() == 0)
 				return false;
-			FriendizerUser fzUser = ServerFacade.login(Utility.getInstance().userInfo.getId(),
-					Utility.getInstance().facebook.getAccessToken(), regID);
-			if (fzUser == null)
+			User userInfo = ServerFacade.login(userID, Utility.getInstance().facebook.getAccessToken(), regID);
+			if (userInfo == null)
 				return false;
 			else {
-				Utility.getInstance().userInfo.updateFriendizerData(fzUser);
+				Utility.getInstance().userInfo = userInfo;
 				return true;
 			}
 		}
@@ -228,7 +225,7 @@ public class SplashActivity extends SherlockActivity {
 	 */
 	public void requestFacebookUserData() {
 		Bundle params = new Bundle();
-		params.putString("fields", "name, first_name, picture, birthday, gender");
+		params.putString("fields", "id");
 		// Send a new request only if there are none currently
 		if ((userRequestListener == null) || (!userRequestListener.completed))
 			userRequestListener = new UserRequestListener();
@@ -236,7 +233,7 @@ public class SplashActivity extends SherlockActivity {
 	}
 
 	/*
-	 * Callback for fetching current user's name, picture, uid.
+	 * Callback for fetching the current user's uid
 	 */
 	public class UserRequestListener extends BaseRequestListener {
 		public boolean completed = false;
@@ -246,30 +243,10 @@ public class SplashActivity extends SherlockActivity {
 			JSONObject jsonObject;
 			try {
 				jsonObject = new JSONObject(response);
-				final User userInfo = new User(new FacebookUser(jsonObject));
-				Utility.getInstance().userInfo = userInfo;
-
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						dialogFriendizer.show();
-					}
-				});
-
-				/*
-				 * Login/Register to GCM
-				 */
-				GCMRegistrar.checkDevice(context);
-				// Make sure the manifest was properly set - comment out this line
-				// while developing the app, then uncomment it when it's ready.
-				GCMRegistrar.checkManifest(context);
-				final String regID = GCMRegistrar.getRegistrationId(context);
-				if (regID.equals("")) // Register to GCM
-					GCMRegistrar.register(context, Utility.SENDER_ID);
-				else
-					friendizerLoginTask.execute();
-			} catch (Exception e) {
-				Log.w(TAG, "The response from Facebook: " + response);
+				userID = Long.parseLong(jsonObject.getString("id"));
+				Log.w(TAG, "ID = "+userID);
+			} catch (JSONException e) {
+				Log.e(TAG, "The response from Facebook: " + response);
 				Log.e(TAG, e.getMessage());
 				handler.post(new Runnable() {
 					@Override
@@ -277,9 +254,29 @@ public class SplashActivity extends SherlockActivity {
 						showErrorDialog("Couldn't connect to Facebook");
 					}
 				});
-			} finally {
 				completed = true;
 			}
+
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					dialogFriendizer.show();
+				}
+			});
+
+			/*
+			 * Login/Register to GCM
+			 */
+			GCMRegistrar.checkDevice(context);
+			// Make sure the manifest was properly set - comment out this line
+			// while developing the app, then uncomment it when it's ready.
+			GCMRegistrar.checkManifest(context);
+			final String regID = GCMRegistrar.getRegistrationId(context);
+			if (regID.equals("")) // Register to GCM
+				GCMRegistrar.register(context, Utility.SENDER_ID);
+			else
+				friendizerLoginTask.execute();
+			completed = true;
 		}
 	}
 
