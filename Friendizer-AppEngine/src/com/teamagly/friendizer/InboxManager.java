@@ -43,11 +43,8 @@ public class InboxManager extends HttpServlet {
 
 		ChatMessage message = new ChatMessage(source, destination, text);
 
-		try {
-			pm.makePersistent(message);
-		} finally {
-			pm.close();
-		}
+		pm.makePersistent(message);
+		pm.close();
 		out.println(message);
 
 		// Make the message collapsible
@@ -97,7 +94,6 @@ public class InboxManager extends HttpServlet {
 		@SuppressWarnings("unchecked")
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(destination);
 		query.closeAll();
-		pm.close();
 		if (!messages.isEmpty()) {
 			for (ChatMessage m : messages) {
 				m.setUnread(false);
@@ -105,6 +101,7 @@ public class InboxManager extends HttpServlet {
 			}
 			out.println(new Gson().toJson(messages));
 		}
+		pm.close();
 	}
 
 	private void getInbox(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -123,7 +120,6 @@ public class InboxManager extends HttpServlet {
 		@SuppressWarnings("unchecked")
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(userId);
 		query.closeAll();
-		pm.close();
 		if (!messages.isEmpty()) {
 			for (ChatMessage m : messages) {
 				out.println(m);
@@ -132,6 +128,7 @@ public class InboxManager extends HttpServlet {
 			}
 			out.println(new Gson().toJson(messages));
 		}
+		pm.close();
 	}
 
 }

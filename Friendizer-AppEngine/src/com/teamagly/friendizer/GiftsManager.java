@@ -55,7 +55,6 @@ public class GiftsManager extends HttpServlet {
 			pm.close();
 			throw new ServletException("This user doesn't exist");
 		}
-		pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();

@@ -115,10 +115,11 @@ public class AchievementsManager extends HttpServlet {
 		Util.calculateLevel(user.getLevel(), user.getPoints());
 
 		if (result.isEmpty()) {
+			pm = PMF.get().getPersistenceManager();
 			pm.makePersistent(new UserAchievement(user.getId(), 30001));
+			pm.close();
 			notificate(user, 30001, context);
 		}
-		pm.close();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -146,10 +147,11 @@ public class AchievementsManager extends HttpServlet {
 			Util.calculateLevel(user.getLevel(), user.getPoints());
 
 			if (result.isEmpty()) {
+				pm = PMF.get().getPersistenceManager();
 				pm.makePersistent(new UserAchievement(user.getId(), 29001));
 				notificate(user, 29001, context);
+				pm.close();
 			}
-			pm.close();
 		}
 	}
 

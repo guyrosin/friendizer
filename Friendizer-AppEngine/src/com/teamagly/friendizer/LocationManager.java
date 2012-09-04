@@ -54,6 +54,7 @@ public class LocationManager extends HttpServlet {
 		cal.setTime(new Date());
 		cal.add(Calendar.MINUTE, -30);
 		Date updated = cal.getTime();
+		pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("since > updatedDate");
 		query.declareParameters("java.util.Date updatedDate");
@@ -118,16 +119,16 @@ public class LocationManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		User user = pm.getObjectById(User.class, userID);
-		pm.close();
-		if (user == null)
+		if (user == null) {
+			pm.close();
 			throw new ServletException("This user doesn't exist");
+		}
 		// Update the current date
 		user.setSince(new Date());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		cal.add(Calendar.MINUTE, -30);
 		Date updated = cal.getTime();
-		pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("since > updatedDate");
 		query.setOrdering("since asc");

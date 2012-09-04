@@ -1,7 +1,6 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -72,7 +71,6 @@ public class UserManager extends HttpServlet {
 			updateUserFromFacebook(user);
 			pm = PMF.get().getPersistenceManager();
 			pm.makePersistent(user);
-			pm.close();
 		} else {
 			user = result.get(0);
 			// Update the new access token of the user
@@ -155,7 +153,6 @@ public class UserManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
-		PrintWriter out = response.getWriter();
 
 		long userID = Long.parseLong(request.getParameter("userID"));
 		String status = request.getParameter("status");
@@ -169,13 +166,9 @@ public class UserManager extends HttpServlet {
 			throw new ServletException("This user doesn't exist");
 		User user = result.get(0);
 		user.setStatus(status);
-
-		try {
-			pm.makePersistent(user);
-		} finally {
-			pm.close();
-		}
-		out.println("Updated status: " + status);
+		pm.makePersistent(user);
+		pm.close();
+		log.info("Updated status: " + status);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -264,10 +257,11 @@ public class UserManager extends HttpServlet {
 
 			int result = new Double(formula).intValue();
 
-			pm.close();
 			response.getWriter().println(result);
 		} catch (Exception e) {
 			response.getWriter().println(e.getMessage());
+		} finally {
+			pm.close();
 		}
 	}
 }

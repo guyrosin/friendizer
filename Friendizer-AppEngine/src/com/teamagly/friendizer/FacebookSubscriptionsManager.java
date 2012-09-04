@@ -115,11 +115,8 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 				.fetchObject(userID, JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
 		user.updateFacebookData(jsonObject);
 		pm = PMF.get().getPersistenceManager();
-		try {
-			pm.makePersistent(user);
-		} finally {
-			pm.close();
-		}
+		pm.makePersistent(user);
+		pm.close();
 	}
 
 	public void addSubscription(String fields) {

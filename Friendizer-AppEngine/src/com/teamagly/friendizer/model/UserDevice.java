@@ -54,15 +54,13 @@ public class UserDevice {
 	@SuppressWarnings("unchecked")
 	public static List<UserDevice> getDeviceInfoForUser(long userID) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			Query query = pm.newQuery(UserDevice.class);
-			query.setFilter("userID == " + userID);
-			List<UserDevice> result = (List<UserDevice>) query.execute();
-			query.closeAll();
-			return result;
-		} finally {
-			pm.close();
-		}
+		Query query = pm.newQuery(UserDevice.class);
+		query.setFilter("userID == " + userID);
+		List<UserDevice> result = (List<UserDevice>) query.execute();
+		result.size(); // App Engine bug workaround
+		query.closeAll();
+		pm.close();
+		return result;
 	}
 
 	public long getId() {
