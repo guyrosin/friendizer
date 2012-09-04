@@ -56,6 +56,7 @@ public class UserManager extends HttpServlet {
 
 	@SuppressWarnings("unchecked")
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
 		String regID = request.getParameter(Util.REG_ID);
 		long userID = Long.parseLong(request.getParameter(Util.USER_ID));
 		String accessToken = request.getParameter(Util.ACCESS_TOKEN);
@@ -118,6 +119,7 @@ public class UserManager extends HttpServlet {
 
 	@SuppressWarnings("unchecked")
 	private void userDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);

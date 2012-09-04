@@ -71,6 +71,7 @@ public class GiftsManager extends HttpServlet {
 		query = pm.newQuery(Gift.class);
 		query.setFilter(giftsFilter.toString());
 		List<Gift> gifts = (List<Gift>) query.execute();
+		gifts.size(); // App Engine bug workaround
 		query.closeAll();
 		pm.close();
 		HashMap<Long, Integer> counters = new HashMap<Long, Integer>();
