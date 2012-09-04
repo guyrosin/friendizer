@@ -15,6 +15,11 @@ package com.teamagly.friendizer;
  */
 public class Util {
 
+	public static final String APP_ID = "273844699335189"; // Facebook app ID
+	public static final String APP_SECRET = "b2d90b5989dfdf082742e12d365053b9"; // Facebook app secret
+	public static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
+	public static final String BASE_URL = "http://friendizer.appspot.com/";
+
 	/**
 	 * Key for user ID (from Facebook) in shared preferences.
 	 */
@@ -26,8 +31,6 @@ public class Util {
 	public static final String REG_ID = "regID";
 
 	public static final String ACCESS_TOKEN = "accessToken";
-
-	public static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
 
 	/**
 	 * 

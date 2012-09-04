@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message;
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.GiftCount;
@@ -39,12 +39,10 @@ public class GiftsManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(Gift.class);
 		List<Gift> result = (List<Gift>) query.execute();
+		result.size(); // Important: App Engine bug workaround
 		query.closeAll();
-		JSONArray giftsArray = new JSONArray();
-		for (Gift gift : result)
-			giftsArray.put(gift.toJSONObject());
 		pm.close();
-		response.getWriter().println(giftsArray);
+		response.getWriter().println(new Gson().toJson(result));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -52,18 +50,17 @@ public class GiftsManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + userID);
-		List<User> result = (List<User>) query.execute();
-		query.closeAll();
-		if (result.isEmpty())
+		User user = pm.getObjectById(User.class, userID);
+		if (user == null) {
+			pm.close();
 			throw new ServletException("This user doesn't exist");
-		query = pm.newQuery(UserGift.class);
+		}
+		pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();
 		query.closeAll();
 		if (userGifts.isEmpty()) {
-			response.getWriter().println(new JSONArray());
 			pm.close();
 			return;
 		}
@@ -75,6 +72,7 @@ public class GiftsManager extends HttpServlet {
 		query.setFilter(giftsFilter.toString());
 		List<Gift> gifts = (List<Gift>) query.execute();
 		query.closeAll();
+		pm.close();
 		HashMap<Long, Integer> counters = new HashMap<Long, Integer>();
 		for (Gift gift : gifts)
 			counters.put(gift.getId(), 0);
@@ -86,11 +84,7 @@ public class GiftsManager extends HttpServlet {
 		for (Long giftID : counters.keySet())
 			giftCounts.add(new GiftCount(getGift(gifts, giftID), counters.get(giftID)));
 
-		JSONArray giftsArray = new JSONArray();
-		for (GiftCount gift : giftCounts)
-			giftsArray.put(gift.toJSONObject());
-		pm.close();
-		response.getWriter().println(giftsArray);
+		response.getWriter().println(new Gson().toJson(giftCounts));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -114,13 +108,10 @@ public class GiftsManager extends HttpServlet {
 			throw new ServletException("The sender doesn't exist");
 		if (receiver == null)
 			throw new ServletException("The receiver doesn't exist");
-		query = pm.newQuery(Gift.class);
-		query.setFilter("id == " + giftID);
-		List<Gift> result2 = (List<Gift>) query.execute();
-		query.closeAll();
-		if (result2.isEmpty())
-			throw new ServletException("The gift doesn't exist");
-		Gift gift = result2.get(0);
+
+		Gift gift = pm.getObjectById(Gift.class, giftID);
+		if (gift == null)
+			throw new ServletException("This gift doesn't exist");
 		if (sender.getMoney() < gift.getValue())
 			throw new ServletException("The sender doesn't have enough money to send this gift");
 		sender.setMoney(sender.getMoney() - gift.getValue());

@@ -4,14 +4,14 @@ import javax.jdo.annotations.*;
 
 @PersistenceCapable
 public class UserBlock {
-	@SuppressWarnings("unused")
 	@PrimaryKey
-	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+	@Persistent(
+			valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
-	
+
 	@Persistent
 	private long userID;
-	
+
 	@Persistent
 	private long blockedID;
 

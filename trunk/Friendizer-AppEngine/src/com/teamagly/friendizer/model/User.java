@@ -1,21 +1,42 @@
 package com.teamagly.friendizer.model;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONObject;
+import com.restfb.json.JsonObject;
 
 @PersistenceCapable
 public class User {
+
+	/*
+	 * Facebook data
+	 */
+
 	@PrimaryKey
 	@Persistent
-	private Long id;
+	private Long id; // Facebook ID
+
+	@Persistent
+	private String name; // Full name
+
+	@Persistent
+	private String gender;
+
+	@Persistent
+	private String birthday;
+
+	@Persistent
+	private String picture;
+
+	@Persistent
+	private String token; // Facebook access token
+
+	/*
+	 * Friendizer data
+	 */
 
 	@Persistent
 	private long owner;
@@ -36,27 +57,10 @@ public class User {
 	private double longitude;
 
 	@Persistent
-	private Date since;
-
-	@Persistent
-	private String token; // Facebook access token
+	private Date since; // When the user was last seen
 
 	@Persistent
 	private String status;
-
-	public User(long id, long owner, long points, int level, long money, double latitude, double longitude, Date since,
-			String token, String status) {
-		this.id = id;
-		this.owner = owner;
-		this.points = points;
-		this.level = level;
-		this.money = money;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.since = since;
-		this.token = token;
-		this.status = status;
-	}
 
 	/**
 	 * Constructor for a new user
@@ -74,29 +78,79 @@ public class User {
 		this.status = "";
 	}
 
-	public User(JSONObject obj) throws JSONException {
-		id = obj.getLong("id");
-		owner = obj.getLong("owner");
-		points = obj.getLong("points");
-		level = obj.getInt("level");
-		money = obj.getLong("money");
-		latitude = obj.getDouble("latitude");
-		longitude = obj.getDouble("longitude");
-		token = obj.getString("token");
-		status = obj.getString("status");
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		try {
-			since = format.parse(obj.getString("since"));
-		} catch (ParseException e) {
-			throw new JSONException("JSONObject[\"since\"] is not a date.");
-		}
-	}
-
 	public long getId() {
 		return id;
 	}
 
 	public void setId(long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the gender
+	 */
+	public String getGender() {
+		return gender;
+	}
+
+	/**
+	 * @param gender
+	 *            the gender to set
+	 */
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	/**
+	 * @return the birthday
+	 */
+	public String getBirthday() {
+		return birthday;
+	}
+
+	/**
+	 * @param birthday
+	 *            the birthday to set
+	 */
+	public void setBirthday(String birthday) {
+		this.birthday = birthday;
+	}
+
+	/**
+	 * @return the picture
+	 */
+	public String getPicture() {
+		return picture;
+	}
+
+	/**
+	 * @param picture
+	 *            the picture to set
+	 */
+	public void setPicture(String picture) {
+		this.picture = picture;
+	}
+
+	/**
+	 * @param id
+	 *            the id to set
+	 */
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -172,27 +226,18 @@ public class User {
 		this.status = status;
 	}
 
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("id", id);
-			obj.put("owner", owner);
-			obj.put("points", points);
-			obj.put("level", level);
-			obj.put("money", money);
-			obj.put("latitude", latitude);
-			obj.put("longitude", longitude);
-			obj.put("token", token);
-			obj.put("status", status);
-			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-			obj.put("since", format.format(since));
-		} catch (JSONException e) {
-		}
-		return obj;
-	}
-
-	@Override
-	public String toString() {
-		return toJSONObject().toString();
+	public void updateFacebookData(JsonObject jsonObject) {
+		if (jsonObject.has("name"))
+			name = jsonObject.getString("name");
+		if (jsonObject.has("picture"))
+			try {
+				picture = jsonObject.getJsonObject("picture").getJsonObject("data").optString("url");
+			} catch (Exception e) {
+				picture = jsonObject.getString("picture"); // Old picture format
+			}
+		if (jsonObject.has("gender"))
+			gender = jsonObject.getString("gender");
+		if (jsonObject.has("birthday"))
+			birthday = jsonObject.getString("birthday");
 	}
 }

@@ -15,6 +15,7 @@ import com.teamagly.friendizer.model.UserDevice;
 public class UnregisterServlet extends HttpServlet {
 	private final Logger log = Logger.getLogger(getClass().getName());
 
+	@SuppressWarnings("unused")
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String regIDParam = req.getParameter(Util.REG_ID);
