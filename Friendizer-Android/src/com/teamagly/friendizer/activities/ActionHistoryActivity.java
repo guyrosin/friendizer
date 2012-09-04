@@ -3,8 +3,8 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.content.Intent;
@@ -20,9 +20,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.ActionsAdapter;
-import com.teamagly.friendizer.adapters.GiftsSendAdapter;
 import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -50,6 +48,8 @@ public class ActionHistoryActivity extends SherlockActivity {
 		setContentView(R.layout.gifts_layout);
 		gridView = (GridView) findViewById(R.id.gridview);
 		actionsList = new ArrayList<Action>();
+		adapter = new ActionsAdapter(this, 0, actionsList);
+		gridView.setAdapter(adapter);
 	}
 
 	/*
@@ -60,14 +60,13 @@ public class ActionHistoryActivity extends SherlockActivity {
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		adapter = new ActionsAdapter(this, 0, actionsList);
-		gridView.setAdapter(adapter);
+		actionsList.clear();
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Action[] actions = ServerFacade.actionHistory(destUser.getId());
-					actionsList = Arrays.asList(actions);
-				} catch (Exception e) {
+					List<Action> actions = ServerFacade.actionHistory(destUser.getId());
+					actionsList.addAll(actions);
+				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}
 				runOnUiThread(new Runnable() {

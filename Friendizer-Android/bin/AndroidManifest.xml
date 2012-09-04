@@ -94,9 +94,10 @@
         </receiver>
 
         <service android:name=".GCMIntentService" />
-        <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 
         <!-- Little Fluffy Location Library -->
+        <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
+
         <receiver
             android:name="com.littlefluffytoys.littlefluffylocationlibrary.StartupBroadcastReceiver"
             android:exported="true" >
@@ -107,9 +108,11 @@
         <receiver
             android:name="com.littlefluffytoys.littlefluffylocationlibrary.PassiveLocationChangedReceiver"
             android:exported="true" />
-        <receiver android:name=".LocationBroadcastReceiver">
+        <receiver android:name=".LocationBroadcastReceiver" >
             <intent-filter>
-                <action android:name="com.teamagly.friendizer.littlefluffylocationlibrary.LOCATION_CHANGED" android:exported="false"/>
+                <action
+                    android:name="com.teamagly.friendizer.littlefluffylocationlibrary.LOCATION_CHANGED"
+                    android:exported="false" />
             </intent-filter>
         </receiver>
     </application>

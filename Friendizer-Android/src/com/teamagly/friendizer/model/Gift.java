@@ -1,12 +1,10 @@
 package com.teamagly.friendizer.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Gift {
 	private Long id;
-    private String name;
-    private String iconRes;
+	private String name;
+	private String iconRes;
 	private int value;
 
 	public Gift(long id, String name, String iconRes, int value) {
@@ -14,13 +12,6 @@ public class Gift {
 		this.name = name;
 		this.iconRes = iconRes;
 		this.value = value;
-	}
-	
-	public Gift(JSONObject obj) throws JSONException {
-		id = obj.getLong("id");
-		name = obj.getString("name");
-		iconRes = obj.getString("iconRes");
-		value = obj.getInt("value");
 	}
 
 	public long getId() {
@@ -53,22 +44,5 @@ public class Gift {
 
 	public void setValue(int value) {
 		this.value = value;
-	}
-	
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("id", id);
-			obj.put("name", name);
-			obj.put("iconRes", iconRes);
-		    obj.put("value", value);
-		} catch (JSONException e) {
-		}
-		return obj;
-	}
-	
-	@Override
-	public String toString() {
-		return toJSONObject().toString();
 	}
 }

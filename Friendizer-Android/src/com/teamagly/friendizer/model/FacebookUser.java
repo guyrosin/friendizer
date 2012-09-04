@@ -1,11 +1,8 @@
 package com.teamagly.friendizer.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import org.json.JSONObject;
-
-import android.util.Log;
 
 import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.Utility;
@@ -53,7 +50,7 @@ public class FacebookUser implements Serializable {
 			gender = jsonObject.optString("gender");
 
 			try {
-				age = Utility.calcAge(new Date(jsonObject.optString("birthday")));
+				age = Utility.calcAge(jsonObject.optString("birthday"));
 			} catch (IllegalArgumentException e) {
 				age = "";
 			}
@@ -65,7 +62,7 @@ public class FacebookUser implements Serializable {
 			gender = jsonObject.optString("sex");
 
 			try {
-				age = Utility.calcAge(new Date(jsonObject.optString("birthday_date")));
+				age = Utility.calcAge(jsonObject.optString("birthday_date"));
 			} catch (IllegalArgumentException e) {
 				age = "";
 			}

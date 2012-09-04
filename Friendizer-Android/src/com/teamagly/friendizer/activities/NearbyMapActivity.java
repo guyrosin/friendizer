@@ -1,9 +1,8 @@
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.json.JSONArray;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -42,10 +41,7 @@ import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.readystatesoftware.maps.OnSingleTapListener;
 import com.readystatesoftware.maps.TapControlledMapView;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
@@ -179,8 +175,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		mapView.invalidate();
 
 		if (Utility.getInstance().getLocation() != null) {
-			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().getLocation(),
-					Utility.getInstance().userInfo, markerLayout);
+			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().userInfo, markerLayout);
 			myItemizedOverlay.addOverlay(myOverlayItem);
 			zoomMyLocation();
 		}
@@ -240,58 +235,26 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	 * Clears the current users list and request the information from Facebook
 	 */
 	protected void requestFriends() {
-		class NearbyUsersTask extends AsyncTask<Long, Void, JSONArray> {
-			FriendizerUser[] nearbyUsers;
+		class NearbyUsersTask extends AsyncTask<Long, Void, List<User>> {
 
-			protected JSONArray doInBackground(Long... userIDs) {
+			protected List<User> doInBackground(Long... userIDs) {
 				try {
-					nearbyUsers = ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
-					// Build a comma separated string of all the users' IDs
-					StringBuilder IDsBuilder = new StringBuilder();
-					for (int i = 0; i < nearbyUsers.length - 1; i++)
-						IDsBuilder.append(nearbyUsers[i].getId() + ",");
-					IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
-					Bundle params = new Bundle();
-					// Request the details of each nearby user
-					// Note: must order by uid (same as ownList servlet) so the next for loop will work!
-					String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
-							+ IDsBuilder.toString() + ") order by uid";
-					params.putString("method", "fql.query");
-					params.putString("query", query);
-					try {
-						String response = Utility.getInstance().facebook.request(params);
-						return new JSONArray(response);
-					} catch (Exception e) {
-						Log.e(TAG, e.getMessage());
-					}
-				} catch (Exception e) {
-					return new JSONArray();
+					return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+				} catch (IOException e) {
+					Log.e(TAG, e.getMessage());
 				}
-				return new JSONArray();
+				return new ArrayList<User>();
 			}
 
-			protected void onPostExecute(final JSONArray jsonArray) {
-				if (jsonArray.length() == 0)
-					setSupportProgressBarIndeterminateVisibility(false);
-				else {
-					try {
-						int len = jsonArray.length();
-						for (int i = 0; i < len; i++) {
-							User userInfo = new User(nearbyUsers[i],
-									new FacebookUser(jsonArray.getJSONObject(i), FBQueryType.FQL));
-							CustomOverlayItem overlayItem = new CustomOverlayItem(userInfo.getGeoPoint(), userInfo, markerLayout);
-							nearbyUsersItemizedOverlay.addOverlay(overlayItem);
-						}
-					} catch (Exception e) {
-						Log.e(TAG, e.getMessage());
-					} finally {
-						mapView.invalidate();
-						setSupportProgressBarIndeterminateVisibility(false);
+			protected void onPostExecute(final List<User> nearbyUsers) {
+				if (nearbyUsers.size() > 0) {
+					for (User user : nearbyUsers) {
+						CustomOverlayItem overlayItem = new CustomOverlayItem(user, markerLayout);
+						nearbyUsersItemizedOverlay.addOverlay(overlayItem);
 					}
-					// for (int i = 0; i < nearbyUsersItemizedOverlay.size(); i++)
-					// Log.e(TAG, "yo: " + nearbyUsersItemizedOverlay.getItem(i).getTitle() + ", "
-					// + nearbyUsersItemizedOverlay.getItem(i).getPoint());
+					mapView.invalidate();
 				}
+				setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}
 

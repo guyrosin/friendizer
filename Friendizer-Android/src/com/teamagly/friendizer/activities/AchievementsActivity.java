@@ -4,6 +4,7 @@
 package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -64,9 +65,8 @@ public class AchievementsActivity extends SherlockActivity {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					Achievement[] achvs = ServerFacade.getAchievements(user.getId());
-					for (Achievement achv : achvs)
-						achievements.add(achv);
+					List<Achievement> achvs = ServerFacade.getAchievements(user.getId());
+					achievements.addAll(achvs);
 				} catch (Exception e) {
 					Log.e(TAG, e.getMessage());
 				}

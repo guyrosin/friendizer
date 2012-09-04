@@ -1,15 +1,9 @@
 package com.teamagly.friendizer.model;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Date;
 
 import com.teamagly.friendizer.utils.Utility;
-
-import java.util.Date;
 
 public class Message implements Serializable {
 
@@ -48,40 +42,6 @@ public class Message implements Serializable {
 		this.text = text;
 		this.unread = true;
 		this.time = new Date();
-	}
-
-	public Message(JSONObject obj) throws JSONException {
-		this.id = obj.getLong("id");
-		this.source = obj.getLong("source");
-		this.destination = obj.getLong("destination");
-		this.text = obj.getString("text");
-		this.unread = obj.getBoolean("unread");
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		try {
-			this.time = format.parse(obj.getString("time"));
-		} catch (ParseException e) {
-			throw new JSONException("JSONObject[\"time\"] is not a date.");
-		}
-	}
-
-	@Override
-	public String toString() {
-		return toJSONObject().toString();
-	}
-
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("id", id);
-			obj.put("source", source);
-			obj.put("destination", destination);
-			obj.put("text", text);
-			obj.put("unread", unread);
-			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-			obj.put("time", format.format(time));
-		} catch (JSONException e) {
-		}
-		return obj;
 	}
 
 	public Long getId() {

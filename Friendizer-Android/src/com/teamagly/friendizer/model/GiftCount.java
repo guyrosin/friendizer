@@ -1,8 +1,5 @@
 package com.teamagly.friendizer.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class GiftCount {
 
 	private Gift gift;
@@ -16,14 +13,6 @@ public class GiftCount {
 	public GiftCount(Gift gift) {
 		this.gift = gift;
 		this.count = 0;
-	}
-
-	public GiftCount(JSONObject obj) {
-		try {
-			gift = new Gift(obj);
-			count = obj.getInt("count");
-		} catch (JSONException e) {
-		}
 	}
 
 	public Gift getGift() {

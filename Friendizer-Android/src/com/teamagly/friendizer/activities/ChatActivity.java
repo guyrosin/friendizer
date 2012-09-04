@@ -4,6 +4,7 @@
 package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -45,7 +46,7 @@ public class ChatActivity extends SherlockActivity {
 	private Button sendButton;
 
 	private MessagesAdapter messagesAdapter;
-	private ArrayList<Message> messages;
+	private List<Message> messages;
 	private User destUser;
 
 	// The action listener for the EditText widget, to listen for the return key

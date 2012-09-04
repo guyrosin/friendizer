@@ -1,6 +1,8 @@
 package com.teamagly.friendizer.activities;
 
-import org.json.JSONArray;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,10 +22,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.FacebookUser;
-import com.teamagly.friendizer.model.FriendizerUser;
 import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.User.FBQueryType;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
@@ -114,61 +113,28 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	protected void requestFriends() {
 		usersList.clear();
 		friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-		class NearbyUsersTask extends AsyncTask<Long, Void, FriendizerUser[]> {
+		class NearbyUsersTask extends AsyncTask<Long, Void, List<User>> {
 
-			protected FriendizerUser[] doInBackground(Long... userIDs) {
+			protected List<User> doInBackground(Long... userIDs) {
 				try {
-					return ServerFacade.nearbyUsers(userIDs[0]);
-				} catch (Exception e) {
+					return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
-					return new FriendizerUser[] {};
 				}
+				return new ArrayList<User>();
 			}
 
-			protected void onPostExecute(final FriendizerUser[] nearbyUsers) {
+			protected void onPostExecute(final List<User> nearbyUsers) {
 				TextView empty = (TextView) activity.findViewById(R.id.empty);
-				if (nearbyUsers.length == 0) {
-					activity.setSupportProgressBarIndeterminateVisibility(false);
+				if (nearbyUsers.size() == 0) {
 					empty.setVisibility(View.VISIBLE);
 				} else {
+					for (User user : nearbyUsers)
+						usersList.add(user);
 					empty.setVisibility(View.GONE);
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							// Build a comma separated string of all the users' IDs
-							StringBuilder IDsBuilder = new StringBuilder();
-							for (int i = 0; i < nearbyUsers.length - 1; i++)
-								IDsBuilder.append(nearbyUsers[i].getId() + ",");
-							IDsBuilder.append(nearbyUsers[nearbyUsers.length - 1].getId());
-							Bundle params = new Bundle();
-							try {
-								// Request the details of each nearby user
-								// Note: must order by uid (same as ownList servlet) so the next for loop will work!
-								String query = "SELECT name, uid, pic_square, sex, birthday_date from user where uid in ("
-										+ IDsBuilder.toString() + ") order by uid";
-								params.putString("method", "fql.query");
-								params.putString("query", query);
-								String response = Utility.getInstance().facebook.request(params);
-								JSONArray jsonArray = new JSONArray(response);
-								int len = jsonArray.length();
-								for (int i = 0; i < len; i++) {
-									usersList.add(new User(nearbyUsers[i], new FacebookUser(jsonArray.getJSONObject(i),
-											FBQueryType.FQL)));
-								}
-							} catch (Exception e) {
-								Log.e(TAG, e.getMessage());
-							} finally {
-								handler.post(new Runnable() {
-									@Override
-									public void run() {
-										activity.setSupportProgressBarIndeterminateVisibility(false);
-										friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-									}
-								});
-							}
-						}
-					}).start();
+					friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 				}
+				activity.setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}
 

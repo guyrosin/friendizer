@@ -3,115 +3,82 @@
  */
 package com.teamagly.friendizer.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class Achievement {
-    private Long id;
+	private Long id;
 
-    private String title;
+	private String title;
 
-    private String description;
+	private String description;
 
-    private String iconRes;
+	private String iconRes;
 
-    private int reward;
-    
-    private long points;
+	private int reward;
 
-    public boolean earned;
+	private long points;
 
-    public Achievement(JSONObject obj) throws JSONException {
-	id = obj.getLong("id");
-	title = obj.getString("title");
-	description = obj.getString("description");
-	iconRes = obj.getString("iconRes");
-	reward = obj.getInt("reward");
-	points = obj.getLong("points");
-	earned = obj.getBoolean("earned");
-    }
+	public boolean earned;
 
-    public JSONObject toJSONObject() {
-	JSONObject obj = new JSONObject();
-	try {
-	    obj.put("id", id);
-	    obj.put("title", title);
-	    obj.put("description", description);
-	    obj.put("iconRes", iconRes);
-	    obj.put("reward", reward);
-	    obj.put("points", points);
-	    obj.put("earned", earned);
-	} catch (JSONException e) {
+	public long getId() {
+		return id;
 	}
-	return obj;
-    }
 
-    @Override
-    public String toString() {
-	return toJSONObject().toString();
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public long getId() {
-	return id;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public void setId(long id) {
-	this.id = id;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public String getTitle() {
-	return title;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setTitle(String title) {
-	this.title = title;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public String getDescription() {
-	return description;
-    }
+	public String getIconRes() {
+		return iconRes;
+	}
 
-    public void setDescription(String description) {
-	this.description = description;
-    }
+	public void setIconRes(String iconRes) {
+		this.iconRes = iconRes;
+	}
 
-    public String getIconRes() {
-	return iconRes;
-    }
+	public int getReward() {
+		return reward;
+	}
 
-    public void setIconRes(String iconRes) {
-	this.iconRes = iconRes;
-    }
+	public void setReward(int reward) {
+		this.reward = reward;
+	}
 
-    public int getReward() {
-	return reward;
-    }
-
-    public void setReward(int reward) {
-	this.reward = reward;
-    }
-    
-    public long getPoints() {
+	public long getPoints() {
 		return points;
 	}
-    
-    public void setPoints(long points) {
+
+	public void setPoints(long points) {
 		this.points = points;
 	}
 
-    /**
-     * @return the earned
-     */
-    public boolean isEarned() {
-	return earned;
-    }
+	/**
+	 * @return the earned
+	 */
+	public boolean isEarned() {
+		return earned;
+	}
 
-    /**
-     * @param earned
-     *            the earned to set
-     */
-    public void setEarned(boolean earned) {
-	this.earned = earned;
-    }
+	/**
+	 * @param earned
+	 *            the earned to set
+	 */
+	public void setEarned(boolean earned) {
+		this.earned = earned;
+	}
 
 }
