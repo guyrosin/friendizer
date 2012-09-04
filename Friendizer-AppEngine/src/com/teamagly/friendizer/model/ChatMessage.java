@@ -1,7 +1,5 @@
 package com.teamagly.friendizer.model;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -47,40 +45,6 @@ public class ChatMessage {
 		this.text = text;
 		this.unread = true;
 		this.time = new Date();
-	}
-
-	public ChatMessage(JSONObject obj) throws JSONException {
-		this.id = obj.getLong("id");
-		this.source = obj.getLong("source");
-		this.destination = obj.getLong("destination");
-		this.text = obj.getString("text");
-		this.unread = obj.getBoolean("unread");
-		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		try {
-			this.time = format.parse(obj.getString("time"));
-		} catch (ParseException e) {
-			throw new JSONException("JSONObject[\"time\"] is not a date.");
-		}
-	}
-
-	@Override
-	public String toString() {
-		return toJSONObject().toString();
-	}
-
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("id", id);
-			obj.put("source", source);
-			obj.put("destination", destination);
-			obj.put("text", text);
-			obj.put("unread", unread);
-			SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-			obj.put("time", format.format(time));
-		} catch (JSONException e) {
-		}
-		return obj;
 	}
 
 	public String toC2DMMessage() throws JSONException {

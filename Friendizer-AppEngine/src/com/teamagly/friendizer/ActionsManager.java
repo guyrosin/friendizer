@@ -1,6 +1,7 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.gson.Gson;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.User;
 
@@ -22,13 +23,11 @@ public class ActionsManager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + userID);
-		List<User> result = (List<User>) query.execute();
-		query.closeAll();
-		if (result.isEmpty())
+		User user = pm.getObjectById(User.class, userID);
+		pm.close();
+		if (user == null)
 			throw new ServletException("This user doesn't exist");
-		query = pm.newQuery(Action.class);
+		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
 		query.setOrdering("date desc");
 		List<Action> result1 = (List<Action>) query.execute();
@@ -39,29 +38,29 @@ public class ActionsManager extends HttpServlet {
 		List<Action> result2 = (List<Action>) query.execute();
 		query.closeAll();
 		int i = 0, j = 0;
-		JSONArray actionsArray = new JSONArray();
+		ArrayList<Action> actions = new ArrayList<Action>();
 		while (true) {
 			if (i < result1.size()) {
 				if (j < result2.size()) {
 					if (result1.get(i).getDate().after(result2.get(j).getDate())) {
-						actionsArray.put(result1.get(i).toJSONObject());
+						actions.add(result1.get(i));
 						i++;
 					} else {
-						actionsArray.put(result2.get(j).toJSONObject());
+						actions.add(result2.get(j));
 						j++;
 					}
 				} else {
-					actionsArray.put(result1.get(i).toJSONObject());
+					actions.add(result1.get(i));
 					i++;
 				}
 			} else if (j < result2.size()) {
-				actionsArray.put(result2.get(j).toJSONObject());
+				actions.add(result2.get(j));
 				j++;
 			} else
 				break;
 		}
 		pm.close();
-		response.getWriter().println(actionsArray);
+		response.getWriter().println(new Gson().toJson(actions));
 	}
 
 	public static void madeBuy(long buyerID, long boughtID) {

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message;
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.ChatMessage;
 
@@ -50,6 +50,7 @@ public class InboxManager extends HttpServlet {
 		}
 		out.println(message);
 
+		// Make the message collapsible
 		Message msg = new Message.Builder().addData("type", NotificationType.CHAT.toString())
 				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).collapseKey("NEARBY").build();
 		SendMessage.sendMessage(destination, msg);
@@ -73,19 +74,11 @@ public class InboxManager extends HttpServlet {
 		query.setRange(from, to);
 		query.declareParameters("long user1, long user2");
 
-		try {
-			@SuppressWarnings("unchecked")
-			List<ChatMessage> results = (List<ChatMessage>) query.execute(user1, user2);
-			if (!results.isEmpty()) {
-				JSONArray messages = new JSONArray();
-				for (ChatMessage m : results) {
-					messages.put(m.toJSONObject());
-				}
-				out.println(messages);
-			}
-		} finally {
-			query.closeAll();
-		}
+		@SuppressWarnings("unchecked")
+		List<ChatMessage> messages = (List<ChatMessage>) query.execute(user1, user2);
+		if (!messages.isEmpty())
+			out.println(new Gson().toJson(messages));
+		query.closeAll();
 	}
 
 	private void getUnread(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -101,21 +94,16 @@ public class InboxManager extends HttpServlet {
 		query.setOrdering("id time");
 		query.declareParameters("long dest");
 
-		try {
-			@SuppressWarnings("unchecked")
-			List<ChatMessage> results = (List<ChatMessage>) query.execute(destination);
-			if (!results.isEmpty()) {
-				JSONArray messages = new JSONArray();
-				for (ChatMessage m : results) {
-					m.setUnread(false);
-					pm.makePersistent(m);
-					messages.put(m);
-				}
-				out.println(messages);
+		@SuppressWarnings("unchecked")
+		List<ChatMessage> messages = (List<ChatMessage>) query.execute(destination);
+		query.closeAll();
+		pm.close();
+		if (!messages.isEmpty()) {
+			for (ChatMessage m : messages) {
+				m.setUnread(false);
+				pm.makePersistent(m);
 			}
-		} finally {
-			query.closeAll();
-			pm.close();
+			out.println(new Gson().toJson(messages));
 		}
 	}
 
@@ -128,23 +116,21 @@ public class InboxManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
 		Query query = pm.newQuery(ChatMessage.class);
-		query.setFilter("source == src && unread == true");
+		query.setFilter("source == src");
 		query.setOrdering("id desc");
 		query.declareParameters("long src");
 
-		try {
-			@SuppressWarnings("unchecked")
-			List<ChatMessage> results = (List<ChatMessage>) query.execute(userId);
-			if (!results.isEmpty()) {
-				for (ChatMessage m : results) {
-					out.println(m);
-					m.setUnread(false);
-					pm.makePersistent(m);
-				}
+		@SuppressWarnings("unchecked")
+		List<ChatMessage> messages = (List<ChatMessage>) query.execute(userId);
+		query.closeAll();
+		pm.close();
+		if (!messages.isEmpty()) {
+			for (ChatMessage m : messages) {
+				out.println(m);
+				m.setUnread(false);
+				pm.makePersistent(m);
 			}
-		} finally {
-			query.closeAll();
-			pm.close();
+			out.println(new Gson().toJson(messages));
 		}
 	}
 

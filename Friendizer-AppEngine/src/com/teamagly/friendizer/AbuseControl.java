@@ -3,12 +3,16 @@ package com.teamagly.friendizer;
 import java.io.IOException;
 import java.util.List;
 
-import javax.jdo.*;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
-import com.teamagly.friendizer.model.*;
+import com.google.gson.Gson;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserBlock;
 
 @SuppressWarnings("serial")
 public class AbuseControl extends HttpServlet {
@@ -21,7 +25,7 @@ public class AbuseControl extends HttpServlet {
 		else
 			blockList(request, response);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void block(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
@@ -52,23 +56,20 @@ public class AbuseControl extends HttpServlet {
 		pm.close();
 		response.getWriter().println("You blocked the user");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void blockList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + userID);
-		List<User> result = (List<User>) query.execute();
-		query.closeAll();
-		if (result.isEmpty())
+		User user = pm.getObjectById(User.class, userID);
+		pm.close();
+		if (user == null)
 			throw new ServletException("This user doesn't exist");
-		query = pm.newQuery(UserBlock.class);
+		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockedID = (List<UserBlock>) query.execute();
 		query.closeAll();
 		if (blockedID.isEmpty()) {
-			response.getWriter().println(new JSONArray());
 			pm.close();
 			return;
 		}
@@ -80,10 +81,7 @@ public class AbuseControl extends HttpServlet {
 		query.setFilter(blockedFilter.toString());
 		List<User> blocked = (List<User>) query.execute();
 		query.closeAll();
-		JSONArray blockedArray = new JSONArray();
-		for (User user : blocked)
-			blockedArray.put(user.toJSONObject());
 		pm.close();
-		response.getWriter().println(blockedArray);
+		response.getWriter().println(new Gson().toJson(blocked));
 	}
 }

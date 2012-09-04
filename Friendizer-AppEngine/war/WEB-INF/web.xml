@@ -143,4 +143,17 @@
 	    <url-pattern>/moneyLeaderboard</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+	    <servlet-name>FacebookSubscriptionsManager</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.FacebookSubscriptionsManager</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>FacebookSubscriptionsManager</servlet-name>
+	    <url-pattern>/facebookSubscriptions</url-pattern>
+	    <url-pattern>/addSubscription</url-pattern>
+	    <url-pattern>/deleteSubscriptions</url-pattern>
+	    <url-pattern>/updateUsers</url-pattern>
+	</servlet-mapping>
+	
 </web-app>

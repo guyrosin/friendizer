@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
+import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
@@ -29,6 +30,10 @@ import com.teamagly.friendizer.PMF;
 public class UserDevice {
 
 	@PrimaryKey
+	@Persistent(
+			valueStrategy = IdGeneratorStrategy.IDENTITY)
+	Long id;
+
 	@Persistent
 	private String regID;
 
@@ -58,6 +63,14 @@ public class UserDevice {
 		} finally {
 			pm.close();
 		}
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	/**

@@ -4,9 +4,6 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONObject;
-
 @PersistenceCapable
 public class Gift {
 	@PrimaryKey
@@ -27,13 +24,6 @@ public class Gift {
 		this.name = name;
 		this.iconRes = iconRes;
 		this.value = value;
-	}
-
-	public Gift(JSONObject obj) throws JSONException {
-		id = obj.getLong("id");
-		name = obj.getString("name");
-		iconRes = obj.getString("iconRes");
-		value = obj.getInt("value");
 	}
 
 	public long getId() {
@@ -66,22 +56,5 @@ public class Gift {
 
 	public void setValue(int value) {
 		this.value = value;
-	}
-
-	public JSONObject toJSONObject() {
-		JSONObject obj = new JSONObject();
-		try {
-			obj.put("id", id);
-			obj.put("name", name);
-			obj.put("iconRes", iconRes);
-			obj.put("value", value);
-		} catch (JSONException e) {
-		}
-		return obj;
-	}
-
-	@Override
-	public String toString() {
-		return toJSONObject().toString();
 	}
 }

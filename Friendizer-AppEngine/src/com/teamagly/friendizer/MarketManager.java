@@ -53,12 +53,9 @@ public class MarketManager extends HttpServlet {
 		ActionsManager.madeBuy(userID, buyID);
 		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
 		if (buy.getOwner() > 0) {
-			query = pm.newQuery(User.class);
-			query.setFilter("id == " + buy.getOwner());
-			result = (List<User>) query.execute();
-			query.closeAll();
-			if (!result.isEmpty()) {
-				User preOwner = result.get(0);
+			User preOwner = pm.getObjectById(User.class, buy.getOwner());
+			pm.close();
+			if (preOwner != null) {
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 				pm.makePersistent(preOwner);
 			}

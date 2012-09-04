@@ -4,7 +4,6 @@ import javax.jdo.annotations.*;
 
 @PersistenceCapable
 public class UserGift {
-	@SuppressWarnings("unused")
 	@PrimaryKey
 	@Persistent(
 			valueStrategy = IdGeneratorStrategy.IDENTITY)

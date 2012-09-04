@@ -1,7 +1,9 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -12,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message;
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.AchievementInfo;
@@ -21,37 +23,37 @@ import com.teamagly.friendizer.model.UserAchievement;
 
 @SuppressWarnings("serial")
 public class AchievementsManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + userID);
-		List<User> result = (List<User>) query.execute();
-		query.closeAll();
-		if (result.isEmpty())
+		User user = pm.getObjectById(User.class, userID);
+		if (user == null) {
+			pm.close();
 			throw new ServletException("This user doesn't exist");
-		query = pm.newQuery(Achievement.class);
+		}
+		Query query = pm.newQuery(Achievement.class);
 		List<Achievement> achvs = (List<Achievement>) query.execute();
 		query.closeAll();
 		query = pm.newQuery(UserAchievement.class);
 		query.setFilter("userID == " + userID);
 		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
 		query.closeAll();
-		JSONArray achvsArray = new JSONArray();
+		List<AchievementInfo> achvInfos = new ArrayList<AchievementInfo>();
 		for (Achievement achv : achvs) {
 			boolean earned = false;
-			for (UserAchievement userAchv : userAchvs) {
+			for (UserAchievement userAchv : userAchvs)
 				if (userAchv.getAchievementID() == achv.getId()) {
 					earned = true;
 					break;
 				}
-			}
-			achvsArray.put(new AchievementInfo(achv, earned).toJSONObject());
+			achvInfos.add(new AchievementInfo(achv, earned));
 		}
 		pm.close();
-		response.getWriter().println(achvsArray);
+		response.getWriter().println(new Gson().toJson(achvInfos));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -95,12 +97,12 @@ public class AchievementsManager extends HttpServlet {
 		query.closeAll();
 
 		/* Get the achievement from the database */
-		query = pm.newQuery(Achievement.class);
-		query.setFilter("id == " + 30001);
-		List<Achievement> achvResult = (List<Achievement>) query.execute();
-		query.closeAll();
-
-		Achievement achv = achvResult.get(0);
+		Achievement achv = pm.getObjectById(Achievement.class, 30001);
+		pm.close();
+		if (achv == null) {
+			log.severe("This achievement doesn't exist");
+			return;
+		}
 
 		// Reward the user with money
 		user.setMoney(user.getMoney() + achv.getReward());
@@ -129,12 +131,12 @@ public class AchievementsManager extends HttpServlet {
 			query.closeAll();
 
 			/* Get the achievement from the database */
-			query = pm.newQuery(Achievement.class);
-			query.setFilter("id == " + 29001);
-			List<Achievement> achvResult = (List<Achievement>) query.execute();
-			query.closeAll();
-
-			Achievement achv = achvResult.get(0);
+			Achievement achv = pm.getObjectById(Achievement.class, 29001);
+			pm.close();
+			if (achv == null) {
+				log.severe("This achievement doesn't exist");
+				return;
+			}
 
 			// Reward the user with money
 			user.setMoney(user.getMoney() + achv.getReward());

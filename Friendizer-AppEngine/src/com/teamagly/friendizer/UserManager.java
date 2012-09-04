@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -12,10 +13,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.labs.repackaged.org.json.JSONArray;
+import com.google.gson.Gson;
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.json.JsonObject;
 import com.teamagly.friendizer.model.Like;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.model.UserDevice;
@@ -23,6 +26,7 @@ import com.teamagly.friendizer.model.UserMatching;
 
 @SuppressWarnings("serial")
 public class UserManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -54,7 +58,7 @@ public class UserManager extends HttpServlet {
 	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String regID = request.getParameter(Util.REG_ID);
 		long userID = Long.parseLong(request.getParameter(Util.USER_ID));
-		String accesToken = request.getParameter(Util.ACCESS_TOKEN);
+		String accessToken = request.getParameter(Util.ACCESS_TOKEN);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		query.setFilter("id == " + userID);
@@ -63,34 +67,53 @@ public class UserManager extends HttpServlet {
 		User user;
 		if (result.isEmpty()) {
 			// Create a new user with the given ID and access token
-			user = new User(userID, accesToken);
+			user = new User(userID, accessToken);
+			updateUserFromFacebook(user);
+			pm = PMF.get().getPersistenceManager();
 			pm.makePersistent(user);
+			pm.close();
 		} else {
 			user = result.get(0);
 			// Update the new access token of the user
-			user.setToken(accesToken);
+			user.setToken(accessToken);
 			// Update the current date
 			user.setSince(new Date());
+
+			// TODO: temporary, remove this later
+			if (user.getPicture() == null || user.getPicture().length() == 0)
+				updateUserFromFacebook(user);
 		}
 
 		pm.close();
-		response.getWriter().println(user.toJSONObject());
+		response.getWriter().println(new Gson().toJson(user));
 
 		// Create/update the device registration
-		String deviceID = request.getParameter(Util.REG_ID);
-
-		if (deviceID != null) {
+		if (regID != null && regID.length() > 0) {
 			pm = PMF.get().getPersistenceManager();
+			query = pm.newQuery(UserDevice.class);
+			query.setFilter("regID == regIDParam");
+			query.declareParameters("String regIDParam");
+			List<UserDevice> devices = (List<UserDevice>) query.execute(regID);
 			UserDevice device;
-			try {
-				device = pm.getObjectById(UserDevice.class, regID); // Update the user ID
-				device.setUserID(userID);
-			} catch (Exception e) { // Create a new device
+			if (devices.size() == 0)
 				device = new UserDevice(regID, userID);
+			else { // Update the user ID
+				device = devices.get(0);
+				device.setUserID(userID);
 			}
 			pm.makePersistent(device);
 			pm.close();
-		}
+		} else
+			log.severe("Error: no reg ID");
+	}
+
+	private void updateUserFromFacebook(User user) {
+		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
+		// Get the user's data from Facebook
+		// Note: using JsonObject instead of User object for the profile picture
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
+				Parameter.with("fields", "name,gender,birthday,picture"));
+		user.updateFacebookData(jsonObject);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -105,7 +128,7 @@ public class UserManager extends HttpServlet {
 			throw new ServletException("This user doesn't exist");
 		User user = result.get(0);
 		pm.close();
-		response.getWriter().println(new UserMatching(user, 0));
+		response.getWriter().println(new Gson().toJson(new UserMatching(user, 0)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -121,12 +144,10 @@ public class UserManager extends HttpServlet {
 		query = pm.newQuery(User.class);
 		query.setFilter("owner == " + userID);
 		result = (List<User>) query.execute();
+		result.size(); // Important: this is an App Engine bug workaround
 		query.closeAll();
-		JSONArray users = new JSONArray();
-		for (User user : result)
-			users.put(user.toJSONObject());
 		pm.close();
-		response.getWriter().println(users);
+		response.getWriter().println(new Gson().toJson(result));
 	}
 
 	@SuppressWarnings("unchecked")

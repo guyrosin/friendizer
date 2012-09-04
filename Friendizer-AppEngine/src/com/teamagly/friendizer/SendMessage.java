@@ -64,7 +64,7 @@ public class SendMessage {
 			for (int i = 0; i < results.size(); i++) {
 				String canonicalRegId = results.get(i).getCanonicalRegistrationId();
 				if (canonicalRegId != null) {
-					String regID = regIDs.get(i);
+					long regID = new Long(regIDs.get(i));
 					// same device has more than on registration id: update it
 					log.finest("canonicalRegId " + canonicalRegId);
 					PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -125,7 +125,7 @@ public class SendMessage {
 				PersistenceManager pm = PMF.get().getPersistenceManager();
 				UserDevice device;
 				try {
-					device = pm.getObjectById(UserDevice.class, regIDParam);
+					device = pm.getObjectById(UserDevice.class, new Long(regIDParam));
 					device.setRegID(canonicalRegId);
 					pm.makePersistent(device);
 				} catch (Exception e) {
