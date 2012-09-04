@@ -64,6 +64,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		activity = getSherlockActivity();
 
 		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
+		friendsAdapter.setNotifyOnChange(true);
 
 		// Restore scroll position
 		if (savedInstanceState != null)

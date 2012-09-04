@@ -204,7 +204,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtValue.setText(String.valueOf(userInfo.getPoints()));
 		if (userInfo.getOwnsList() != null)
 			txtOwns.setText(String.valueOf(userInfo.getOwnsList().size()));
-		if (userInfo.getStatus().length() > 0) {
+		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0) {
 			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
 			txtStatus.setVisibility(View.VISIBLE);
 		} else
@@ -214,7 +214,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
 		txtName.setText(userInfo.getName());
 		txtAge.setText(userInfo.getAge());
-		if (userInfo.getGender().length() > 0) {
+		if (userInfo.getGender() != null && userInfo.getGender().length() > 0) {
 			String genderStr = userInfo.getGender();
 			// Capitalize the first letter
 			// txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));

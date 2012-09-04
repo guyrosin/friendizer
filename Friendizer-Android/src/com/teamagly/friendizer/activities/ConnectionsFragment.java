@@ -35,7 +35,7 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 	protected void requestFriends() {
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		usersList.clear();
-		friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+		// friendsAdapter.notifyDataSetChanged(); // Notify the adapter
 		final List<User> ownsList = Utility.getInstance().userInfo.getOwnsList();
 		usersList.addAll(ownsList);
 		if (ownsList.size() == 0)
