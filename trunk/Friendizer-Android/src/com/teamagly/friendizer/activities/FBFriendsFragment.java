@@ -3,13 +3,11 @@ package com.teamagly.friendizer.activities;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -51,25 +49,11 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	 */
 	protected void requestFriends() {
 		Bundle params = new Bundle();
-		// Query for the friends who are using Friendizer, ordered by uid
-		// Note: must order by uid (same as ownList servlet) so the next for loop will work!
-		String query = "select uid, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by uid";
+		// Query for the friends who are using Friendizer
+		String query = "select uid, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1";
 		params.putString("method", "fql.query");
 		params.putString("query", query);
 		Utility.getInstance().mAsyncRunner.request(null, params, new FriendsRequestListener());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
-	 */
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-		User userInfo = usersList.get(position);
-		// Create an intent with the friend's data
-		Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
-		intent.putExtra("user", userInfo);
-		startActivity(intent);
 	}
 
 	/*
@@ -88,13 +72,13 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 			usersList.clear();
 			final TextView empty = (TextView) activity.findViewById(R.id.empty);
 			final int len = jsonArray.length();
-			handler.post(new Runnable() {
+			activity.runOnUiThread(new Runnable() {
 				public void run() {
 					friendsAdapter.notifyDataSetChanged();
 					if (len == 0)
 						empty.setVisibility(View.VISIBLE);
 					else
-						empty.setVisibility(View.VISIBLE);
+						empty.setVisibility(View.GONE);
 				}
 			});
 

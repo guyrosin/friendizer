@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.AchievementsAdapter;
 import com.teamagly.friendizer.model.Achievement;
@@ -37,6 +38,7 @@ public class AchievementsActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		user = ((User) getIntent().getSerializableExtra("user"));
 		actionBar = getSupportActionBar();
 		if (user.getId() == Utility.getInstance().userInfo.getId()) // If the user is the current one

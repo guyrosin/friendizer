@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.AchievementInfo;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.GiftCount;
@@ -145,6 +146,7 @@ public final class ServerFacade {
 		URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		UserMatching userMatching = new Gson().fromJson(in.readLine(), UserMatching.class);
+		// Convert from the server's UserMatching type to User
 		User user = userMatching.getUser();
 		user.setMatching(userMatching.getMatching());
 		in.close();
@@ -241,9 +243,15 @@ public final class ServerFacade {
 	public static List<Achievement> getAchievements(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "achievements?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Achievement> achvs = new Gson().fromJson(in.readLine(), new TypeToken<List<Achievement>>() {
+		List<AchievementInfo> achvInfos = new Gson().fromJson(in.readLine(), new TypeToken<List<AchievementInfo>>() {
 		}.getType());
 		in.close();
+		// Convert from the server's AchievementInfo type to Achievement
+		List<Achievement> achvs = new ArrayList<Achievement>();
+		for (AchievementInfo achvInfo : achvInfos) {
+			achvInfo.getAchv().setEarned(achvInfo.isEarned());
+			achvs.add(achvInfo.getAchv());
+		}
 		return achvs;
 	}
 
@@ -280,6 +288,8 @@ public final class ServerFacade {
 		List<GiftCount> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<GiftCount>>() {
 		}.getType());
 		in.close();
+		if (gifts == null)
+			gifts = new ArrayList<GiftCount>();
 		return gifts;
 	}
 

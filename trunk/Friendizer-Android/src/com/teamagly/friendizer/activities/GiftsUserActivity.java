@@ -88,6 +88,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 			@Override
 			protected void onPostExecute(List<GiftCount> gifts) {
 				giftsList.addAll(gifts);
+				adapter.notifyDataSetChanged();
 				setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}.execute();
