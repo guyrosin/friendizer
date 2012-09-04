@@ -62,9 +62,10 @@ public class AbuseControl extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		User user = pm.getObjectById(User.class, userID);
-		pm.close();
-		if (user == null)
+		if (user == null) {
+			pm.close();
 			throw new ServletException("This user doesn't exist");
+		}
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockedID = (List<UserBlock>) query.execute();
@@ -80,6 +81,7 @@ public class AbuseControl extends HttpServlet {
 		query = pm.newQuery(User.class);
 		query.setFilter(blockedFilter.toString());
 		List<User> blocked = (List<User>) query.execute();
+		blocked.size(); // App Engine bug workaround
 		query.closeAll();
 		pm.close();
 		response.getWriter().println(new Gson().toJson(blocked));

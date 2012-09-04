@@ -28,25 +28,22 @@ public class SendMessage {
 		Query q = pm.newQuery(UserDevice.class);
 		q.setFilter("userID == userIDParam");
 		q.declareParameters("long userIDParam");
-		try {
-			@SuppressWarnings("unchecked")
-			List<UserDevice> results = (List<UserDevice>) q.execute(userIDParam);
-			if (!results.isEmpty()) {
-				Sender sender = new Sender(Util.SENDER_ID);
-				if (results.size() == 1)
-					sendSingleMessage(msg, results.get(0).getRegID(), sender);
-				else {
-					List<String> regIDs = new ArrayList<String>();
-					for (UserDevice device : results)
-						regIDs.add(device.getRegID());
-					sendMulticastMessage(msg, regIDs, sender);
-				}
-			} else {
-				log.warning("no devices for user" + userIDParam);
+		@SuppressWarnings("unchecked")
+		List<UserDevice> results = (List<UserDevice>) q.execute(userIDParam);
+		if (!results.isEmpty()) {
+			Sender sender = new Sender(Util.SENDER_ID);
+			if (results.size() == 1)
+				sendSingleMessage(msg, results.get(0).getRegID(), sender);
+			else {
+				List<String> regIDs = new ArrayList<String>();
+				for (UserDevice device : results)
+					regIDs.add(device.getRegID());
+				sendMulticastMessage(msg, regIDs, sender);
 			}
-		} finally {
-			pm.close();
+		} else {
+			log.warning("no devices for user" + userIDParam);
 		}
+		pm.close();
 	}
 
 	private static void sendMulticastMessage(Message message, List<String> regIDs, Sender sender) {
@@ -61,26 +58,27 @@ public class SendMessage {
 		// check if any registration id must be updated
 		if (multicastResult.getCanonicalIds() != 0) {
 			List<Result> results = multicastResult.getResults();
+			PersistenceManager pm = PMF.get().getPersistenceManager();
 			for (int i = 0; i < results.size(); i++) {
 				String canonicalRegId = results.get(i).getCanonicalRegistrationId();
 				if (canonicalRegId != null) {
 					long regID = new Long(regIDs.get(i));
 					// same device has more than on registration id: update it
 					log.finest("canonicalRegId " + canonicalRegId);
-					PersistenceManager pm = PMF.get().getPersistenceManager();
 					try {
 						UserDevice device = pm.getObjectById(UserDevice.class, regID);
 						device.setRegID(canonicalRegId);
 						pm.makePersistent(device);
 					} catch (Exception e) {
 					}
-					pm.close();
 				}
 			}
+			pm.close();
 		}
 		if (multicastResult.getFailure() != 0) {
 			// there were failures, check if any could be retried
 			List<Result> results = multicastResult.getResults();
+			PersistenceManager pm = PMF.get().getPersistenceManager();
 			for (int i = 0; i < results.size(); i++) {
 				String error = results.get(i).getErrorCodeName();
 				if (error != null) {
@@ -88,7 +86,6 @@ public class SendMessage {
 					log.warning("Got error (" + error + ") for regId " + regId);
 					if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
 						// The app has been removed from device, so unregister it
-						PersistenceManager pm = PMF.get().getPersistenceManager();
 						try {
 							Query query = pm.newQuery(UserDevice.class);
 							query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
@@ -96,12 +93,11 @@ public class SendMessage {
 							query.deletePersistentAll();
 						} catch (Exception e) {
 							log.severe("Error unregistering device: " + e.getMessage());
-						} finally {
-							pm.close();
 						}
 					}
 				}
 			}
+			pm.close();
 		}
 	}
 
@@ -129,6 +125,7 @@ public class SendMessage {
 					device.setRegID(canonicalRegId);
 					pm.makePersistent(device);
 				} catch (Exception e) {
+					log.warning(e.getMessage());
 				}
 				pm.close();
 			}

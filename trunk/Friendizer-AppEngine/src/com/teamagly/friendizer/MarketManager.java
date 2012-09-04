@@ -54,7 +54,6 @@ public class MarketManager extends HttpServlet {
 		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
 		if (buy.getOwner() > 0) {
 			User preOwner = pm.getObjectById(User.class, buy.getOwner());
-			pm.close();
 			if (preOwner != null) {
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 				pm.makePersistent(preOwner);

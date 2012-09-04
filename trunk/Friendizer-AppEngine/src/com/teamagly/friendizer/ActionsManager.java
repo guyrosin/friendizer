@@ -24,9 +24,10 @@ public class ActionsManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		User user = pm.getObjectById(User.class, userID);
-		pm.close();
-		if (user == null)
+		if (user == null) {
+			pm.close();
 			throw new ServletException("This user doesn't exist");
+		}
 		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
 		query.setOrdering("date desc");
