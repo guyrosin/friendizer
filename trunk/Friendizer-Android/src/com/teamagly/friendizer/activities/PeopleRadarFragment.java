@@ -6,13 +6,9 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
@@ -21,40 +17,15 @@ import android.widget.TextView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.squareup.seismic.ShakeDetector;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class PeopleRadarFragment extends AbstractFriendsListFragment {
+public class PeopleRadarFragment extends AbstractFriendsListFragment implements ShakeDetector.Listener {
 	private final String TAG = getClass().getName();
-
-	// Variables for the "shake to reload" feature
-	private SensorManager mSensorManager;
-	private float mAccel; // acceleration apart from gravity
-	private float mAccelCurrent; // current acceleration including gravity
-	private float mAccelLast; // last acceleration including gravity
-	private final SensorEventListener mSensorListener = new SensorEventListener() {
-		public void onSensorChanged(SensorEvent se) {
-			float x = se.values[0];
-			float y = se.values[1];
-			float z = se.values[2];
-			mAccelLast = mAccelCurrent;
-			mAccelCurrent = FloatMath.sqrt(x * x + y * y + z * z);
-			float delta = mAccelCurrent - mAccelLast;
-			mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-
-			// Check if the device is shaken
-			if (mAccel > 2.3) {
-				// Reload the data
-				activity.setSupportProgressBarIndeterminateVisibility(true);
-				requestFriends();
-			}
-		}
-
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		}
-	};
+	private ShakeDetector shakeDetector;
 
 	/*
 	 * (non-Javadoc)
@@ -64,6 +35,8 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
+
+		shakeDetector = new ShakeDetector(this);
 	}
 
 	/*
@@ -77,12 +50,6 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (no people nearby)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-
-		// Shake to reload functionality
-		mSensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
-		mAccel = 0.00f;
-		mAccelCurrent = SensorManager.GRAVITY_EARTH;
-		mAccelLast = SensorManager.GRAVITY_EARTH;
 	}
 
 	/*
@@ -92,8 +59,8 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-				SensorManager.SENSOR_DELAY_NORMAL);
+		SensorManager sensorManager = (SensorManager) activity.getSystemService(Context.SENSOR_SERVICE);
+		shakeDetector.start(sensorManager);
 	}
 
 	/*
@@ -103,7 +70,18 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		mSensorManager.unregisterListener(mSensorListener);
+		shakeDetector.stop();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.squareup.seismic.ShakeDetector.Listener#hearShake()
+	 */
+	@Override
+	public void hearShake() {
+		// Reload the data
+		activity.setSupportProgressBarIndeterminateVisibility(true);
+		requestFriends();
 	}
 
 	/**
@@ -117,7 +95,7 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment {
 
 			protected List<User> doInBackground(Long... userIDs) {
 				try {
-					return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+					return ServerFacade.nearbyUsers(userIDs[0]);
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}

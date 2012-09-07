@@ -1,8 +1,13 @@
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,6 +66,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	 */
 	public class FriendsRequestListener extends BaseRequestListener {
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void onComplete(final String response, final Object state) {
 			try {
@@ -82,24 +88,38 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				}
 			});
 
+			List<Long> ids = new ArrayList<Long>();
 			for (int i = 0; i < len; i++)
 				try {
 					long userID = jsonArray.getJSONObject(i).optLong("uid");
-					if (userID > 0) {
-						User user = ServerFacade.userDetails(userID);
-						if (user != null)
-							usersList.add(user);
-					}
+					if (userID > 0)
+						ids.add(userID);
 				} catch (Exception e) {
 					Log.w(TAG, e.getMessage());
 				}
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-					activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
-				}
-			});
+			new FriendsTask().execute(ids);
 		}
 	}
+
+	class FriendsTask extends AsyncTask<List<Long>, Void, Void> {
+
+		protected Void doInBackground(List<Long>... userIDsPass) {
+			List<Long> userIDs = userIDsPass[0];
+			for (long userID : userIDs)
+				try {
+					User user = ServerFacade.userDetails(userID);
+					if (user != null)
+						usersList.add(user);
+				} catch (IOException e) {
+					Log.e(TAG, e.getMessage());
+				}
+			return null;
+		}
+
+		protected void onPostExecute(Void v) {
+			friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+			activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
+		}
+	}
+
 }

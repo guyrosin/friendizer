@@ -49,6 +49,8 @@ public class User implements Serializable {
 
 	private String status;
 
+	private boolean fbUpdate;
+
 	List<User> ownsList = new ArrayList<User>();
 
 	long distance = 0;
@@ -99,21 +101,6 @@ public class User implements Serializable {
 	 */
 	public void setBirthday(String birthday) {
 		this.birthday = birthday;
-	}
-
-	/**
-	 * @return the picture
-	 */
-	public String getPicture() {
-		return picture;
-	}
-
-	/**
-	 * @param picture
-	 *            the picture to set
-	 */
-	public void setPicture(String picture) {
-		this.picture = picture;
 	}
 
 	/**
@@ -391,6 +378,21 @@ public class User implements Serializable {
 	 */
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	/**
+	 * @return the fbUpdate
+	 */
+	public boolean isFbUpdate() {
+		return fbUpdate;
+	}
+
+	/**
+	 * @param fbUpdate
+	 *            the fbUpdate to set
+	 */
+	public void setFbUpdate(boolean fbUpdate) {
+		this.fbUpdate = fbUpdate;
 	}
 
 	public void updateFacebookData(JSONObject jsonObject) {
