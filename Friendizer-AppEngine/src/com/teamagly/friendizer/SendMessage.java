@@ -33,12 +33,12 @@ public class SendMessage {
 		if (!results.isEmpty()) {
 			Sender sender = new Sender(Util.SENDER_ID);
 			if (results.size() == 1)
-				sendSingleMessage(msg, results.get(0).getRegID(), sender);
+				sendSingleMessage(msg, results.get(0).getRegID(), userIDParam, sender);
 			else {
 				List<String> regIDs = new ArrayList<String>();
 				for (UserDevice device : results)
 					regIDs.add(device.getRegID());
-				sendMulticastMessage(msg, regIDs, sender);
+				sendMulticastMessage(msg, regIDs, userIDParam, sender);
 			}
 		} else {
 			log.warning("no devices for user" + userIDParam);
@@ -46,8 +46,8 @@ public class SendMessage {
 		pm.close();
 	}
 
-	private static void sendMulticastMessage(Message message, List<String> regIDs, Sender sender) {
-		// Recover registration ids from datastore
+	private static void sendMulticastMessage(Message message, List<String> regIDs, long userIDParam, Sender sender) {
+		log.info("Sending message to uid " + userIDParam);
 		MulticastResult multicastResult;
 		try {
 			multicastResult = sender.send(message, regIDs, 3);
@@ -62,14 +62,20 @@ public class SendMessage {
 			for (int i = 0; i < results.size(); i++) {
 				String canonicalRegId = results.get(i).getCanonicalRegistrationId();
 				if (canonicalRegId != null) {
-					long regID = new Long(regIDs.get(i));
+					long regIDParam = Long.parseLong(regIDs.get(i));
+					log.info("updating reg id: " + regIDParam + " for uid " + userIDParam);
 					// same device has more than on registration id: update it
-					log.finest("canonicalRegId " + canonicalRegId);
-					try {
-						UserDevice device = pm.getObjectById(UserDevice.class, regID);
+					// Replace the current regID with the canonical one
+					Query q = pm.newQuery(UserDevice.class);
+					q.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
+					q.declareParameters("long regIDParam, String userIDParam");
+					@SuppressWarnings("unchecked")
+					List<UserDevice> devices = (List<UserDevice>) q.execute(regIDParam, userIDParam);
+					if (!devices.isEmpty()) {
+						log.info("update succeed");
+						UserDevice device = devices.get(0);
 						device.setRegID(canonicalRegId);
 						pm.makePersistent(device);
-					} catch (Exception e) {
 					}
 				}
 			}
@@ -82,18 +88,19 @@ public class SendMessage {
 			for (int i = 0; i < results.size(); i++) {
 				String error = results.get(i).getErrorCodeName();
 				if (error != null) {
-					String regId = regIDs.get(i);
-					log.warning("Got error (" + error + ") for regId " + regId);
-					if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+					if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
 						// The app has been removed from device, so unregister it
+						String regIDParam = regIDs.get(i);
 						try {
 							Query query = pm.newQuery(UserDevice.class);
 							query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
 							query.declareParameters("String regIDParam, String userIDParam");
-							query.deletePersistentAll();
+							query.deletePersistentAll(regIDParam, userIDParam);
 						} catch (Exception e) {
 							log.severe("Error unregistering device: " + e.getMessage());
 						}
+					} else {
+						log.warning("Got an unexpected error: " + error);
 					}
 				}
 			}
@@ -101,8 +108,8 @@ public class SendMessage {
 		}
 	}
 
-	private static void sendSingleMessage(Message message, String regIDParam, Sender sender) {
-		log.info("Sending message to device " + regIDParam);
+	private static void sendSingleMessage(Message message, String regIDParam, long userIDParam, Sender sender) {
+		log.info("Sending message to uid " + userIDParam + ", to device " + regIDParam);
 		Result result;
 		try {
 			result = sender.send(message, regIDParam, 3);
@@ -119,13 +126,15 @@ public class SendMessage {
 				// same device has more than on registration id: update it
 				log.finest("canonicalRegId " + canonicalRegId);
 				PersistenceManager pm = PMF.get().getPersistenceManager();
-				UserDevice device;
-				try {
-					device = pm.getObjectById(UserDevice.class, new Long(regIDParam));
+				Query q = pm.newQuery(UserDevice.class);
+				q.setFilter(Util.REG_ID + " == regIDParam");
+				q.declareParameters("long regIDParam");
+				@SuppressWarnings("unchecked")
+				List<UserDevice> devices = (List<UserDevice>) q.execute(Long.parseLong(regIDParam));
+				if (!devices.isEmpty()) {
+					UserDevice device = devices.get(0);
 					device.setRegID(canonicalRegId);
 					pm.makePersistent(device);
-				} catch (Exception e) {
-					log.warning(e.getMessage());
 				}
 				pm.close();
 			}
@@ -138,7 +147,7 @@ public class SendMessage {
 					Query query = pm.newQuery(UserDevice.class);
 					query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
 					query.declareParameters("String regIDParam, String userIDParam");
-					query.deletePersistentAll();
+					query.deletePersistentAll(regIDParam, userIDParam);
 				} catch (Exception e) {
 					log.severe("Error unregistering device: " + e.getMessage());
 				} finally {

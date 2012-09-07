@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletException;
@@ -22,6 +24,8 @@ import com.teamagly.friendizer.model.UserMatching;
 
 @SuppressWarnings("serial")
 public class LocationManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
@@ -37,11 +41,16 @@ public class LocationManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		double latitude = Double.parseDouble(request.getParameter("latitude"));
 		double longitude = Double.parseDouble(request.getParameter("longitude"));
+		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		pm.close();
-		if (user == null)
-			throw new ServletException("This user doesn't exist");
+		try {
+			user = pm.getObjectById(User.class, userID);
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("User doesn't exist");
+			return;
+		} finally {
+			pm.close();
+		}
 		user.setLatitude(latitude);
 		user.setLongitude(longitude);
 		user.setSince(new Date());
@@ -101,9 +110,10 @@ public class LocationManager extends HttpServlet {
 
 					// If he didn't buy him in the last week (didn't buy him for a long time)
 					if (result2.isEmpty()) {
-						// Send a notification to the nearby user suggesting to buy the user again
+						// Send a collapsible notification to the nearby user suggesting to buy the user again
 						Message msg = new Message.Builder().addData("type", NotificationType.NEARBY.toString())
-								.addData(Util.USER_ID, String.valueOf(userID)).addData("text", Notifications.NEARBY_MSG).build();
+								.addData(Util.USER_ID, String.valueOf(userID)).addData("text", Notifications.NEARBY_MSG)
+								.collapseKey("NEARBY").build();
 						SendMessage.sendMessage(nearbyUser.getId(), msg);
 					}
 				}
@@ -117,11 +127,14 @@ public class LocationManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
+		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		if (user == null) {
+		try {
+			user = pm.getObjectById(User.class, userID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
-			throw new ServletException("This user doesn't exist");
+			log.severe("User doesn't exist");
+			return;
 		}
 		// Update the current date
 		user.setSince(new Date());

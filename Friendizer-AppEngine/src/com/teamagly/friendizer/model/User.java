@@ -62,6 +62,9 @@ public class User {
 	@Persistent
 	private String status;
 
+	@Persistent
+	private boolean fbUpdate;
+
 	/**
 	 * Constructor for a new user
 	 */
@@ -76,6 +79,7 @@ public class User {
 		this.since = new Date();
 		this.token = token;
 		this.status = "";
+		fbUpdate = false;
 	}
 
 	public long getId() {
@@ -224,6 +228,21 @@ public class User {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	/**
+	 * @return the fbUpdate
+	 */
+	public boolean isFbUpdate() {
+		return fbUpdate;
+	}
+
+	/**
+	 * @param fbUpdate
+	 *            the fbUpdate to set
+	 */
+	public void setFbUpdate(boolean fbUpdate) {
+		this.fbUpdate = fbUpdate;
 	}
 
 	public void updateFacebookData(JsonObject jsonObject) {

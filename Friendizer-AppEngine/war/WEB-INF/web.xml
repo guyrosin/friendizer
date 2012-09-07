@@ -153,7 +153,9 @@
 	    <url-pattern>/facebookSubscriptions</url-pattern>
 	    <url-pattern>/addSubscription</url-pattern>
 	    <url-pattern>/deleteSubscriptions</url-pattern>
+	    <url-pattern>/listSubscriptions</url-pattern>
 	    <url-pattern>/updateUsers</url-pattern>
+	    <url-pattern>/extendAccessTokens</url-pattern>
 	</servlet-mapping>
 	
 </web-app>
