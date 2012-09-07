@@ -47,9 +47,8 @@ public class InboxManager extends HttpServlet {
 		pm.close();
 		out.println(message);
 
-		// Make the message collapsible
 		Message msg = new Message.Builder().addData("type", NotificationType.CHAT.toString())
-				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).collapseKey("NEARBY").build();
+				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).build();
 		SendMessage.sendMessage(destination, msg);
 	}
 

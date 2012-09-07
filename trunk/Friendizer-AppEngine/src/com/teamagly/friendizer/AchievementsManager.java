@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletContext;
@@ -30,10 +31,12 @@ public class AchievementsManager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		if (user == null) {
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
-			throw new ServletException("This user doesn't exist");
+			log.severe("User doesn't exist");
+			return;
 		}
 		Query query = pm.newQuery(Achievement.class);
 		List<Achievement> achvs = (List<Achievement>) query.execute();
@@ -64,13 +67,14 @@ public class AchievementsManager extends HttpServlet {
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 
-		/* Get the achievement from the database */
-		query = pm.newQuery(Achievement.class);
-		query.setFilter("id == " + 28001);
-		List<Achievement> achvResult = (List<Achievement>) query.execute();
-		query.closeAll();
-
-		Achievement achv = achvResult.get(0);
+		Achievement achv;
+		/* Get the achievement from the database */try {
+			achv = pm.getObjectById(Achievement.class, 28001);
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("This achievement doesn't exist");
+			return;
+		}
 
 		// Reward the user with money
 		user.setMoney(user.getMoney() + achv.getReward());
@@ -96,12 +100,15 @@ public class AchievementsManager extends HttpServlet {
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 
+		Achievement achv;
 		/* Get the achievement from the database */
-		Achievement achv = pm.getObjectById(Achievement.class, 30001);
-		pm.close();
-		if (achv == null) {
+		try {
+			achv = pm.getObjectById(Achievement.class, 30001);
+		} catch (JDOObjectNotFoundException e) {
 			log.severe("This achievement doesn't exist");
 			return;
+		} finally {
+			pm.close();
 		}
 
 		// Reward the user with money
@@ -131,12 +138,14 @@ public class AchievementsManager extends HttpServlet {
 			List<UserAchievement> result = (List<UserAchievement>) query.execute();
 			query.closeAll();
 
-			/* Get the achievement from the database */
-			Achievement achv = pm.getObjectById(Achievement.class, 29001);
-			pm.close();
-			if (achv == null) {
+			Achievement achv;
+			/* Get the achievement from the database */try {
+				achv = pm.getObjectById(Achievement.class, 29001);
+			} catch (JDOObjectNotFoundException e) {
 				log.severe("This achievement doesn't exist");
 				return;
+			} finally {
+				pm.close();
 			}
 
 			// Reward the user with money
@@ -156,9 +165,16 @@ public class AchievementsManager extends HttpServlet {
 	}
 
 	private static void notificate(User user, int achievementID, ServletContext context) {
+		Achievement achievement;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Achievement achievement = pm.getObjectById(Achievement.class, new Long(achievementID));
-		pm.close();
+		try {
+			achievement = pm.getObjectById(Achievement.class, new Long(achievementID));
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("Achievement was not found");
+			return;
+		} finally {
+			pm.close();
+		}
 
 		Message msg = new Message.Builder().addData("type", NotificationType.ACH.toString())
 				.addData(Util.USER_ID, String.valueOf(user.getId())).addData("title", achievement.getTitle())

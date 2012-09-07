@@ -2,7 +2,9 @@ package com.teamagly.friendizer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletException;
@@ -16,6 +18,8 @@ import com.teamagly.friendizer.model.UserBlock;
 
 @SuppressWarnings("serial")
 public class AbuseControl extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
@@ -42,29 +46,41 @@ public class AbuseControl extends HttpServlet {
 			else
 				blocked = u;
 		}
-		if (user == null)
-			throw new ServletException("The user doesn't exist");
-		if (blocked == null)
-			throw new ServletException("The user you want to block doesn't exist");
+		if (user == null) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		if (blocked == null) {
+			pm.close();
+			log.severe("The user you want to block doesn't exist");
+			return;
+		}
 		query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
 		List<UserBlock> result2 = (List<UserBlock>) query.execute();
 		query.closeAll();
-		if (!result2.isEmpty())
-			throw new ServletException("You already blocked this user");
+		if (!result2.isEmpty()) {
+			pm.close();
+			log.severe("You've already blocked " + blocked.getName());
+			response.getWriter().println("You've already blocked " + blocked.getName());
+			return;
+		}
 		pm.makePersistent(new UserBlock(userID, blockedID));
 		pm.close();
-		response.getWriter().println("You blocked the user");
+		response.getWriter().println("You've successfully blocked " + blocked.getName());
 	}
 
 	@SuppressWarnings("unchecked")
 	private void blockList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		if (user == null) {
+		try { // Check if the user exists
+			pm.getObjectById(User.class, userID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
-			throw new ServletException("This user doesn't exist");
+			log.severe("User doesn't exist");
+			return;
 		}
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);

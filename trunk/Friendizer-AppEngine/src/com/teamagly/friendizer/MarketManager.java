@@ -2,7 +2,9 @@ package com.teamagly.friendizer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletException;
@@ -16,6 +18,8 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class MarketManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		buy(request, response);
@@ -37,35 +41,51 @@ public class MarketManager extends HttpServlet {
 			else
 				buy = user;
 		}
-		if (buyer == null)
-			throw new ServletException("This user doesn't exist");
-		if (buy == null)
-			throw new ServletException("The user you want to buy doesn't exist");
-		if (buy.getOwner() == userID)
-			throw new ServletException("You already own the user you want to buy");
-		if (buyer.getMoney() < buy.getPoints())
-			throw new ServletException("You don't have enough money to buy this user");
+		if (buyer == null) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		if (buy == null) {
+			pm.close();
+			log.severe("The user you want to buy doesn't exist");
+			return;
+		}
+		if (buy.getOwner() == userID) {
+			pm.close();
+			log.severe("You already own the user you want to buy");
+			response.getWriter().println("You already own the user you want to buy");
+			return;
+		}
+		if (buyer.getMoney() < buy.getPoints()) {
+			pm.close();
+			log.severe("You don't have enough money to buy this user");
+			response.getWriter().println("You don't have enough money to buy this user");
+			return;
+		}
 		buyer.setMoney(buyer.getMoney() - buy.getPoints());
 		buyer.setPoints(buyer.getPoints() + 10);
 		// Check for level up
 		buyer.setLevel(Util.calculateLevel(buyer.getLevel(), buyer.getPoints()));
-		pm.makePersistent(buyer);
 		ActionsManager.madeBuy(userID, buyID);
 		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
+		pm.makePersistent(buyer);
 		if (buy.getOwner() > 0) {
-			User preOwner = pm.getObjectById(User.class, buy.getOwner());
-			if (preOwner != null) {
+			User preOwner;
+			try {
+				preOwner = pm.getObjectById(User.class, buy.getOwner());
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 				pm.makePersistent(preOwner);
+			} catch (JDOObjectNotFoundException e) {
 			}
 		}
 		buy.setPoints(buy.getPoints() + 20);
 		// Check for level up
 		buy.setLevel(Util.calculateLevel(buy.getLevel(), buy.getPoints()));
 		buy.setOwner(userID);
-		pm.makePersistent(buy);
 		AchievementsManager.userValueIncreased(buy, getServletContext());
 		AchievementsManager.someoneBoughtUser(buy, getServletContext());
+		pm.makePersistent(buy);
 		pm.close();
 		response.getWriter().println("Purchase Done");
 

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletException;
@@ -18,15 +20,19 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class ActionsManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		if (user == null) {
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
-			throw new ServletException("This user doesn't exist");
+			log.severe("User doesn't exist");
+			return;
 		}
 		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);

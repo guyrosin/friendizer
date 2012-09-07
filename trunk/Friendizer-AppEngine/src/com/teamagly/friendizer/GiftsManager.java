@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 import javax.servlet.ServletException;
@@ -22,6 +24,8 @@ import com.teamagly.friendizer.model.UserGift;
 
 @SuppressWarnings("serial")
 public class GiftsManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
@@ -50,10 +54,12 @@ public class GiftsManager extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		User user = pm.getObjectById(User.class, userID);
-		if (user == null) {
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
-			throw new ServletException("This user doesn't exist");
+			log.severe("User doesn't exist");
+			return;
 		}
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
@@ -104,16 +110,32 @@ public class GiftsManager extends HttpServlet {
 			else
 				receiver = user;
 		}
-		if (sender == null)
-			throw new ServletException("The sender doesn't exist");
-		if (receiver == null)
-			throw new ServletException("The receiver doesn't exist");
+		if (sender == null) {
+			pm.close();
+			log.severe("The sender doesn't exist");
+			return;
+		}
+		if (receiver == null) {
+			pm.close();
+			log.severe("The receiver doesn't exist");
+			return;
+		}
 
-		Gift gift = pm.getObjectById(Gift.class, giftID);
-		if (gift == null)
-			throw new ServletException("This gift doesn't exist");
-		if (sender.getMoney() < gift.getValue())
-			throw new ServletException("The sender doesn't have enough money to send this gift");
+		Gift gift;
+		try {
+			gift = pm.getObjectById(Gift.class, giftID);
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("This gift doesn't exist");
+			response.getWriter().println("This gift doesn't exist");
+			return;
+		}
+		if (sender.getMoney() < gift.getValue()) {
+			pm.close();
+			log.info("The sender doesn't have enough money to send this gift");
+			response.getWriter().println("Sorry, you don't have enough money to buy this gift");
+			return;
+		}
 		sender.setMoney(sender.getMoney() - gift.getValue());
 		pm.makePersistent(sender);
 
