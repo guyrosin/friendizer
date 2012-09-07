@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,21 +17,16 @@ public class UnregisterServlet extends HttpServlet {
 	@SuppressWarnings("unused")
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String regIDParam = req.getParameter(Util.REG_ID);
-		String userIDParam = req.getParameter(Util.USER_ID);
+		String regID = req.getParameter(Util.REG_ID);
+		String userID = req.getParameter(Util.USER_ID);
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Query query = pm.newQuery(UserDevice.class);
-
-			query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
-			query.declareParameters("String regIDParam, String userIDParam");
-			query.deletePersistentAll();
+			pm.deletePersistent(pm.getObjectById(UserDevice.class, regID)); // Delete the regID
 		} catch (Exception e) {
-			log.warning("Error unregistering device: " + e.getMessage());
-		} finally {
-			pm.close();
+			log.severe("Couldn't delete old reg ID: " + regID);
 		}
+		pm.close();
 		resp.setStatus(HttpServletResponse.SC_OK);
 	}
 }

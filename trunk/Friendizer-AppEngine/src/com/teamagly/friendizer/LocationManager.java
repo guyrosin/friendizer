@@ -48,12 +48,13 @@ public class LocationManager extends HttpServlet {
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("User doesn't exist");
 			return;
-		} finally {
-			pm.close();
 		}
 		user.setLatitude(latitude);
 		user.setLongitude(longitude);
 		user.setSince(new Date());
+
+		pm.makePersistent(user);
+		pm.close();
 
 		// TODO: Put it in a new thread
 

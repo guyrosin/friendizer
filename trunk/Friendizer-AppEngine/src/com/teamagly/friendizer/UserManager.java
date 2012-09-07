@@ -95,21 +95,19 @@ public class UserManager extends HttpServlet {
 
 		// Create/update the device registration
 		if (regID != null && regID.length() > 0) {
-			Query query = pm.newQuery(UserDevice.class);
-			query.setFilter("regID == regIDParam");
-			query.declareParameters("String regIDParam");
-			List<UserDevice> devices = (List<UserDevice>) query.execute(regID);
-			UserDevice device;
-			if (devices.size() == 0)
+			UserDevice device = null;
+			try {
+				device = pm.getObjectById(UserDevice.class, regID);
+				device.setUserID(userID); // Update the user ID
+			} catch (JDOObjectNotFoundException e) {
 				device = new UserDevice(regID, userID);
-			else { // Update the user ID
-				device = devices.get(0);
-				device.setUserID(userID);
+			} finally {
+				if (device != null)
+					pm.makePersistent(device);
+				pm.close();
 			}
-			pm.makePersistent(device);
 		} else
-			log.severe("No reg ID");
-		pm.close();
+			log.severe("No reg ID in the request");
 	}
 
 	private void updateUserFromFacebook(User user) {
