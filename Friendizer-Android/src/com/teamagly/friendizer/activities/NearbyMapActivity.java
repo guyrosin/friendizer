@@ -4,23 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.FragmentTransaction;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +32,7 @@ import com.google.android.maps.Overlay;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.readystatesoftware.maps.OnSingleTapListener;
 import com.readystatesoftware.maps.TapControlledMapView;
+import com.squareup.seismic.ShakeDetector;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
@@ -48,46 +41,20 @@ import com.teamagly.friendizer.utils.Utility;
 import com.teamagly.friendizer.widgets.CustomItemizedOverlay;
 import com.teamagly.friendizer.widgets.CustomOverlayItem;
 
-public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.TabListener {
+public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.TabListener, ShakeDetector.Listener {
 
 	private final String TAG = getClass().getName();
 	public static final String ACTION_UPDATE_LOCATION = "com.teamagly.friendizer.UPDATE_LOCATION";
 
 	ActionBar actionBar;
 	ArrayList<Integer> tabs = new ArrayList<Integer>();
+	private ShakeDetector shakeDetector;
 	protected TapControlledMapView mapView;
 	protected List<Overlay> mapOverlays;
 	protected Drawable stub;
 	protected CustomItemizedOverlay myItemizedOverlay;
 	protected CustomItemizedOverlay nearbyUsersItemizedOverlay;
 	LinearLayout markerLayout;
-
-	// Variables for the "shake to reload" feature
-	private SensorManager mSensorManager;
-	private float mAccel; // acceleration apart from gravity
-	private float mAccelCurrent; // current acceleration including gravity
-	private float mAccelLast; // last acceleration including gravity
-	private final SensorEventListener accelerometerListener = new SensorEventListener() {
-		public void onSensorChanged(SensorEvent se) {
-			float x = se.values[0];
-			float y = se.values[1];
-			float z = se.values[2];
-			mAccelLast = mAccelCurrent;
-			mAccelCurrent = FloatMath.sqrt(x * x + y * y + z * z);
-			float delta = mAccelCurrent - mAccelLast;
-			mAccel = mAccel * 0.9f + delta; // perform low-cut filter
-
-			// Check if the device is shaken
-			if (mAccel > 2.3) {
-				// Reload the data
-				setSupportProgressBarIndeterminateVisibility(true);
-				requestFriends();
-			}
-		}
-
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		}
-	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -98,11 +65,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		setTabs();
-
-		// Acquire a reference to the system Location Manager
-		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-			buildAlertMessageNoGPS();
 
 		stub = getResources().getDrawable(R.drawable.stub);
 		ImageView meButton = (ImageView) findViewById(R.id.meButton);
@@ -146,15 +108,12 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		mapOverlays.add(nearbyUsersItemizedOverlay);
 		mapOverlays.add(myItemizedOverlay);
 
-		// Shake to reload functionality
-		mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-		mAccel = 0.00f;
-		mAccelCurrent = SensorManager.GRAVITY_EARTH;
-		mAccelLast = SensorManager.GRAVITY_EARTH;
+		shakeDetector = new ShakeDetector(this);
 	}
 
 	protected void zoomMyLocation() {
 		if (Utility.getInstance().getLocation() != null) {
+			Log.w(TAG, "zooming, loc:" + Utility.getInstance().getLocation());
 			mapView.getController().animateTo(Utility.getInstance().getLocation());
 			mapView.getController().setZoom(17);
 		} else
@@ -177,38 +136,26 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		if (Utility.getInstance().getLocation() != null) {
 			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().userInfo, markerLayout);
 			myItemizedOverlay.addOverlay(myOverlayItem);
+			Log.w(TAG, "added my location, loc:" + Utility.getInstance().getLocation());
 			zoomMyLocation();
 		}
 		mapView.invalidate();
 
-		mSensorManager.registerListener(accelerometerListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-				SensorManager.SENSOR_DELAY_NORMAL);
-
 		registerReceiver(locationReceiver, new IntentFilter(ACTION_UPDATE_LOCATION));
 
 		requestFriends();
+
+		SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+		shakeDetector.start(sensorManager);
 	}
 
 	public BroadcastReceiver locationReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(TAG, "Got a location update");
+			Log.w(TAG, "Got a location update");
 			onResume();
 		}
 	};
-
-	private void setTabs() {
-		tabs = new ArrayList<Integer>();
-		tabs.add(R.string.nearby);
-		tabs.add(R.string.friends);
-		tabs.add(R.string.my_profile);
-
-		// Create the tabs
-		actionBar.addTab(actionBar.newTab().setText(R.string.nearby).setTabListener(this));
-		actionBar.addTab(actionBar.newTab().setText(R.string.friends).setTabListener(this));
-		actionBar.addTab(actionBar.newTab().setText(R.string.my_profile).setTabListener(this));
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -217,8 +164,19 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mSensorManager.unregisterListener(accelerometerListener);
+		shakeDetector.stop();
 		unregisterReceiver(locationReceiver);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.squareup.seismic.ShakeDetector.Listener#hearShake()
+	 */
+	@Override
+	public void hearShake() {
+		// Reload the data
+		setSupportProgressBarIndeterminateVisibility(true);
+		requestFriends();
 	}
 
 	/*
@@ -264,21 +222,23 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	/**
 	 * Shows an alert dialog in case the GPS is disabled
 	 */
-	private void buildAlertMessageNoGPS() {
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
-				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog, final int id) {
-						startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-					}
-				}).setNegativeButton("Skip", new DialogInterface.OnClickListener() {
-					public void onClick(final DialogInterface dialog, final int id) {
-						dialog.cancel();
-					}
-				});
-		final AlertDialog alert = builder.create();
-		alert.show();
-	}
+	/*
+	 * private void buildAlertMessageNoGPS() {
+	 * final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	 * builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
+	 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+	 * public void onClick(final DialogInterface dialog, final int id) {
+	 * startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+	 * }
+	 * }).setNegativeButton("Skip", new DialogInterface.OnClickListener() {
+	 * public void onClick(final DialogInterface dialog, final int id) {
+	 * dialog.cancel();
+	 * }
+	 * });
+	 * final AlertDialog alert = builder.create();
+	 * alert.show();
+	 * }
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -329,6 +289,19 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+
+	private void setTabs() {
+		tabs = new ArrayList<Integer>();
+		tabs.add(R.string.nearby);
+		tabs.add(R.string.friends);
+		tabs.add(R.string.my_profile);
+
+		// Create the tabs
+		actionBar.addTab(actionBar.newTab().setText(R.string.nearby).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(R.string.friends).setTabListener(this));
+		actionBar.addTab(actionBar.newTab().setText(R.string.my_profile).setTabListener(this));
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 	}
 
 	/*

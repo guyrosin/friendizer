@@ -428,9 +428,12 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		}
 
 		protected void onPostExecute(Integer matching) {
-			userInfo.setMatching(matching);
-			// Update the view
-			txtMatching.setText(String.valueOf(matching) + "%");
+			if (matching > 0) {
+				userInfo.setMatching(matching);
+				// Update the view
+				txtMatching.setText(String.valueOf(matching) + "%");
+			} else
+				txtMatching.setText("");
 			setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 		}
 	}

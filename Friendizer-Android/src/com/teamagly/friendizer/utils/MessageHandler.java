@@ -1,6 +1,7 @@
 package com.teamagly.friendizer.utils;
 
 import java.io.IOException;
+import java.net.URL;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -9,11 +10,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
+import android.os.AsyncTask;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
 
 import com.teamagly.friendizer.FriendizerApp;
@@ -53,8 +57,7 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "Achievement Earned", title, APP_ICON_RES_ID, notificationIntent);
-			playNotificationSound(context);
+			generateNotification(context, "Achievement Earned", title, null, notificationIntent, "Achievement earned!");
 		} else if (type == NotificationType.BUY) { // Bought by someone
 			bought(context, userID);
 		} else if (type == NotificationType.GFT) { // Received a gift
@@ -69,30 +72,70 @@ public class MessageHandler {
 	/**
 	 * Display a notification containing the given string.
 	 */
-	@SuppressWarnings("deprecation")
-	public static void generateNotification(Context context, String title, String message, int smallIconResID, Intent intent) {
-		long when = System.currentTimeMillis();
+	public static void generateNotification(Context context, String title, String message, String picURL, Intent intent,
+			String tickerText) {
+		final long when = System.currentTimeMillis();
+		if (picURL != null && picURL.length() > 0) {
+			try {
+				// Fetch the image
+				URL url = new URL(picURL);
+				Builder builder = new Builder(context).setContentTitle(title).setContentText(message)
+						.setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText)
+						.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
+				new FetchImageTask(context, builder).execute(url);
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+			}
+		} else {
+			Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID)
+					.setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when)
+					.setAutoCancel(true);
+			notify(context, builder);
+		}
+	}
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setContentTitle(title)
-				.setContentText(message).setWhen(when).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0))
-				.setAutoCancel(true);
-		if (smallIconResID > 0)
-			builder.setSmallIcon(smallIconResID);
-		// if (bigIconResID >0)
-		// builder.setLargeIcon(context.getResources().getDrawable(bigIconResID));
+	static class FetchImageTask extends AsyncTask<URL, Void, Bitmap> {
+		Builder builder;
+		Context context;
 
+		public FetchImageTask(Context context, Builder builder) {
+			this.builder = builder;
+			this.context = context;
+		}
+
+		protected Bitmap doInBackground(URL... urls) {
+			try {
+				return BitmapFactory.decodeStream(urls[0].openConnection().getInputStream());
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+				return null;
+			}
+		}
+
+		protected void onPostExecute(Bitmap bitmap) {
+			try {
+				builder.setLargeIcon(bitmap);
+				MessageHandler.notify(context, builder);
+			} catch (Exception e) {
+				Log.w(TAG, "", e);
+			}
+		}
+	}
+
+	private static void notify(Context context, Builder builder) {
 		SharedPreferences settings = Utility.getSharedPreferences();
 		int notificatonID = settings.getInt("notificationID", 0);
 
 		NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(notificatonID, builder.getNotification());
+		nm.notify(notificatonID, builder.build());
 
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putInt("notificationID", ++notificatonID % 32);
 		editor.commit();
+		playNotificationSound(context);
 	}
 
-	private void playNotificationSound(Context context) {
+	private static void playNotificationSound(Context context) {
 		Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		if (uri != null) {
 			Ringtone rt = RingtoneManager.getRingtone(context, uri);
@@ -120,13 +163,12 @@ public class MessageHandler {
 						// Show a status bar notification
 						Intent notificationIntent = new Intent(context, ChatActivity.class);
 						notificationIntent.putExtra("user", user);
-						generateNotification(context, user.getName(), msg, APP_ICON_RES_ID, notificationIntent);
-						playNotificationSound(context);
+						generateNotification(context, user.getName(), msg, user.getPicURL(), notificationIntent,
+								"New message from " + user.getFirstName());
 					}
 				}
 			}, null, Activity.RESULT_CANCELED, null, null);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -139,10 +181,9 @@ public class MessageHandler {
 			// TODO: put the gift ID in the intent...
 			Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "Received a " + giftName, "From " + user.getName(), APP_ICON_RES_ID, notificationIntent);
-			playNotificationSound(context);
+			generateNotification(context, "Received a " + giftName, "From " + user.getName(), user.getPicURL(),
+					notificationIntent, "New gift from " + user.getFirstName());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -154,8 +195,8 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, user.getName(), text, APP_ICON_RES_ID, notificationIntent);
-			playNotificationSound(context);
+			generateNotification(context, user.getName(), text, user.getPicURL(), notificationIntent, user.getFirstName()
+					+ " is nearby!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}
@@ -168,9 +209,8 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "You've been bought in friendizer", "By " + user.getName(), APP_ICON_RES_ID,
-					notificationIntent);
-			playNotificationSound(context);
+			generateNotification(context, "You've been bought in friendizer", "By " + user.getName(), user.getPicURL(),
+					notificationIntent, user.getFirstName() + " has just bought you!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}

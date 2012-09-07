@@ -244,7 +244,7 @@ public class SplashActivity extends SherlockActivity {
 			try {
 				jsonObject = new JSONObject(response);
 				userID = Long.parseLong(jsonObject.getString("id"));
-				Log.w(TAG, "ID = "+userID);
+				Log.w(TAG, "ID = " + userID);
 			} catch (JSONException e) {
 				Log.e(TAG, "The response from Facebook: " + response);
 				Log.e(TAG, e.getMessage());
@@ -255,6 +255,7 @@ public class SplashActivity extends SherlockActivity {
 					}
 				});
 				completed = true;
+				return;
 			}
 
 			handler.post(new Runnable() {

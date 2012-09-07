@@ -116,7 +116,6 @@ public final class ServerFacade {
 				res = post(serverUrl, params);
 				GCMRegistrar.setRegisteredOnServer(FriendizerApp.getContext(), true);
 				User user = new Gson().fromJson(res, User.class);
-				user.setOwnsList(ownList(userID));
 				return user;
 			} catch (IOException e) {
 				// Here we are simplifying and retrying on any error; in a real
@@ -146,6 +145,8 @@ public final class ServerFacade {
 		URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		UserMatching userMatching = new Gson().fromJson(in.readLine(), UserMatching.class);
+		if (userMatching == null)
+			return null;
 		// Convert from the server's UserMatching type to User
 		User user = userMatching.getUser();
 		user.setMatching(userMatching.getMatching());
@@ -179,16 +180,27 @@ public final class ServerFacade {
 	public static int matching(long userID1, long userID2) throws IOException {
 		URL url = new URL(fullServerAddress + "matching?userID1=" + userID1 + "&userID2=" + userID2);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		int matching = Integer.parseInt(in.readLine());
-		in.close();
+		int matching = -1;
+		try {
+			matching = Integer.parseInt(in.readLine());
+		} catch (Exception e) {
+		} finally {
+			in.close();
+		}
 		return matching;
 	}
 
 	public static List<User> nearbyUsers(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "nearbyUsers?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		List<UserMatching> userMatchings = new Gson().fromJson(in.readLine(), new TypeToken<List<UserMatching>>() {
 		}.getType());
+		// Convert from the server's UserMatching type to User
+		List<User> users = new ArrayList<User>();
+		for (UserMatching userMatching : userMatchings) {
+			userMatching.getUser().setMatching(userMatching.getMatching());
+			users.add(userMatching.getUser());
+		}
 		in.close();
 		return users;
 	}
