@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
@@ -62,19 +63,25 @@ public class SendMessage {
 			for (int i = 0; i < results.size(); i++) {
 				String canonicalRegId = results.get(i).getCanonicalRegistrationId();
 				if (canonicalRegId != null) {
-					long regIDParam = Long.parseLong(regIDs.get(i));
+					String regIDParam = regIDs.get(i);
+					try {
+						pm.deletePersistent(pm.getObjectById(UserDevice.class, regIDParam)); // Delete the regID
+					} catch (Exception e) {
+						log.severe("Couldn't delete old reg ID: " + regIDParam);
+					}
 					log.info("updating reg id: " + regIDParam + " for uid " + userIDParam);
 					// same device has more than on registration id: update it
-					// Replace the current regID with the canonical one
-					Query q = pm.newQuery(UserDevice.class);
-					q.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
-					q.declareParameters("long regIDParam, String userIDParam");
-					@SuppressWarnings("unchecked")
-					List<UserDevice> devices = (List<UserDevice>) q.execute(regIDParam, userIDParam);
-					if (!devices.isEmpty()) {
-						log.info("update succeed");
-						UserDevice device = devices.get(0);
-						device.setRegID(canonicalRegId);
+					// Replace the current regID with the canonical one if it doesn't already exists
+					UserDevice device = null;
+					try {
+						device = pm.getObjectById(UserDevice.class, canonicalRegId);
+						if (device.getUserID() != userIDParam) { // Update the user ID if necessary
+							device.setUserID(userIDParam);
+							pm.makePersistent(device);
+						}
+						device.setUserID(userIDParam); // Update the user ID
+					} catch (JDOObjectNotFoundException e) { // Add the canonical ID
+						device = new UserDevice(canonicalRegId, userIDParam);
 						pm.makePersistent(device);
 					}
 				}
@@ -92,16 +99,12 @@ public class SendMessage {
 						// The app has been removed from device, so unregister it
 						String regIDParam = regIDs.get(i);
 						try {
-							Query query = pm.newQuery(UserDevice.class);
-							query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
-							query.declareParameters("String regIDParam, String userIDParam");
-							query.deletePersistentAll(regIDParam, userIDParam);
+							pm.deletePersistent(pm.getObjectById(UserDevice.class, regIDParam)); // Delete the regID
 						} catch (Exception e) {
-							log.severe("Error unregistering device: " + e.getMessage());
+							log.severe("Couldn't delete old reg ID: " + regIDParam);
 						}
-					} else {
+					} else
 						log.warning("Got an unexpected error: " + error);
-					}
 				}
 			}
 			pm.close();
@@ -123,40 +126,42 @@ public class SendMessage {
 			log.info("Succesfully sent message to device " + regIDParam);
 			String canonicalRegId = result.getCanonicalRegistrationId();
 			if (canonicalRegId != null) {
-				// same device has more than on registration id: update it
 				log.finest("canonicalRegId " + canonicalRegId);
-				PersistenceManager pm = PMF.get().getPersistenceManager();
-				Query q = pm.newQuery(UserDevice.class);
-				q.setFilter(Util.REG_ID + " == regIDParam");
-				q.declareParameters("long regIDParam");
-				@SuppressWarnings("unchecked")
-				List<UserDevice> devices = (List<UserDevice>) q.execute(Long.parseLong(regIDParam));
-				if (!devices.isEmpty()) {
-					UserDevice device = devices.get(0);
-					device.setRegID(canonicalRegId);
-					pm.makePersistent(device);
-				}
-				pm.close();
-			}
-		} else {
-			String error = result.getErrorCodeName();
-			if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+				// same device has more than one registration id: delete the old one and add the canonical one
 				PersistenceManager pm = PMF.get().getPersistenceManager();
 				try {
-					// The app has been removed from device, so unregister it
-					Query query = pm.newQuery(UserDevice.class);
-					query.setFilter(Util.REG_ID + " == regIDParam && " + Util.USER_ID + " == userIDParam");
-					query.declareParameters("String regIDParam, String userIDParam");
-					query.deletePersistentAll(regIDParam, userIDParam);
+					pm.deletePersistent(pm.getObjectById(UserDevice.class, regIDParam)); // Delete the regID
 				} catch (Exception e) {
-					log.severe("Error unregistering device: " + e.getMessage());
+					log.severe("Couldn't delete old reg ID: " + regIDParam);
+				}
+				try {
+					UserDevice device = pm.getObjectById(UserDevice.class, canonicalRegId);
+					if (device.getUserID() != userIDParam) { // Update the user ID if necessary
+						device.setUserID(userIDParam);
+						pm.makePersistent(device);
+					}
+				} catch (JDOObjectNotFoundException e) {
+					// Add the canonical ID
+					UserDevice device = new UserDevice(canonicalRegId, userIDParam);
+					pm.makePersistent(device);
 				} finally {
 					pm.close();
 				}
-			} else {
-				log.severe("Error sending message to device " + regIDParam + ": " + error);
 			}
+		} else {
+			String error = result.getErrorCodeName();
+			if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
+				PersistenceManager pm = PMF.get().getPersistenceManager();
+				// The app has been removed from device, so unregister it
+				try {
+					pm.deletePersistent(pm.getObjectById(UserDevice.class, regIDParam)); // Delete the regID
+				} catch (Exception e) {
+					log.severe("Couldn't delete old reg ID: " + regIDParam);
+				} finally {
+					pm.close();
+				}
+			} else
+				log.warning("Got an unexpected error: " + error);
 		}
 	}
-
 }
