@@ -1,26 +1,17 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.Gift;
-import com.teamagly.friendizer.model.GiftCount;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserGift;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class GiftsManager extends HttpServlet {
@@ -149,13 +140,15 @@ public class GiftsManager extends HttpServlet {
 		pm.close();
 		response.getWriter().println("The gift has been sent");
 
-		Message msg = new Message.Builder().addData("type", NotificationType.GFT.toString())
-				.addData(Util.USER_ID, String.valueOf(senderID)).addData("giftID", String.valueOf(userGift.getGiftID()))
-				.addData("giftName", String.valueOf(gift.getName())).build();
-		SendMessage.sendMessage(receiverID, msg);
+		Builder msg = new Builder();
+		msg.addData("type", NotificationType.GFT.toString());
+		msg.addData("userID", String.valueOf(senderID));
+		msg.addData("giftID", String.valueOf(userGift.getGiftID()));
+		msg.addData("giftName", String.valueOf(gift.getName()));
+		SendMessage.sendMessage(receiverID, msg.build());
 	}
 
-	public Gift getGift(List<Gift> gifts, long giftID) {
+	private Gift getGift(List<Gift> gifts, long giftID) {
 		for (Gift gift : gifts)
 			if (gift.getId() == giftID)
 				return gift;

@@ -11,7 +11,6 @@ import com.restfb.Facebook;
  * 
  */
 public class Like {
-
 	@Facebook
 	String id;
 

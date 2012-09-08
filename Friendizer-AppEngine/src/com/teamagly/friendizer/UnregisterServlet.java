@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.teamagly.friendizer.model.UserDevice;
 
@@ -16,9 +14,9 @@ public class UnregisterServlet extends HttpServlet {
 
 	@SuppressWarnings("unused")
 	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String regID = req.getParameter(Util.REG_ID);
-		String userID = req.getParameter(Util.USER_ID);
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String regID = request.getParameter("regID");
+		String userID = request.getParameter("userID");
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -27,6 +25,6 @@ public class UnregisterServlet extends HttpServlet {
 			log.severe("Couldn't delete old reg ID: " + regID);
 		}
 		pm.close();
-		resp.setStatus(HttpServletResponse.SC_OK);
+		response.setStatus(HttpServletResponse.SC_OK);
 	}
 }

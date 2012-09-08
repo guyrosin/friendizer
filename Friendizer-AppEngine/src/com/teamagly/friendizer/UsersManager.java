@@ -1,37 +1,26 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.jdo.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
 
 import com.google.gson.Gson;
-import com.restfb.Connection;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
+import com.restfb.*;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
-import com.teamagly.friendizer.model.Like;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserDevice;
-import com.teamagly.friendizer.model.UserMatching;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
-public class UserManager extends HttpServlet {
+public class UsersManager extends HttpServlet {
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
 		if (servlet.intern() == "userDetails")
@@ -44,24 +33,19 @@ public class UserManager extends HttpServlet {
 			matching(request, response);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String address = req.getRequestURI();
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String address = request.getRequestURI();
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
 		if (servlet.intern() == "login")
-			login(req, resp);
+			login(request, response);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
-		String regID = request.getParameter(Util.REG_ID);
-		long userID = Long.parseLong(request.getParameter(Util.USER_ID));
-		String accessToken = request.getParameter(Util.ACCESS_TOKEN);
+		String regID = request.getParameter("regID");
+		long userID = Long.parseLong(request.getParameter("userID"));
+		String accessToken = request.getParameter("regID");
 		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -72,13 +56,14 @@ public class UserManager extends HttpServlet {
 			user.setSince(new Date());
 			pm.makePersistent(user);
 
-			if (user.isFbUpdate()) // Check if there's a Facebook data update for this user
+			if (user.isFbUpdate()) { // Check if there's a Facebook data update for this user
 				try {
 					updateUserFromFacebook(user, Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
 					user.setFbUpdate(false);
 				} catch (Exception e) {
 					log.severe(e.getMessage());
 				}
+			}
 
 			// TODO: temporary, remove this later
 			if (user.getPicture() == null || user.getPicture().length() == 0)
@@ -114,8 +99,7 @@ public class UserManager extends HttpServlet {
 		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 		// Get the user's data from Facebook
 		// Note: using JsonObject instead of User object for the profile picture
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
-				Parameter.with("fields", "name,gender,birthday,picture"));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", "name,gender,birthday,picture"));
 		user.updateFacebookData(jsonObject);
 	}
 
@@ -124,12 +108,11 @@ public class UserManager extends HttpServlet {
 		// Request those fields from Facebook
 		// Note: using JsonObject instead of User object in case we want the profile picture
 		log.info("Requesting update for uid " + user.getId() + " for " + StringUtils.join(fields));
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
-				Parameter.with("fields", StringUtils.join(fields)));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
 		user.updateFacebookData(jsonObject);
 	}
 
-	private void userDetails(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void userDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -144,7 +127,7 @@ public class UserManager extends HttpServlet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void ownList(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void ownList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -161,7 +144,7 @@ public class UserManager extends HttpServlet {
 		pm.close();
 	}
 
-	private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 
 		long userID = Long.parseLong(request.getParameter("userID"));
@@ -179,7 +162,7 @@ public class UserManager extends HttpServlet {
 		}
 	}
 
-	private void matching(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void matching(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long user1ID = Long.parseLong(request.getParameter("userID1"));
 		long user2ID = Long.parseLong(request.getParameter("userID2"));
 

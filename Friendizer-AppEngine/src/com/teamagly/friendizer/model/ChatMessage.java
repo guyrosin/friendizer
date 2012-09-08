@@ -2,21 +2,15 @@ package com.teamagly.friendizer.model;
 
 import java.util.Date;
 
-import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.jdo.annotations.*;
 
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONObject;
+import com.google.appengine.labs.repackaged.org.json.*;
 import com.teamagly.friendizer.Notifications;
 
 @PersistenceCapable
 public class ChatMessage {
-
 	@PrimaryKey
-	@Persistent(
-			valueStrategy = IdGeneratorStrategy.IDENTITY)
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
 
 	@Persistent
@@ -102,5 +96,4 @@ public class ChatMessage {
 	public void setTime(Date time) {
 		this.time = time;
 	}
-
 }

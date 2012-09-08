@@ -1,7 +1,6 @@
 package com.teamagly.friendizer.model;
 
 public class GiftCount {
-
 	private Gift gift;
 	private int count;
 

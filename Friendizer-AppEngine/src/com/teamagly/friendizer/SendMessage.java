@@ -1,38 +1,32 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 
 import com.google.android.gcm.server.Constants;
-import com.google.android.gcm.server.Message;
-import com.google.android.gcm.server.MulticastResult;
-import com.google.android.gcm.server.Result;
-import com.google.android.gcm.server.Sender;
+import com.google.android.gcm.server.*;
 import com.teamagly.friendizer.model.UserDevice;
 
 /**
  * Send a message using GCM
  */
 public class SendMessage {
+	private static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
 
 	private static final Logger log = Logger.getLogger(SendMessage.class.getName());
 
+	@SuppressWarnings("unchecked")
 	public static void sendMessage(long userIDParam, Message msg) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query q = pm.newQuery(UserDevice.class);
 		q.setFilter("userID == userIDParam");
 		q.declareParameters("long userIDParam");
-		@SuppressWarnings("unchecked")
 		List<UserDevice> results = (List<UserDevice>) q.execute(userIDParam);
 		if (!results.isEmpty()) {
-			Sender sender = new Sender(Util.SENDER_ID);
+			Sender sender = new Sender(SENDER_ID);
 			if (results.size() == 1)
 				sendSingleMessage(msg, results.get(0).getRegID(), userIDParam, sender);
 			else {

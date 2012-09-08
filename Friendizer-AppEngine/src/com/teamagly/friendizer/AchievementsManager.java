@@ -1,26 +1,17 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.jdo.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
-import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserAchievement;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class AchievementsManager extends HttpServlet {
@@ -83,7 +74,7 @@ public class AchievementsManager extends HttpServlet {
 		// Check for another achievement
 		AchievementsManager.userValueIncreased(user, context);
 		// check for level up
-		Util.calculateLevel(user.getLevel(), user.getPoints());
+		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
 		if (result.isEmpty()) {
 			pm.makePersistent(new UserAchievement(user.getId(), 28001));
@@ -119,7 +110,7 @@ public class AchievementsManager extends HttpServlet {
 		// Check for another achievement
 		AchievementsManager.userValueIncreased(user, context);
 		// check for level up
-		Util.calculateLevel(user.getLevel(), user.getPoints());
+		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
 		if (result.isEmpty()) {
 			pm = PMF.get().getPersistenceManager();
@@ -153,7 +144,7 @@ public class AchievementsManager extends HttpServlet {
 			// Reward the user with points
 			user.setPoints(user.getPoints() + achv.getPoints());
 			// check for level up
-			Util.calculateLevel(user.getLevel(), user.getPoints());
+			user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
 			if (result.isEmpty()) {
 				pm = PMF.get().getPersistenceManager();
@@ -176,9 +167,11 @@ public class AchievementsManager extends HttpServlet {
 			pm.close();
 		}
 
-		Message msg = new Message.Builder().addData("type", NotificationType.ACH.toString())
-				.addData(Util.USER_ID, String.valueOf(user.getId())).addData("title", achievement.getTitle())
-				.addData("iconRes", achievement.getIconRes()).build();
-		SendMessage.sendMessage(user.getId(), msg);
+		Builder msg = new Builder();
+		msg.addData("type", NotificationType.ACH.toString());
+		msg.addData("userID", String.valueOf(user.getId()));
+		msg.addData("title", achievement.getTitle());
+		msg.addData("iconRes", achievement.getIconRes());
+		SendMessage.sendMessage(user.getId(), msg.build());
 	}
 }

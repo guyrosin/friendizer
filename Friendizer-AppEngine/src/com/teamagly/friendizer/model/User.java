@@ -2,19 +2,16 @@ package com.teamagly.friendizer.model;
 
 import java.util.Date;
 
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.jdo.annotations.*;
 
 import com.restfb.json.JsonObject;
 
 @PersistenceCapable
 public class User {
-
 	/*
 	 * Facebook data
 	 */
-
+	
 	@PrimaryKey
 	@Persistent
 	private Long id; // Facebook ID

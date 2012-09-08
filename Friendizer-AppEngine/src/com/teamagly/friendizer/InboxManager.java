@@ -1,33 +1,30 @@
 package com.teamagly.friendizer;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.ChatMessage;
 
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
-
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if (request.getRequestURI().endsWith("/send"))
+		String address = request.getRequestURI();
+		String servlet = address.substring(address.lastIndexOf("/") + 1);
+		if (servlet.intern() == "send")
 			send(request, response);
-		else if (request.getRequestURI().endsWith("/getConversation"))
+		else if (servlet.intern() == "getConversation")
 			getConversation(request, response);
-		else if (request.getRequestURI().endsWith("/getUnread"))
+		else if (servlet.intern() == "getUnread")
 			getUnread(request, response);
-		else if (request.getRequestURI().endsWith("/getInbox"))
+		else
 			getInbox(request, response);
 	}
 
@@ -47,11 +44,14 @@ public class InboxManager extends HttpServlet {
 		pm.close();
 		out.println(message);
 
-		Message msg = new Message.Builder().addData("type", NotificationType.CHAT.toString())
-				.addData(Util.USER_ID, String.valueOf(source)).addData("text", message.getText()).build();
-		SendMessage.sendMessage(destination, msg);
+		Builder msg = new Builder();
+		msg.addData("type", NotificationType.CHAT.toString());
+		msg.addData("userID", String.valueOf(source));
+		msg.addData("text", message.getText());
+		SendMessage.sendMessage(destination, msg.build());
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getConversation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
@@ -70,13 +70,13 @@ public class InboxManager extends HttpServlet {
 		query.setRange(from, to);
 		query.declareParameters("long user1, long user2");
 
-		@SuppressWarnings("unchecked")
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(user1, user2);
 		if (!messages.isEmpty())
 			out.println(new Gson().toJson(messages));
 		query.closeAll();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getUnread(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
@@ -90,7 +90,6 @@ public class InboxManager extends HttpServlet {
 		query.setOrdering("id time");
 		query.declareParameters("long dest");
 
-		@SuppressWarnings("unchecked")
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(destination);
 		query.closeAll();
 		if (!messages.isEmpty()) {
@@ -103,6 +102,7 @@ public class InboxManager extends HttpServlet {
 		pm.close();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void getInbox(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
@@ -116,7 +116,6 @@ public class InboxManager extends HttpServlet {
 		query.setOrdering("id desc");
 		query.declareParameters("long src");
 
-		@SuppressWarnings("unchecked")
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(userId);
 		query.closeAll();
 		if (!messages.isEmpty()) {
@@ -129,5 +128,4 @@ public class InboxManager extends HttpServlet {
 		}
 		pm.close();
 	}
-
 }
