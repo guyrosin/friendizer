@@ -1,36 +1,17 @@
-/**
- * 
- */
 package com.teamagly.friendizer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.google.gson.stream.JsonReader;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
+import com.restfb.*;
 import com.restfb.FacebookClient.AccessToken;
-import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
@@ -38,6 +19,10 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class FacebookSubscriptionsManager extends HttpServlet {
+	private static final String APP_ID = "273844699335189"; // Facebook app ID
+	private static final String APP_SECRET = "b2d90b5989dfdf082742e12d365053b9"; // Facebook app secret
+	private static final String BASE_URL = "http://friendizer.appspot.com/";
+	
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 
 	private static final String VERIFY_TOKEN = "FRIENDIZER";
@@ -71,13 +56,9 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
 	@SuppressWarnings("unused")
 	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		/*
 		 * Change Notifications
 		 */
@@ -93,7 +74,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		 */
 
 		// Decode
-		JsonReader reader = new JsonReader(req.getReader());
+		JsonReader reader = new JsonReader(request.getReader());
 		reader.beginObject();
 		String objectName = reader.nextName();
 		String object = reader.nextString();
@@ -131,7 +112,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		reader.close();
 	}
 
-	void requestFBData(String userID, List<String> fields) {
+	private void requestFBData(String userID, List<String> fields) {
 		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -147,8 +128,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		// Note: using JsonObject instead of User object in case we want the profile picture
 		try {
 			log.info("Requesting update for uid " + userID + " for " + StringUtils.join(fields));
-			JsonObject jsonObject = facebook.fetchObject(userID, JsonObject.class,
-					Parameter.with("fields", StringUtils.join(fields)));
+			JsonObject jsonObject = facebook.fetchObject(userID, JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
 			user.updateFacebookData(jsonObject);
 			pm.makePersistent(user);
 			pm.close();
@@ -162,11 +142,11 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 
 	public void addSubscription(String fields) {
 		FacebookClient facebook = new DefaultFacebookClient();
-		AccessToken accessToken = facebook.obtainAppAccessToken(Util.APP_ID, Util.APP_SECRET);
-		String url = "https://graph.facebook.com/" + Util.APP_ID + "/subscriptions";
+		AccessToken accessToken = facebook.obtainAppAccessToken(APP_ID, APP_SECRET);
+		String url = "https://graph.facebook.com/" + APP_ID + "/subscriptions";
 		String charset = "UTF-8";
 		String object = "user";
-		String callbackURL = Util.BASE_URL + "facebookSubscriptions";
+		String callbackURL = BASE_URL + "facebookSubscriptions";
 		OutputStream output = null;
 		try {
 			String query = String.format("access_token=%s&object=%s&fields=%s&callback_url=%s&verify_token=%s&method=post",
@@ -190,18 +170,19 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if (output != null)
+			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException logOrIgnore) {
 				}
+			}
 		}
 	}
 
 	public void deleteSubscriptions() {
 		FacebookClient facebook = new DefaultFacebookClient();
-		AccessToken accessToken = facebook.obtainAppAccessToken(Util.APP_ID, Util.APP_SECRET);
-		String url = "https://graph.facebook.com/" + Util.APP_ID + "/subscriptions";
+		AccessToken accessToken = facebook.obtainAppAccessToken(APP_ID, APP_SECRET);
+		String url = "https://graph.facebook.com/" + APP_ID + "/subscriptions";
 		String charset = "UTF-8";
 		try {
 			url = url + "?access_token=" + URLEncoder.encode(accessToken.getAccessToken(), charset);
@@ -223,10 +204,9 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 
 	public void listSubscriptions(PrintWriter writer) {
 		FacebookClient facebook = new DefaultFacebookClient();
-		AccessToken accessToken = facebook.obtainAppAccessToken(Util.APP_ID, Util.APP_SECRET);
+		AccessToken accessToken = facebook.obtainAppAccessToken(APP_ID, APP_SECRET);
 		try {
-			URL url = new URL("https://graph.facebook.com/" + Util.APP_ID + "/subscriptions?access_token="
-					+ accessToken.getAccessToken());
+			URL url = new URL("https://graph.facebook.com/" + APP_ID + "/subscriptions?access_token=" + accessToken.getAccessToken());
 			writer.println("URL: " + url.toString());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 			String line;
@@ -243,10 +223,10 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void updateUsers() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
-		@SuppressWarnings("unchecked")
 		List<User> users = (List<User>) query.execute();
 		for (User user : users) {
 			try {
@@ -257,16 +237,16 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void extendAccessTokens() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
-		@SuppressWarnings("unchecked")
 		List<User> users = (List<User>) query.execute();
 		for (User user : users) {
 			// Request an extended access token
 			try {
 				FacebookClient facebook = new DefaultFacebookClient(user.getToken());
-				AccessToken accessToken = facebook.obtainExtendedAccessToken(Util.APP_ID, Util.APP_SECRET, user.getToken());
+				AccessToken accessToken = facebook.obtainExtendedAccessToken(APP_ID, APP_SECRET, user.getToken());
 				user.setToken(accessToken.getAccessToken());
 				pm.makePersistent(user);
 			} catch (Exception e) {
@@ -276,5 +256,4 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		}
 		pm.close();
 	}
-
 }

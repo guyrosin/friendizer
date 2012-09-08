@@ -1,9 +1,6 @@
 package com.teamagly.friendizer.model;
 
-import javax.jdo.annotations.IdGeneratorStrategy;
-import javax.jdo.annotations.PersistenceCapable;
-import javax.jdo.annotations.Persistent;
-import javax.jdo.annotations.PrimaryKey;
+import javax.jdo.annotations.*;
 
 @PersistenceCapable
 public class Mission {
@@ -40,5 +37,4 @@ public class Mission {
 	public void setType(int type) {
 		this.type = type;
 	}
-
 }

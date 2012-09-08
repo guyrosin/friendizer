@@ -1,25 +1,20 @@
-/**
- * 
- */
 package com.teamagly.friendizer;
 
 import java.util.HashMap;
-import java.util.Map;
 
-import net.sf.jsr107cache.Cache;
-import net.sf.jsr107cache.CacheException;
-import net.sf.jsr107cache.CacheFactory;
-import net.sf.jsr107cache.CacheManager;
-import net.sf.jsr107cache.CacheStatistics;
+import net.sf.jsr107cache.*;
 
 import com.google.appengine.api.memcache.jsr107cache.GCacheFactory;
 
-public class MatchingCache {
-
+public final class MatchingCache {
 	private static final int ONE_DAY = 3600 * 24;
-	static Cache cache;
+	private static Cache cache;
+	
+	private MatchingCache() {
+	}
+	
 	static {
-		Map<String, Integer> props = new HashMap<String, Integer>();
+		HashMap<String, Integer> props = new HashMap<String, Integer>();
 		props.put(GCacheFactory.EXPIRATION_DELTA, ONE_DAY);
 		try {
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
@@ -45,5 +40,4 @@ public class MatchingCache {
 		int misses = stats.getCacheMisses();
 		return "Cache hits: " + hits + "\nCache misses:" + misses;
 	}
-
 }

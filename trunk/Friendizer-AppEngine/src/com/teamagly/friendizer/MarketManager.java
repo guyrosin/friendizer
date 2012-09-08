@@ -4,15 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.User;
 
@@ -89,9 +85,9 @@ public class MarketManager extends HttpServlet {
 		pm.close();
 		response.getWriter().println("Purchase Done");
 
-		Message msg = new Message.Builder().addData("type", NotificationType.BUY.toString())
-				.addData(Util.USER_ID, String.valueOf(userID)).build();
-		SendMessage.sendMessage(buyID, msg);
+		Builder msg = new Builder();
+		msg.addData("type", NotificationType.BUY.toString());
+		msg.addData("userID", String.valueOf(userID));
+		SendMessage.sendMessage(buyID, msg.build());
 	}
-
 }

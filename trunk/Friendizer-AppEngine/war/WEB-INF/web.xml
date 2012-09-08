@@ -42,12 +42,12 @@
 	</servlet-mapping>
 	
 	<servlet>
-		<servlet-name>UserManager</servlet-name>
-		<servlet-class>com.teamagly.friendizer.UserManager</servlet-class>
+		<servlet-name>UsersManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.UsersManager</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>UserManager</servlet-name>
+		<servlet-name>UsersManager</servlet-name>
 		<url-pattern>/login</url-pattern>
 		<url-pattern>/userDetails</url-pattern>
 		<url-pattern>/ownList</url-pattern>

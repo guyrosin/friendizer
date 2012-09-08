@@ -5,8 +5,7 @@ import javax.jdo.annotations.*;
 @PersistenceCapable
 public class UserAchievement {
 	@PrimaryKey
-	@Persistent(
-			valueStrategy = IdGeneratorStrategy.IDENTITY)
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
 
 	@Persistent

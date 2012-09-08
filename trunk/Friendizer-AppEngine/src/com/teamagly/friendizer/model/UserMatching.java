@@ -1,7 +1,6 @@
 package com.teamagly.friendizer.model;
 
 public class UserMatching {
-
 	private User user;
 	private int matching;
 

@@ -1,26 +1,17 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserMatching;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class LocationManager extends HttpServlet {
@@ -84,39 +75,42 @@ public class LocationManager extends HttpServlet {
 		 * The loop goes over the users and check only the nearby users
 		 */
 		for (User nearbyUser : users) {
-			if ((nearbyUser.getId() != userID)
-					&& (user.getLatitude() - nearbyUser.getLatitude()) * (user.getLatitude() - nearbyUser.getLatitude())
-							+ (user.getLongitude() - nearbyUser.getLongitude())
-							* (user.getLongitude() - nearbyUser.getLongitude()) <= 1000) {
+			if (nearbyUser.getId() == userID)
+				continue;
+			double latitudeDiff = user.getLatitude() - nearbyUser.getLatitude();
+			double longitudeDiff = user.getLongitude() - nearbyUser.getLongitude();
+			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff > 1)
+				continue;
+			
+			query2 = pm.newQuery(Action.class);
+			query2.setFilter("date < updatedDate && (buyerID == nearbyUserID && boughtID == userID)");
+			query2.declareParameters("java.util.Date updatedDate, long userID, long nearbyUserID");
 
+			// Check if the nearby user bought the current user before one week (or more)
+			result2 = (List<Action>) query2.execute(updated2, userID, nearbyUser.getId());
+
+			query2.closeAll();
+
+			// If he bought him in the past
+			if (!result2.isEmpty()) {
 				query2 = pm.newQuery(Action.class);
-				query2.setFilter("date < updatedDate && (buyerID == nearbyUserID && boughtID == userID)");
+				query2.setFilter("date > updatedDate && (buyerID == nearbyUserID && boughtID == userID)");
 				query2.declareParameters("java.util.Date updatedDate, long userID, long nearbyUserID");
 
-				// Check if the nearby user bought the current user before one week (or more)
+				// Check if the nearby user bought the current user in the last week
 				result2 = (List<Action>) query2.execute(updated2, userID, nearbyUser.getId());
 
 				query2.closeAll();
 
-				// If he bought him in the past
-				if (!result2.isEmpty()) {
-					query2 = pm.newQuery(Action.class);
-					query2.setFilter("date > updatedDate && (buyerID == nearbyUserID && boughtID == userID)");
-					query2.declareParameters("java.util.Date updatedDate, long userID, long nearbyUserID");
-
-					// Check if the nearby user bought the current user in the last week
-					result2 = (List<Action>) query2.execute(updated2, userID, nearbyUser.getId());
-
-					query2.closeAll();
-
-					// If he didn't buy him in the last week (didn't buy him for a long time)
-					if (result2.isEmpty()) {
-						// Send a collapsible notification to the nearby user suggesting to buy the user again
-						Message msg = new Message.Builder().addData("type", NotificationType.NEARBY.toString())
-								.addData(Util.USER_ID, String.valueOf(userID)).addData("text", Notifications.NEARBY_MSG)
-								.collapseKey("NEARBY").build();
-						SendMessage.sendMessage(nearbyUser.getId(), msg);
-					}
+				// If he didn't buy him in the last week (didn't buy him for a long time)
+				if (result2.isEmpty()) {
+					// Send a collapsible notification to the nearby user suggesting to buy the user again
+					Builder msg = new Builder();
+					msg.addData("type", NotificationType.NEARBY.toString());
+					msg.addData("userID", String.valueOf(userID));
+					msg.addData("text", Notifications.NEARBY_MSG);
+					msg.collapseKey("NEARBY");
+					SendMessage.sendMessage(nearbyUser.getId(), msg.build());
 				}
 			}
 		}
@@ -157,11 +151,11 @@ public class LocationManager extends HttpServlet {
 		 * The loop goes over the users and adds only the nearby users to a list
 		 */
 		for (User nearbyUser : result) {
-			if ((nearbyUser.getId() != userID)
-					&& (user.getLatitude() - nearbyUser.getLatitude()) * (user.getLatitude() - nearbyUser.getLatitude())
-							+ (user.getLongitude() - nearbyUser.getLongitude())
-							* (user.getLongitude() - nearbyUser.getLongitude()) <= 1000) {
-
+			if (nearbyUser.getId() == userID)
+				continue;
+			double latitudeDiff = user.getLatitude() - nearbyUser.getLatitude();
+			double longitudeDiff = user.getLongitude() - nearbyUser.getLongitude();
+			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff <= 1) {
 				UserMatching userMatching = new UserMatching(nearbyUser, 0);
 				nearbyUsers.add(userMatching);
 			}
