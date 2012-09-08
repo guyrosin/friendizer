@@ -27,6 +27,8 @@ public class UsersManager extends HttpServlet {
 			userDetails(request, response);
 		else if (servlet.intern() == "ownList")
 			ownList(request, response);
+		else if (servlet.intern() == "getFriends")
+			getFriends(request, response);
 		else if (servlet.intern() == "updateStatus")
 			updateStatus(request, response);
 		else if (servlet.intern() == "matching")
@@ -128,6 +130,7 @@ public class UsersManager extends HttpServlet {
 
 	@SuppressWarnings("unchecked")
 	private void ownList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -141,6 +144,57 @@ public class UsersManager extends HttpServlet {
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("User doesn't exist");
 		}
+		pm.close();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void getFriends(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.setCharacterEncoding("UTF-8");
+		long userID = Long.parseLong(request.getParameter("userID"));
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		HashSet<String> names = new HashSet<String>();
+		Query query = pm.newQuery(Action.class);
+		query.setFilter("buyerID == " + userID);
+		List<Action> result = (List<Action>) query.execute();
+		query.closeAll();
+		List<User> friends = new ArrayList<User>();
+		for (Action action : result) {
+			long friendID = action.getBoughtID() != userID ? action.getBoughtID() : action.getBuyerID();
+			try {
+				User friend = pm.getObjectById(User.class, friendID);
+				if (!names.contains(friend.getName())) {
+					friends.add(friend);
+					names.add(friend.getName());
+				}
+			} catch (JDOObjectNotFoundException e) {
+				log.severe("User " + friendID + " doesn't exist");
+			}
+		}
+		query = pm.newQuery(Action.class);
+		query.setFilter("boughtID == " + userID);
+		result = (List<Action>) query.execute();
+		query.closeAll();
+		for (Action action : result) {
+			long friendID = action.getBoughtID() != userID ? action.getBoughtID() : action.getBuyerID();
+			try {
+				User friend = pm.getObjectById(User.class, friendID);
+				if (!names.contains(friend.getName())) {
+					friends.add(friend);
+					names.add(friend.getName());
+				}
+			} catch (JDOObjectNotFoundException e) {
+				log.severe("User " + friendID + " doesn't exist");
+			}
+		}
+
+		response.getWriter().println(new Gson().toJson(friends));
 		pm.close();
 	}
 
