@@ -42,6 +42,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	private final String TAG = getClass().getName();
 	ActionBar actionBar;
 	User userInfo;
+	long userID;
 
 	private ImageView userPic;
 	private TextView txtName;
@@ -57,7 +58,6 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	private TextView txtLevel;
 	private TextProgressBar xpBar;
 	final Handler handler = new Handler();
-	boolean connectedFlag = false; // Whether I'm connected to this user
 
 	/*
 	 * (non-Javadoc)
@@ -90,16 +90,15 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		userInfo = (User) intent.getSerializableExtra("user");
 		if (userInfo == null) {
 			// If passed the user's ID, fetching the details will be done in onResume()
-			if (intent.getLongExtra("userID", 0) > 0) {
-				userInfo = new User();
-				userInfo.setId(intent.getLongExtra("userID", 0));
-			} else {
+			if (intent.getLongExtra("userID", 0) > 0)
+				userID = intent.getLongExtra("userID", 0);
+			else {
 				Toast.makeText(this, "An error occured", Toast.LENGTH_SHORT).show();
 				finish();
 			}
 		} else {
-			// actionBar.setTitle(userInfo.getName());
 			updateViews();
+			updateButtons();
 		}
 	}
 
@@ -112,16 +111,19 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 
-		// Reload the mutual friends number
-		Bundle params = new Bundle();
-		Utility.getInstance().mAsyncRunner.request("me/mutualfriends/" + String.valueOf(userInfo.getId()), params,
-				new MutualFriendsListener());
-
-		updateViews();
-		// Reload the user's details from our servers (in the background)
-		new FriendizerTask().execute(userInfo.getId());
-		// Get the matching with this user (in the background)
-		new MatchingTask().execute(userInfo.getId(), Utility.getInstance().userInfo.getId());
+		if (userInfo == null) { // Reload the user's details from our servers
+			new FriendizerTask().execute(userID);
+			// Get the matching with this user
+			new MatchingTask().execute(userID, Utility.getInstance().userInfo.getId());
+			fetchMutualFriends();
+		} else { // Load only what's missing
+			if (userInfo.getMatching() <= 0) // Fetch the matching only if needed
+				new MatchingTask().execute(userInfo.getId(), Utility.getInstance().userInfo.getId());
+			else
+				txtMatching.setText(String.valueOf(userInfo.getMatching()) + "%");
+			fetchOwnerInfo();
+			fetchMutualFriends();
+		}
 	}
 
 	/*
@@ -134,6 +136,15 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.friend_menu, menu);
 		return true;
+	}
+
+	protected void refreshAll() {
+		setSupportProgressBarIndeterminateVisibility(true);
+		long id = userInfo != null ? userInfo.getId() : userID;
+		new FriendizerTask().execute(id);
+		// Get the matching with this user
+		new MatchingTask().execute(id, Utility.getInstance().userInfo.getId());
+		fetchMutualFriends();
 	}
 
 	/*
@@ -149,7 +160,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			startActivity(intent);
 			return true;
 		case R.id.menu_refresh:
-			onResume();
+			refreshAll();
 			return true;
 		case R.id.menu_settings: // Move to the settings activity
 			startActivity(new Intent(this, FriendsPrefs.class));
@@ -189,7 +200,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			if (result)
 				Toast.makeText(getBaseContext(), userInfo.getName() + " has been blocked!", Toast.LENGTH_LONG).show();
 			else
-				Toast.makeText(getBaseContext(), "Couldn't buy", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getBaseContext(), "Couldn't block " + userInfo.getName(), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -223,7 +234,9 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	}
 
 	protected void updateButtons() {
-		if (connectedFlag) {
+		// Check if I'm connected to this user
+		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())
+				|| (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID())) {
 			// Show the relevant buttons layout
 			buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
 			buttonsTable.setVisibility(View.VISIBLE);
@@ -313,7 +326,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		}
 
 		protected void onPostExecute(Void v) {
-			onResume(); // Refresh
+			refreshAll(); // Refresh
 		}
 	}
 
@@ -333,10 +346,11 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					@Override
 					public void run() {
 						txtMutualFriends.setText(String.valueOf(friends.length()));
+						setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 					}
 				});
 			} catch (JSONException e) {
-				Log.e(TAG, "", e);
+				Log.e(TAG, e.getMessage());
 			}
 		}
 	}
@@ -406,10 +420,6 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
 			}
-			// Check if I'm connected to this user
-			if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())
-					|| (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID()))
-				connectedFlag = true;
 			// Update the views
 			updateViews();
 			updateButtons();
@@ -434,7 +444,22 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				txtMatching.setText(String.valueOf(matching) + "%");
 			} else
 				txtMatching.setText("");
-			setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
+		}
+	}
+
+	protected void fetchMutualFriends() {
+		// Fetch the mutual friends number
+		long id = userInfo != null ? userInfo.getId() : userID;
+		Bundle params = new Bundle();
+		Utility.getInstance().mAsyncRunner.request("me/mutualfriends/" + String.valueOf(id), params, new MutualFriendsListener());
+	}
+
+	protected void fetchOwnerInfo() {
+		if (userInfo.getOwnerID() > 0) {
+			// Get the owner's name and picture from Facebook
+			Bundle params = new Bundle();
+			params.putString("fields", "name, picture");
+			Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params, new OwnerRequestListener());
 		}
 	}
 

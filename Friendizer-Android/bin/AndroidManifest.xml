@@ -75,7 +75,6 @@
         <activity android:name=".activities.GiftsSendActivity" />
         <activity android:name=".activities.GiftsUserActivity" />
         <activity android:name=".activities.ActionHistoryActivity" />
-        <activity android:name=".activities.AccountsActivity" />
         <activity
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >

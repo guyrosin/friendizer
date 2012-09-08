@@ -36,6 +36,7 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 		if (savedInstanceState != null)
 			selectedTab = savedInstanceState.getInt("tab");
 		selectedTab = getIntent().getIntExtra("tab", selectedTab);
+		getIntent().removeExtra("tab"); // Clear the intent
 		if (getIntent().getBooleanExtra("nearby_list", false))
 			selectedTab = -1;
 		setTabs(selectedTab);
@@ -60,6 +61,7 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 					actionBar.setSelectedNavigationItem(tabs.indexOf(tab));
 				} catch (ArrayIndexOutOfBoundsException e) {
 				}
+			getIntent().removeExtra("tab"); // Clear the intent
 		}
 		// TODO use in the background (and not here)
 		// if (!Utility.getInstance().facebook.isSessionValid()) {
@@ -71,11 +73,11 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 	 * (non-Javadoc)
 	 * @see android.app.Activity#onNewIntent(android.content.Intent)
 	 */
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		setIntent(intent);
-	}
+	// @Override
+	// protected void onNewIntent(Intent intent) {
+	// super.onNewIntent(intent);
+	// setIntent(intent);
+	// }
 
 	/*
 	 * (non-Javadoc)

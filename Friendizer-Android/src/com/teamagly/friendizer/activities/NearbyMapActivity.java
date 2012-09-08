@@ -55,6 +55,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	protected CustomItemizedOverlay myItemizedOverlay;
 	protected CustomItemizedOverlay nearbyUsersItemizedOverlay;
 	LinearLayout markerLayout;
+	protected NearbyUsersTask task = new NearbyUsersTask();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -164,6 +165,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	protected void onPause() {
 		super.onPause();
+		task.cancel(true);
 		shakeDetector.stop();
 		unregisterReceiver(locationReceiver);
 	}
@@ -193,30 +195,31 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	 * Clears the current users list and request the information from Facebook
 	 */
 	protected void requestFriends() {
-		class NearbyUsersTask extends AsyncTask<Long, Void, List<User>> {
+		task = new NearbyUsersTask();
+		task.execute(Utility.getInstance().userInfo.getId());
+	}
 
-			protected List<User> doInBackground(Long... userIDs) {
-				try {
-					return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
-				} catch (IOException e) {
-					Log.e(TAG, e.getMessage());
-				}
-				return new ArrayList<User>();
-			}
+	class NearbyUsersTask extends AsyncTask<Long, Void, List<User>> {
 
-			protected void onPostExecute(final List<User> nearbyUsers) {
-				if (nearbyUsers.size() > 0) {
-					for (User user : nearbyUsers) {
-						CustomOverlayItem overlayItem = new CustomOverlayItem(user, markerLayout);
-						nearbyUsersItemizedOverlay.addOverlay(overlayItem);
-					}
-					mapView.invalidate();
-				}
-				setSupportProgressBarIndeterminateVisibility(false);
+		protected List<User> doInBackground(Long... userIDs) {
+			try {
+				return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
 			}
+			return new ArrayList<User>();
 		}
 
-		new NearbyUsersTask().execute(Utility.getInstance().userInfo.getId());
+		protected void onPostExecute(final List<User> nearbyUsers) {
+			if (nearbyUsers.size() > 0) {
+				for (User user : nearbyUsers) {
+					CustomOverlayItem overlayItem = new CustomOverlayItem(user, markerLayout);
+					nearbyUsersItemizedOverlay.addOverlay(overlayItem);
+				}
+				mapView.invalidate();
+			}
+			setSupportProgressBarIndeterminateVisibility(false);
+		}
 	}
 
 	/**
