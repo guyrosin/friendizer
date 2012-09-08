@@ -51,6 +51,7 @@
 		<url-pattern>/login</url-pattern>
 		<url-pattern>/userDetails</url-pattern>
 		<url-pattern>/ownList</url-pattern>
+		<url-pattern>/getFriends</url-pattern>
 		<url-pattern>/updateStatus</url-pattern>
 		<url-pattern>/matching</url-pattern>
 	</servlet-mapping>
