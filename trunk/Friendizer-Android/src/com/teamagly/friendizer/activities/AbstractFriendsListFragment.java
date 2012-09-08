@@ -3,24 +3,12 @@
  */
 package com.teamagly.friendizer.activities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
-
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.FriendsAdapter;
 import com.teamagly.friendizer.adapters.FriendsImageAdapter;
@@ -29,11 +17,26 @@ import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Comparators;
 import com.teamagly.friendizer.utils.Utility;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * Note: the child class has to call activity.setSupportProgressBarIndeterminateVisibility(false) after it's done reloading the
  * data in order to stop the loading indicator
  */
 public abstract class AbstractFriendsListFragment extends SherlockFragment implements OnItemClickListener {
+	protected static String SORT_BY = "sort";
 	@SuppressWarnings("unused")
 	private final String TAG = "AbstractFriendsListFragment";
 	protected GridView gridView;
@@ -63,6 +66,9 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
 
+		SharedPreferences settings = Utility.getSharedPreferences();
+		sortBy = settings.getInt(SORT_BY, 0);
+
 		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
 		friendsAdapter.setNotifyOnChange(true);
 
@@ -85,6 +91,12 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		if (savedPosition >= 0) // initialized to -1
 			gridView.setSelection(savedPosition);
 		requestFriends();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		ImageLoader.getInstance().stop(); // Stop loading the images
 	}
 
 	/*
@@ -124,6 +136,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 	 * (non-Javadoc)
 	 * @see com.actionbarsherlock.app.SherlockListFragment#onOptionsItemSelected(android.view.MenuItem)
 	 */
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
@@ -133,26 +146,20 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 			startActivity(new Intent(activity, FBFriendsActivity.class));
 			return true;
 		case R.id.menu_sort:
-			final String[] options = { "Alphabeth", "Value", "Matching" };
+			final String[] options = { "Alphabeth", "Value" };
 			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 			builder.setTitle("Sort by");
-			builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
+			builder.setSingleChoiceItems(options, sortBy, new DialogInterface.OnClickListener() {
+				@Override
 				public void onClick(DialogInterface dialog, int item) {
 					if (item != sortBy) {
-						switch (item) {
-						case 0:
-							Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
-							break;
-						case 1:
-							Collections.sort(usersList, (new Comparators()).new ValueComparator());
-							break;
-						case 2:
-							Collections.sort(usersList, (new Comparators()).new MatchingComparator());
-							break;
-						}
+						sort(item);
 						sortBy = item;
-						// TODO
-						// friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+						// Save the new order
+						SharedPreferences settings = Utility.getSharedPreferences();
+						SharedPreferences.Editor editor = settings.edit();
+						editor.putInt(SORT_BY, sortBy);
+						editor.commit();
 					}
 					dialog.dismiss();
 				}
@@ -172,6 +179,30 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	protected void sort(int sortBy) {
+		switch (sortBy) {
+		case 0:
+			Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+			break;
+		case 1:
+			Collections.sort(usersList, (new Comparators()).new ValueComparator());
+			break;
+		}
+		activity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+			}
+		});
+	}
+
+	/**
+	 * Sorts the users list by default
+	 */
+	protected void sort() {
+		sort(sortBy);
 	}
 
 	/*

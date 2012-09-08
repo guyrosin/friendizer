@@ -3,7 +3,19 @@
  */
 package com.teamagly.friendizer.activities;
 
-import java.io.IOException;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.TextProgressBar;
 
 import org.json.JSONObject;
 
@@ -22,19 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.widgets.TextProgressBar;
+import java.io.IOException;
 
 public class MyProfileFragment extends SherlockFragment {
 
@@ -112,6 +112,7 @@ public class MyProfileFragment extends SherlockFragment {
 	protected void initButtons() {
 		// Define the achievements button
 		activity.findViewById(R.id.btn_achievements).setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(activity, AchievementsActivity.class);
 				intent.putExtra("user", Utility.getInstance().userInfo);
@@ -120,6 +121,7 @@ public class MyProfileFragment extends SherlockFragment {
 		});
 		// Define the gifts button
 		activity.findViewById(R.id.btn_gifts).setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(activity, GiftsUserActivity.class);
 				intent.putExtra("user", Utility.getInstance().userInfo);
@@ -128,6 +130,7 @@ public class MyProfileFragment extends SherlockFragment {
 		});
 		// Define the action history button
 		activity.findViewById(R.id.btn_action_history).setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				// TODO
 				Toast.makeText(activity, "Coming soon!", Toast.LENGTH_SHORT).show();
@@ -138,6 +141,7 @@ public class MyProfileFragment extends SherlockFragment {
 		});
 		// Define the status change button
 		activity.findViewById(R.id.btn_change_status).setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				showStatusDialog();
 			}
@@ -162,7 +166,6 @@ public class MyProfileFragment extends SherlockFragment {
 			txtStatus.setVisibility(View.GONE);
 		if (userInfo.getOwnsList() != null)
 			owns.setText(String.valueOf(userInfo.getOwnsList().size()));
-		activity.setSupportProgressBarIndeterminateVisibility(false);
 
 		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
 			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
@@ -193,6 +196,7 @@ public class MyProfileFragment extends SherlockFragment {
 		});
 		dialogBuilder.setView(input);
 		dialogBuilder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+			@Override
 			public void onClick(DialogInterface dialog, int whichButton) {
 				final String newStatus = input.getText().toString();
 				new UpdateStatusTask().execute(newStatus);
@@ -200,6 +204,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		});
 		dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
 			public void onClick(DialogInterface dialog, int whichButton) {
 				imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
 			}
@@ -210,6 +215,7 @@ public class MyProfileFragment extends SherlockFragment {
 	protected class UpdateStatusTask extends AsyncTask<String, Void, Void> {
 		String status;
 
+		@Override
 		protected Void doInBackground(String... statuses) {
 			status = statuses[0];
 			try {
@@ -220,6 +226,7 @@ public class MyProfileFragment extends SherlockFragment {
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Void v) {
 			// Update the view
 			if (status.length() > 0) {
@@ -255,6 +262,7 @@ public class MyProfileFragment extends SherlockFragment {
 								startActivity(intent);
 							}
 						});
+						activity.setSupportProgressBarIndeterminateVisibility(false);
 					}
 				});
 			} catch (Exception e) {
@@ -265,6 +273,7 @@ public class MyProfileFragment extends SherlockFragment {
 
 	class FriendizerTask extends AsyncTask<Long, Void, User> {
 
+		@Override
 		protected User doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.userDetails(userIDs[0]);
@@ -274,6 +283,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(final User newUserInfo) {
 			// Request the user's details from friendizer and update the views accordingly
 			try {

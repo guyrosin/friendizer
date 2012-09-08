@@ -1,8 +1,10 @@
 package com.teamagly.friendizer.activities;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,15 +18,14 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FBFriendsFragment extends AbstractFriendsListFragment {
 	private final String TAG = getClass().getName();
 	protected static JSONArray jsonArray;
+	protected FriendsTask task = new FriendsTask();
 
 	/*
 	 * (non-Javadoc)
@@ -49,13 +50,24 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 		return inflater.inflate(R.layout.connections_layout, container, false);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onPause()
+	 */
+	@Override
+	public void onPause() {
+		super.onPause();
+		task.cancel(true);
+	}
+
 	/**
 	 * Clears the current users list and request the information from Facebook
 	 */
+	@Override
 	protected void requestFriends() {
 		Bundle params = new Bundle();
 		// Query for the friends who are using Friendizer
-		String query = "select uid, is_app_user from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1";
+		String query = "select uid, is_app_user, name from user where uid in (select uid2 from friend where uid1=me()) and is_app_user=1 order by name";
 		params.putString("method", "fql.query");
 		params.putString("query", query);
 		Utility.getInstance().mAsyncRunner.request(null, params, new FriendsRequestListener());
@@ -79,8 +91,8 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 			final TextView empty = (TextView) activity.findViewById(R.id.empty);
 			final int len = jsonArray.length();
 			activity.runOnUiThread(new Runnable() {
+				@Override
 				public void run() {
-					friendsAdapter.notifyDataSetChanged();
 					if (len == 0)
 						empty.setVisibility(View.VISIBLE);
 					else
@@ -97,27 +109,34 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				} catch (Exception e) {
 					Log.w(TAG, e.getMessage());
 				}
-			new FriendsTask().execute(ids);
+			task = new FriendsTask();
+			task.execute(ids);
 		}
 	}
 
 	class FriendsTask extends AsyncTask<List<Long>, Void, Void> {
 
+		@Override
 		protected Void doInBackground(List<Long>... userIDsPass) {
 			List<Long> userIDs = userIDsPass[0];
 			for (long userID : userIDs)
 				try {
+					if (isCancelled())
+						return null;
 					User user = ServerFacade.userDetails(userID);
 					if (user != null)
 						usersList.add(user);
+					sort();
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Void v) {
-			friendsAdapter.notifyDataSetChanged(); // Notify the adapter
+			if (isCancelled())
+				return;
 			activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
 		}
 	}
