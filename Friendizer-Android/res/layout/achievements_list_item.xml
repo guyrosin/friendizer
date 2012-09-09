@@ -68,7 +68,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
                 android:singleLine="true"
-                android:text=" pts" />
+                android:text=" coins" />
         </LinearLayout>
     </TableRow>
 

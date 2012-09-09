@@ -11,13 +11,13 @@
         android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:columnWidth="100dp"
+        android:columnWidth="70dp"
         android:gravity="top|center_horizontal"
-        android:horizontalSpacing="4dp"
+        android:horizontalSpacing="3dp"
         android:numColumns="auto_fit"
-        android:paddingTop="5dp"
+        android:paddingTop="3dp"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="4dp" />
+        android:verticalSpacing="3dp" />
 
     <TextView
         android:id="@+id/empty"

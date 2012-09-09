@@ -5,8 +5,10 @@ package com.teamagly.friendizer.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -16,7 +18,8 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Utility;
 
-public class OwnsActivity extends SherlockFragmentActivity {
+public class BaseFragmentActivity extends SherlockFragmentActivity {
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -28,7 +31,29 @@ public class OwnsActivity extends SherlockFragmentActivity {
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		setContentView(R.layout.owns_layout);
+		setContentView(R.layout.blank_layout);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		String fragmentName = getIntent().getStringExtra("fragment");
+		SherlockFragment newFragment = null;
+		if (fragmentName.equals(FBFriendsFragment.class.getName()))
+			newFragment = new FBFriendsFragment();
+		else if (fragmentName.equals(OwnsFragment.class.getName()))
+			newFragment = new OwnsFragment();
+		else if (fragmentName.equals(MutualLikesFragment.class.getName())) {
+			newFragment = new MutualLikesFragment();
+			Bundle bundle = new Bundle();
+			bundle.putSerializable("user", getIntent().getSerializableExtra("user"));
+			newFragment.setArguments(bundle);
+		}
+		if (newFragment != null) {
+			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+			transaction.add(R.id.fragment_container, newFragment);
+			transaction.commit();
+		}
 	}
 
 	/*
@@ -51,7 +76,7 @@ public class OwnsActivity extends SherlockFragmentActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			finish(); // Go back
+			finish();
 			return true;
 		case R.id.menu_refresh:
 			onResume();

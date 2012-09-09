@@ -1,21 +1,5 @@
 package com.teamagly.friendizer.activities;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
-import com.google.android.gcm.GCMRegistrar;
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.SessionEvents;
-import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
-import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
-import com.teamagly.friendizer.utils.SessionStore;
-import com.teamagly.friendizer.utils.Utility;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +21,22 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
+import com.google.android.gcm.GCMRegistrar;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.SessionEvents;
+import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
+import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
+import com.teamagly.friendizer.utils.SessionStore;
+import com.teamagly.friendizer.utils.Utility;
 
 /**
  * The login flow is as follows: Facebook login -> GCM registration -> friendizer login
@@ -74,8 +74,7 @@ public class SplashActivity extends SherlockActivity {
 		protected void onPostExecute(Boolean result) {
 			dialogFriendizer.dismiss(); // Dismiss the progress dialog
 			if (result) {
-				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
-						.show();
+				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
 				// Continue to the main activity
 				Intent intent = new Intent(SplashActivity.this, NearbyMapActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -158,8 +157,7 @@ public class SplashActivity extends SherlockActivity {
 	protected void loginToFacebook() {
 		// if (!Utility.getInstance().facebook.isSessionValid() || fbRequestFailed)
 		// Authorize
-		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests",
-				"user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
+		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
 	}
 
 	/*
@@ -183,13 +181,12 @@ public class SplashActivity extends SherlockActivity {
 
 	protected void showErrorDialog(String errorMsg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(errorMsg + ". Please restart the app").setCancelable(false)
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						finish();
-					}
-				}).show();
+		builder.setMessage(errorMsg + ". Please restart the app").setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				finish();
+			}
+		}).show();
 	}
 
 	/**
@@ -252,12 +249,6 @@ public class SplashActivity extends SherlockActivity {
 					loginToFacebook(); // Try to login
 				} else
 					loginButton.setVisibility(View.VISIBLE);
-				// handler.post(new Runnable() {
-				// @Override
-				// public void run() {
-				// showErrorDialog("Couldn't connect to Facebook");
-				// }
-				// });
 				return;
 			}
 
@@ -297,6 +288,7 @@ public class SplashActivity extends SherlockActivity {
 
 		@Override
 		public void onAuthFail(String error) {
+			Log.e(TAG, error);
 		}
 	}
 
