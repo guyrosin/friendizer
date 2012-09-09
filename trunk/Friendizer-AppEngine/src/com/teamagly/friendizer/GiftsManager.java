@@ -1,17 +1,26 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.*;
+import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserGift;
 
 @SuppressWarnings("serial")
 public class GiftsManager extends HttpServlet {
@@ -25,8 +34,10 @@ public class GiftsManager extends HttpServlet {
 			allGifts(request, response);
 		else if (servlet.intern() == "userGifts")
 			userGifts(request, response);
-		else
+		else if (servlet.intern() == "sendGift")
 			sendGift(request, response);
+		else if (servlet.intern() == "getGift")
+			getGift(request, response);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -95,12 +106,11 @@ public class GiftsManager extends HttpServlet {
 		List<User> result1 = (List<User>) query.execute();
 		query.closeAll();
 		User sender = null, receiver = null;
-		for (User user : result1) {
+		for (User user : result1)
 			if (user.getId() == senderID)
 				sender = user;
 			else
 				receiver = user;
-		}
 		if (sender == null) {
 			pm.close();
 			log.severe("The sender doesn't exist");
@@ -154,4 +164,38 @@ public class GiftsManager extends HttpServlet {
 				return gift;
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	private void getGift(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		long giftID = Long.parseLong(request.getParameter("giftID"));
+		// Check if that user exists
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		Query query = pm.newQuery(UserGift.class);
+		query.setFilter("receiverID == " + userID + " && giftID == " + giftID);
+		List<UserGift> userGifts = (List<UserGift>) query.execute();
+		query.closeAll();
+		if (userGifts.isEmpty()) {
+			pm.close();
+			return;
+		}
+		try {
+			Gift gift = pm.getObjectById(Gift.class, giftID);
+			GiftCount giftCount = new GiftCount(gift, userGifts.size());
+			response.getWriter().println(new Gson().toJson(giftCount));
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("Gift doesn't exist");
+			return;
+		} finally {
+			pm.close();
+		}
+	}
+
 }

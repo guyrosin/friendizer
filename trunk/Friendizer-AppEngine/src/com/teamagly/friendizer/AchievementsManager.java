@@ -1,25 +1,43 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.*;
+import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.AchievementInfo;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserAchievement;
 
 @SuppressWarnings("serial")
 public class AchievementsManager extends HttpServlet {
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String address = request.getRequestURI();
+		String servlet = address.substring(address.lastIndexOf("/") + 1);
+		if (servlet.intern() == "achievements")
+			achivements(request, response);
+		else if (servlet.intern() == "getAchievement")
+			getAchievement(request, response);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void achivements(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -81,6 +99,35 @@ public class AchievementsManager extends HttpServlet {
 			notificate(user, 28001, context);
 		}
 		pm.close();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void getAchievement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		long achvID = Long.parseLong(request.getParameter("achvID"));
+		// Check if that user exists
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		Query query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + userID + " && achievementID == " + achvID);
+		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
+		query.closeAll();
+		try {
+			Achievement achv = pm.getObjectById(Achievement.class, achvID);
+			AchievementInfo achvInfo = new AchievementInfo(achv, !userAchvs.isEmpty());
+			response.getWriter().println(new Gson().toJson(achvInfo));
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("Achievement doesn't exist");
+			return;
+		} finally {
+			pm.close();
+		}
 	}
 
 	@SuppressWarnings("unchecked")

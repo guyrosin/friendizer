@@ -54,6 +54,7 @@
 		<url-pattern>/getFriends</url-pattern>
 		<url-pattern>/updateStatus</url-pattern>
 		<url-pattern>/matching</url-pattern>
+		<url-pattern>/mutualLikes</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -77,6 +78,7 @@
 	<servlet-mapping>
 		<servlet-name>AchievementsManager</servlet-name>
 		<url-pattern>/achievements</url-pattern>
+		<url-pattern>/getAchievement</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -109,6 +111,7 @@
 	    <url-pattern>/allGifts</url-pattern>
 	    <url-pattern>/userGifts</url-pattern>
 	    <url-pattern>/sendGift</url-pattern>
+	    <url-pattern>/getGift</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>

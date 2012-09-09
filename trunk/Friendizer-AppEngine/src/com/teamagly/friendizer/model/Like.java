@@ -20,9 +20,6 @@ public class Like {
 	@Facebook
 	String category;
 
-	@Facebook
-	String created_time;
-
 	/**
 	 * 
 	 * The constructor creates a Like object
@@ -32,21 +29,19 @@ public class Like {
 	 * @param category
 	 * @param created_time
 	 */
-	public Like(String id, String name, String category, String created_time) {
+	public Like(String id, String name, String category) {
 		this.id = id;
 		this.name = name;
 		this.category = category;
-		this.created_time = created_time;
 	}
 
 	/**
 	 * The default constructor creates a Like object
 	 */
 	public Like() {
-		this.id = "";
-		this.name = "";
-		this.category = "";
-		this.created_time = "";
+		id = "";
+		name = "";
+		category = "";
 	}
 
 	public String getId() {
@@ -71,13 +66,5 @@ public class Like {
 
 	public void setCategory(String category) {
 		this.category = category;
-	}
-
-	public String getCreated_time() {
-		return created_time;
-	}
-
-	public void setCreated_time(String created_time) {
-		this.created_time = created_time;
 	}
 }
