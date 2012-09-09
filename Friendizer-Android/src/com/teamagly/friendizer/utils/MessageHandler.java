@@ -58,9 +58,9 @@ public class MessageHandler {
 			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
 			generateNotification(context, "Achievement Earned", title, null, notificationIntent, "Achievement earned!");
-		} else if (type == NotificationType.BUY) { // Bought by someone
+		} else if (type == NotificationType.BUY)
 			bought(context, userID);
-		} else if (type == NotificationType.GFT) { // Received a gift
+		else if (type == NotificationType.GFT) { // Received a gift
 			String giftName = intent.getStringExtra("giftName");
 			gift(context, userID, giftName);
 		} else if (type == NotificationType.NEARBY) { // There's a nearby friend
@@ -72,24 +72,19 @@ public class MessageHandler {
 	/**
 	 * Display a notification containing the given string.
 	 */
-	public static void generateNotification(Context context, String title, String message, String picURL, Intent intent,
-			String tickerText) {
+	public static void generateNotification(Context context, String title, String message, String picURL, Intent intent, String tickerText) {
 		final long when = System.currentTimeMillis();
-		if (picURL != null && picURL.length() > 0) {
+		if (picURL != null && picURL.length() > 0)
 			try {
 				// Fetch the image
 				URL url = new URL(picURL);
-				Builder builder = new Builder(context).setContentTitle(title).setContentText(message)
-						.setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText)
-						.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
+				Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
 				new FetchImageTask(context, builder).execute(url);
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
-		} else {
-			Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID)
-					.setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when)
-					.setAutoCancel(true);
+		else {
+			Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
 			notify(context, builder);
 		}
 	}
@@ -103,6 +98,7 @@ public class MessageHandler {
 			this.context = context;
 		}
 
+		@Override
 		protected Bitmap doInBackground(URL... urls) {
 			try {
 				return BitmapFactory.decodeStream(urls[0].openConnection().getInputStream());
@@ -112,6 +108,7 @@ public class MessageHandler {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(Bitmap bitmap) {
 			try {
 				builder.setLargeIcon(bitmap);
@@ -163,8 +160,7 @@ public class MessageHandler {
 						// Show a status bar notification
 						Intent notificationIntent = new Intent(context, ChatActivity.class);
 						notificationIntent.putExtra("user", user);
-						generateNotification(context, user.getName(), msg, user.getPicURL(), notificationIntent,
-								"New message from " + user.getFirstName());
+						generateNotification(context, user.getName(), msg, user.getPicURL(), notificationIntent, "New message from " + user.getFirstName());
 					}
 				}
 			}, null, Activity.RESULT_CANCELED, null, null);
@@ -181,8 +177,7 @@ public class MessageHandler {
 			// TODO: put the gift ID in the intent...
 			Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "Received a " + giftName, "From " + user.getName(), user.getPicURL(),
-					notificationIntent, "New gift from " + user.getFirstName());
+			generateNotification(context, "Received a " + giftName, "From " + user.getName(), user.getPicURL(), notificationIntent, "New gift from " + user.getFirstName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -195,8 +190,7 @@ public class MessageHandler {
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, user.getName(), text, user.getPicURL(), notificationIntent, user.getFirstName()
-					+ " is nearby!");
+			generateNotification(context, user.getName(), text, user.getPicURL(), notificationIntent, user.getFirstName() + " is nearby!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}
@@ -208,9 +202,8 @@ public class MessageHandler {
 			User user = ServerFacade.userDetails(userID);
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
-			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "You've been bought in friendizer", "By " + user.getName(), user.getPicURL(),
-					notificationIntent, user.getFirstName() + " has just bought you!");
+			notificationIntent.putExtra("user", user);
+			generateNotification(context, "You've been bought in friendizer", "By " + user.getName(), user.getPicURL(), notificationIntent, user.getFirstName() + " has just bought you!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}

@@ -37,7 +37,6 @@ public class FriendizerApp extends Application {
 		// Initialize Little Fluffy Location Library
 		// LocationLibrary.showDebugOutput(true); // For debugging
 		LocationLibrary.initialiseLibrary(getContext(), getPackageName());
-		LocationLibrary.forceLocationUpdate(getContext()); // Force a location update
 
 		// Initialize the Image Loader
 		// Create default options which will be used for every displayImage() call

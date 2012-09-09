@@ -28,6 +28,8 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.google.android.gcm.GCMRegistrar;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
+import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
@@ -143,6 +145,9 @@ public class SplashActivity extends SherlockActivity {
 
 		dialogFriendizer = new ProgressDialog(context);
 		dialogFriendizer.setMessage("Logging in, please wait...");
+
+		// Force a locationInfo update
+		LocationLibrary.forceLocationUpdate(FriendizerApp.getContext());
 
 		// Restore the Facebook session if one exists
 		if (SessionStore.restore(Utility.getInstance().facebook, this)) {

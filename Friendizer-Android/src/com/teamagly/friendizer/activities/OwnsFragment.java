@@ -1,9 +1,8 @@
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,9 +13,11 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.actionbarsherlock.app.ActionBar;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
 
 public class OwnsFragment extends AbstractFriendsListFragment {
 	private final String TAG = getClass().getName();
@@ -29,6 +30,9 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		ActionBar actionBar = activity.getSupportActionBar();
+		actionBar.setTitle("Own List");
+
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you don't own anyone. Go buy someone!)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);

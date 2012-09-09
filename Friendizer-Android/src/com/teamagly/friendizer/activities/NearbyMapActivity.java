@@ -33,6 +33,7 @@ import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.readystatesoftware.maps.OnSingleTapListener;
 import com.readystatesoftware.maps.TapControlledMapView;
 import com.squareup.seismic.ShakeDetector;
+import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
@@ -267,7 +268,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 			finish();
 			return true;
 		case R.id.menu_refresh:
-			LocationLibrary.forceLocationUpdate(this); // Force a locationInfo update
+			LocationLibrary.forceLocationUpdate(FriendizerApp.getContext()); // Force a locationInfo update
 			Toast.makeText(this, "Waiting for location...", Toast.LENGTH_LONG).show();
 			setSupportProgressBarIndeterminateVisibility(true); // Show a loading indicator
 			return true;
@@ -313,8 +314,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		int selectedTabID = tabs.get(tab.getPosition());
 		if (selectedTabID != R.string.nearby) {
-			startActivity(new Intent(this, FriendizerActivity.class).putExtra("tab", selectedTabID).setFlags(
-					Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+			startActivity(new Intent(this, FriendizerActivity.class).putExtra("tab", selectedTabID).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
 			overridePendingTransition(0, 0);
 			finish();
 		}

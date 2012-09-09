@@ -1,10 +1,8 @@
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,9 +16,12 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.actionbarsherlock.app.ActionBar;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
 
 public class FBFriendsFragment extends AbstractFriendsListFragment {
 	private final String TAG = getClass().getName();
@@ -37,6 +38,9 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you have no Facebook friends)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
+
+		ActionBar actionBar = activity.getSupportActionBar();
+		actionBar.setTitle("FB Friends");
 	}
 
 	/*
