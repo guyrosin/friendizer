@@ -1,17 +1,15 @@
 package com.teamagly.friendizer.utils;
 
-import com.google.android.gcm.GCMRegistrar;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.teamagly.friendizer.FriendizerApp;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.Gift;
-import com.teamagly.friendizer.model.GiftCount;
-import com.teamagly.friendizer.model.Message;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserMatching;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -26,16 +24,17 @@ import org.json.JSONException;
 
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import com.google.android.gcm.GCMRegistrar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.teamagly.friendizer.FriendizerApp;
+import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.AchievementInfo;
+import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
+import com.teamagly.friendizer.model.Message;
+import com.teamagly.friendizer.model.User;
 
 public final class ServerFacade {
 	private final static String TAG = "ServerFacade";
@@ -143,13 +142,10 @@ public final class ServerFacade {
 	public static User userDetails(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		UserMatching userMatching = new Gson().fromJson(in.readLine(), UserMatching.class);
-		if (userMatching == null)
-			return null;
-		// Convert from the server's UserMatching type to User
-		User user = userMatching.getUser();
-		user.setMatching(userMatching.getMatching());
+		User user = new Gson().fromJson(in.readLine(), User.class);
 		in.close();
+		if (user == null)
+			return null;
 		user.setOwnsList(ownList(userID));
 		return user;
 	}
@@ -179,8 +175,7 @@ public final class ServerFacade {
 	}
 
 	public static void changeLocation(long userID, double latitude, double longitude) throws IOException {
-		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude="
-				+ longitude);
+		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude=" + longitude);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}
@@ -201,21 +196,14 @@ public final class ServerFacade {
 	public static List<User> nearbyUsers(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "nearbyUsers?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<UserMatching> userMatchings = new Gson().fromJson(in.readLine(), new TypeToken<List<UserMatching>>() {
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
 		}.getType());
-		// Convert from the server's UserMatching type to User
-		List<User> users = new ArrayList<User>();
-		for (UserMatching userMatching : userMatchings) {
-			userMatching.getUser().setMatching(userMatching.getMatching());
-			users.add(userMatching.getUser());
-		}
 		in.close();
 		return users;
 	}
 
 	public static void sendMessage(Message msg) throws IOException, URISyntaxException {
-		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text="
-				+ msg.getText();
+		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text=" + msg.getText();
 		// Use URI to escape characters (whitespace and non-ASCII characters)
 		URI uri = new URI(scheme, serverAddress, "/send", params, null);
 		URL url = new URL(uri.toASCIIString());
@@ -249,8 +237,7 @@ public final class ServerFacade {
 	 * @throws Exception
 	 */
 	public static List<Message> getConversation(long userID, long from, long to) throws IOException {
-		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2="
-				+ userID + "&from=" + from + "&to=" + to);
+		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2=" + userID + "&from=" + from + "&to=" + to);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
 		}.getType());
@@ -268,11 +255,19 @@ public final class ServerFacade {
 		in.close();
 		// Convert from the server's AchievementInfo type to Achievement
 		List<Achievement> achvs = new ArrayList<Achievement>();
-		for (AchievementInfo achvInfo : achvInfos) {
-			achvInfo.getAchv().setEarned(achvInfo.isEarned());
-			achvs.add(achvInfo.getAchv());
-		}
+		for (AchievementInfo achvInfo : achvInfos)
+			achvs.add(new Achievement(achvInfo.getAchv(), achvInfo.isEarned()));
 		return achvs;
+	}
+
+	public static Achievement getAchievement(long achvID) throws IOException {
+		URL url = new URL(fullServerAddress + "getAchievement?achvID=" + achvID);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		AchievementInfo achvInfo = new Gson().fromJson(in.readLine(), AchievementInfo.class);
+		in.close();
+		// Convert from the server's AchievementInfo type to Achievement
+		Achievement achv = new Achievement(achvInfo.getAchv(), achvInfo.isEarned());
+		return achv;
 	}
 
 	public static void updateStatus(String status) throws IOException, URISyntaxException {
@@ -317,6 +312,14 @@ public final class ServerFacade {
 		URL url = new URL(fullServerAddress + "sendGift?senderID=" + senderID + "&receiverID=" + receiverID + "&giftID=" + giftID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
+	}
+
+	public static GiftCount getGift(long userID, long giftID) throws IOException {
+		URL url = new URL(fullServerAddress + "getGift?userID=" + userID + "&giftID=" + giftID);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		GiftCount gift = new Gson().fromJson(in.readLine(), GiftCount.class);
+		in.close();
+		return gift;
 	}
 
 	public static void block(long userID, long blockedID) throws IOException {

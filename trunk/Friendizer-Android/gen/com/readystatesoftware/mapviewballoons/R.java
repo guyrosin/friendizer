@@ -889,13 +889,14 @@ containing a value of this type.
         public static final int spinner_background_ab_friendizer=0x7f0200af;
         public static final int status_icon=0x7f0200b0;
         public static final int stub=0x7f0200b1;
-        public static final int tab_indicator_ab_friendizer=0x7f0200b2;
-        public static final int tab_selected_focused_friendizer=0x7f0200b3;
-        public static final int tab_selected_friendizer=0x7f0200b4;
-        public static final int tab_selected_pressed_friendizer=0x7f0200b5;
-        public static final int tab_unselected_focused_friendizer=0x7f0200b6;
-        public static final int tab_unselected_pressed_friendizer=0x7f0200b7;
-        public static final int xp_bar_states=0x7f0200b8;
+        public static final int stub_image=0x7f0200b2;
+        public static final int tab_indicator_ab_friendizer=0x7f0200b3;
+        public static final int tab_selected_focused_friendizer=0x7f0200b4;
+        public static final int tab_selected_friendizer=0x7f0200b5;
+        public static final int tab_selected_pressed_friendizer=0x7f0200b6;
+        public static final int tab_unselected_focused_friendizer=0x7f0200b7;
+        public static final int tab_unselected_pressed_friendizer=0x7f0200b8;
+        public static final int xp_bar_states=0x7f0200b9;
     }
     public static final class id {
         public static final int abs__action_bar=0x7f050024;
@@ -927,94 +928,105 @@ containing a value of this type.
         public static final int abs__title=0x7f05001d;
         public static final int abs__titleDivider=0x7f05001e;
         public static final int abs__up=0x7f05000d;
-        public static final int achievement_description=0x7f05002c;
-        public static final int achievement_icon=0x7f05002a;
-        public static final int achievement_reward=0x7f05002d;
-        public static final int achievement_reward_suffix=0x7f05002e;
-        public static final int achievement_title=0x7f05002b;
-        public static final int achievements_list=0x7f050029;
-        public static final int age=0x7f050036;
-        public static final int age_title=0x7f050035;
+        public static final int achievement_description=0x7f050032;
+        public static final int achievement_icon=0x7f050030;
+        public static final int achievement_reward=0x7f050033;
+        public static final int achievement_reward_suffix=0x7f050034;
+        public static final int achievement_title=0x7f050031;
+        public static final int achievements_list=0x7f05002f;
+        public static final int achv_desc=0x7f05002a;
+        public static final int achv_earned=0x7f05002e;
+        public static final int achv_icon=0x7f050029;
+        public static final int achv_reward=0x7f05002c;
+        public static final int achv_reward_coins=0x7f05002d;
+        public static final int achv_reward_title=0x7f05002b;
+        public static final int age=0x7f05003c;
+        public static final int age_title=0x7f05003b;
         public static final int balloon_close=0x7f050001;
-        public static final int balloon_disclosure=0x7f050032;
+        public static final int balloon_disclosure=0x7f050038;
         public static final int balloon_inner_layout=0x7f050000;
-        public static final int balloon_item_image=0x7f050058;
-        public static final int balloon_item_snippet=0x7f050031;
-        public static final int balloon_item_title=0x7f050030;
-        public static final int balloon_main_layout=0x7f05002f;
-        public static final int btn_achievements=0x7f050064;
-        public static final int btn_action_history=0x7f050066;
-        public static final int btn_change_status=0x7f050067;
-        public static final int btn_friend_achievements=0x7f05004d;
-        public static final int btn_friend_chat=0x7f05004c;
-        public static final int btn_friend_gifts=0x7f05004f;
-        public static final int btn_friend_send_gift=0x7f05004e;
-        public static final int btn_gifts=0x7f050065;
-        public static final int btn_stranger_achievements=0x7f050053;
-        public static final int btn_stranger_buy=0x7f050051;
-        public static final int btn_stranger_chat=0x7f050052;
-        public static final int btn_stranger_gifts=0x7f050054;
-        public static final int button_send=0x7f05005f;
-        public static final int buttons=0x7f050063;
-        public static final int buttons_friend=0x7f05004b;
-        public static final int buttons_stranger=0x7f050050;
-        public static final int content=0x7f050068;
+        public static final int balloon_item_image=0x7f050063;
+        public static final int balloon_item_snippet=0x7f050037;
+        public static final int balloon_item_title=0x7f050036;
+        public static final int balloon_main_layout=0x7f050035;
+        public static final int btn_achievements=0x7f05006f;
+        public static final int btn_action_history=0x7f050071;
+        public static final int btn_change_status=0x7f050072;
+        public static final int btn_friend_achievements=0x7f050053;
+        public static final int btn_friend_chat=0x7f050052;
+        public static final int btn_friend_gifts=0x7f050055;
+        public static final int btn_friend_send_gift=0x7f050054;
+        public static final int btn_gifts=0x7f050070;
+        public static final int btn_stranger_achievements=0x7f050059;
+        public static final int btn_stranger_buy=0x7f050057;
+        public static final int btn_stranger_chat=0x7f050058;
+        public static final int btn_stranger_gifts=0x7f05005a;
+        public static final int button_send=0x7f05006a;
+        public static final int buttons=0x7f05006e;
+        public static final int buttons_friend=0x7f050051;
+        public static final int buttons_stranger=0x7f050056;
+        public static final int content=0x7f050073;
         public static final int disableHome=0x7f05000b;
-        public static final int empty=0x7f05003e;
-        public static final int fbFriendsList=0x7f05003f;
-        public static final int frame_layout=0x7f050057;
-        public static final int gender=0x7f050037;
-        public static final int gift_icon=0x7f050055;
-        public static final int gift_value=0x7f050056;
-        public static final int gridview=0x7f05003d;
+        public static final int empty=0x7f050044;
+        public static final int fbFriendsList=0x7f050045;
+        public static final int frame_layout=0x7f050062;
+        public static final int gender=0x7f05003d;
+        public static final int gift_count=0x7f05005f;
+        public static final int gift_count_title1=0x7f05005e;
+        public static final int gift_count_title2=0x7f050060;
+        public static final int gift_icon=0x7f05005b;
+        public static final int gift_value=0x7f05005d;
+        public static final int gift_value_title=0x7f05005c;
+        public static final int gridview=0x7f050043;
         public static final int homeAsUp=0x7f050008;
-        public static final int imageView1=0x7f050069;
-        public static final int image_layout=0x7f050040;
-        public static final int level=0x7f050042;
+        public static final int image=0x7f050061;
+        public static final int imageView1=0x7f050074;
+        public static final int image_layout=0x7f050046;
+        public static final int level=0x7f050048;
         public static final int listMode=0x7f050004;
-        public static final int log=0x7f05005d;
-        public static final int loginButton=0x7f05006a;
-        public static final int mapview=0x7f050059;
-        public static final int matching=0x7f05003b;
-        public static final int matching_cont=0x7f05003c;
-        public static final int matching_title=0x7f05003a;
-        public static final int meButton=0x7f05005a;
-        public static final int menu_block=0x7f05006c;
-        public static final int menu_change_status=0x7f050072;
-        public static final int menu_facebook_friends=0x7f05006f;
-        public static final int menu_feedback=0x7f050071;
-        public static final int menu_invite=0x7f050070;
-        public static final int menu_list=0x7f050073;
-        public static final int menu_map=0x7f050074;
-        public static final int menu_refresh=0x7f05006b;
-        public static final int menu_settings=0x7f05006d;
-        public static final int menu_sort=0x7f05006e;
-        public static final int message=0x7f05005c;
-        public static final int money=0x7f050061;
-        public static final int money_title=0x7f050062;
-        public static final int mutual_friends=0x7f050044;
-        public static final int mutual_friends_title=0x7f050045;
-        public static final int name=0x7f050034;
-        public static final int new_msg_text=0x7f05005e;
+        public static final int log=0x7f050068;
+        public static final int loginButton=0x7f050075;
+        public static final int mapview=0x7f050064;
+        public static final int matching=0x7f050041;
+        public static final int matching_cont=0x7f050042;
+        public static final int matching_title=0x7f050040;
+        public static final int meButton=0x7f050065;
+        public static final int menu_block=0x7f050077;
+        public static final int menu_change_status=0x7f05007d;
+        public static final int menu_facebook_friends=0x7f05007a;
+        public static final int menu_feedback=0x7f05007c;
+        public static final int menu_invite=0x7f05007b;
+        public static final int menu_list=0x7f05007e;
+        public static final int menu_map=0x7f05007f;
+        public static final int menu_refresh=0x7f050076;
+        public static final int menu_settings=0x7f050078;
+        public static final int menu_sort=0x7f050079;
+        public static final int message=0x7f050067;
+        public static final int money=0x7f05006c;
+        public static final int money_title=0x7f05006d;
+        public static final int mutual_friends=0x7f05004a;
+        public static final int mutual_friends_title=0x7f05004b;
+        public static final int name=0x7f05003a;
+        public static final int new_msg_text=0x7f050069;
         public static final int normal=0x7f050003;
-        public static final int owner_pic=0x7f050048;
-        public static final int owner_title=0x7f05004a;
-        public static final int owns=0x7f050047;
-        public static final int ownsList=0x7f050060;
-        public static final int owns_title=0x7f050049;
-        public static final int pic=0x7f05005b;
-        public static final int profile_pic=0x7f050033;
+        public static final int owner_pic=0x7f05004e;
+        public static final int owner_title=0x7f050050;
+        public static final int owns=0x7f05004d;
+        public static final int ownsList=0x7f05006b;
+        public static final int owns_title=0x7f05004f;
+        public static final int pic=0x7f050066;
+        public static final int profile_pic=0x7f050039;
         public static final int showCustom=0x7f05000a;
         public static final int showHome=0x7f050007;
         public static final int showTitle=0x7f050009;
-        public static final int status=0x7f050043;
+        public static final int status=0x7f050049;
         public static final int tabMode=0x7f050005;
         public static final int useLogo=0x7f050006;
-        public static final int user_pic=0x7f050041;
-        public static final int value=0x7f050039;
-        public static final int value_title=0x7f050038;
+        public static final int user_pic=0x7f050047;
+        public static final int value=0x7f05003f;
+        public static final int value_title=0x7f05003e;
         public static final int wrap_content=0x7f050002;
-        public static final int xp_bar=0x7f050046;
+        public static final int xp_bar=0x7f05004c;
     }
     public static final class integer {
         public static final int abs__max_action_buttons=0x7f090000;
@@ -1040,29 +1052,32 @@ containing a value of this type.
         public static final int abs__screen_action_bar_overlay=0x7f030011;
         public static final int abs__screen_simple=0x7f030012;
         public static final int abs__screen_simple_overlay_action_mode=0x7f030013;
-        public static final int achievements_layout=0x7f030014;
-        public static final int achievements_list_item=0x7f030015;
-        public static final int balloon_overlay=0x7f030016;
-        public static final int connection_list_item=0x7f030017;
-        public static final int connections_layout=0x7f030018;
-        public static final int fbfriends_layout=0x7f030019;
-        public static final int friend_list_item=0x7f03001a;
-        public static final int friend_profile_layout=0x7f03001b;
-        public static final int gift_item_layout=0x7f03001c;
-        public static final int gifts_layout=0x7f03001d;
-        public static final int main=0x7f03001e;
-        public static final int map_balloon_layout=0x7f03001f;
-        public static final int map_layout=0x7f030020;
-        public static final int map_marker_layout=0x7f030021;
-        public static final int message_incoming_layout=0x7f030022;
-        public static final int message_outgoing_layout=0x7f030023;
-        public static final int messages_layout=0x7f030024;
-        public static final int owns_layout=0x7f030025;
-        public static final int profile_info_layout=0x7f030026;
-        public static final int profile_layout=0x7f030027;
-        public static final int sherlock_spinner_dropdown_item=0x7f030028;
-        public static final int sherlock_spinner_item=0x7f030029;
-        public static final int splash=0x7f03002a;
+        public static final int achievement_info_dialog=0x7f030014;
+        public static final int achievements_layout=0x7f030015;
+        public static final int achievements_list_item=0x7f030016;
+        public static final int balloon_overlay=0x7f030017;
+        public static final int connection_list_item=0x7f030018;
+        public static final int connections_layout=0x7f030019;
+        public static final int fbfriends_layout=0x7f03001a;
+        public static final int friend_list_item=0x7f03001b;
+        public static final int friend_profile_layout=0x7f03001c;
+        public static final int gift_info_dialog=0x7f03001d;
+        public static final int gift_item_layout=0x7f03001e;
+        public static final int gifts_layout=0x7f03001f;
+        public static final int item_grid_image=0x7f030020;
+        public static final int main=0x7f030021;
+        public static final int map_balloon_layout=0x7f030022;
+        public static final int map_layout=0x7f030023;
+        public static final int map_marker_layout=0x7f030024;
+        public static final int message_incoming_layout=0x7f030025;
+        public static final int message_outgoing_layout=0x7f030026;
+        public static final int messages_layout=0x7f030027;
+        public static final int owns_layout=0x7f030028;
+        public static final int profile_info_layout=0x7f030029;
+        public static final int profile_layout=0x7f03002a;
+        public static final int sherlock_spinner_dropdown_item=0x7f03002b;
+        public static final int sherlock_spinner_item=0x7f03002c;
+        public static final int splash=0x7f03002d;
     }
     public static final class menu {
         public static final int friend_menu=0x7f0c0000;
@@ -1143,11 +1158,10 @@ containing a value of this type.
         public static final int view_by=0x7f0a002a;
     }
     public static final class style {
-        public static final int ButtonText=0x7f0b0065;
-        public static final int DashboardButton=0x7f0b0064;
+        public static final int ButtonText=0x7f0b0059;
         public static final int DialogWindowTitle_Sherlock=0x7f0b0033;
         public static final int DialogWindowTitle_Sherlock_Light=0x7f0b0034;
-        public static final int LeftAlignedButtonText=0x7f0b0066;
+        public static final int LeftAlignedButtonText=0x7f0b005a;
         public static final int Sherlock___TextAppearance_Small=0x7f0b0047;
         public static final int Sherlock___Theme=0x7f0b004a;
         public static final int Sherlock___Theme_DarkActionBar=0x7f0b004c;
@@ -1189,12 +1203,10 @@ containing a value of this type.
         public static final int Theme_Sherlock_Light_ForceOverflow=0x7f0b0054;
         public static final int Theme_Sherlock_Light_NoActionBar=0x7f0b0052;
         public static final int Theme_Sherlock_NoActionBar=0x7f0b0051;
-        /**  Remember to reference each actionbar related item twice!! 
-         */
         public static final int Theme_friendizer=0x7f0b0058;
-        public static final int TransparentExpandableListView=0x7f0b0063;
-        public static final int TransparentGridView=0x7f0b0062;
-        public static final int TransparentListView=0x7f0b0061;
+        /**  this style is only referenced in a Light.DarkActionBar based theme 
+         */
+        public static final int Theme_friendizer_widget=0x7f0b0062;
         public static final int Widget=0x7f0b0000;
         public static final int Widget_Sherlock_ActionBar=0x7f0b0002;
         public static final int Widget_Sherlock_ActionBar_Solid=0x7f0b0003;
@@ -1240,14 +1252,33 @@ containing a value of this type.
         public static final int Widget_Sherlock_ProgressBar_Horizontal=0x7f0b0030;
         public static final int Widget_Sherlock_Spinner_DropDown_ActionBar=0x7f0b0024;
         public static final int Widget_Sherlock_TextView_SpinnerItem=0x7f0b0032;
-        public static final int friendizer_ActionBarTabStyle=0x7f0b005d;
-        public static final int friendizer_ActionBarTabTextStyle=0x7f0b005e;
-        public static final int friendizer_DropDownListView=0x7f0b005c;
-        public static final int friendizer_DropDownNav=0x7f0b005f;
-        public static final int friendizer_PopupMenu=0x7f0b005b;
-        public static final int friendizer_ProgressBar=0x7f0b0060;
-        public static final int friendizer_solid_ActionBar=0x7f0b0059;
-        public static final int friendizer_transparent_ActionBar=0x7f0b005a;
+        public static final int friendizer_ActionBarTabStyle=0x7f0b005f;
+        /**  this style is only referenced in a Light.DarkActionBar based theme 
+         */
+        public static final int friendizer_DropDownItem=0x7f0b0063;
+        public static final int friendizer_DropDownListView=0x7f0b005e;
+        public static final int friendizer_DropDownNav=0x7f0b0060;
+        public static final int friendizer_PopupMenu=0x7f0b005d;
+        public static final int friendizer_ProgressBar=0x7f0b0061;
+        /**  this style is only referenced in a Light.DarkActionBar based theme 
+         */
+        public static final int friendizer_SpinnerItem=0x7f0b0064;
+        /** 
+    <style name="TransparentListView" parent="@style/Widget.Sherlock.ListView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
+
+    <style name="TransparentGridView" parent="@style/Widget.Sherlock.GridView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
+
+    <style name="TransparentExpandableListView" parent="@style/Widget.Sherlock.ExpandableListView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
+    
+         */
+        public static final int friendizer_solid_ActionBar=0x7f0b005b;
+        public static final int friendizer_transparent_ActionBar=0x7f0b005c;
     }
     public static final class xml {
         public static final int settings=0x7f040000;

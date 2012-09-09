@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.res.Resources.NotFoundException;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +18,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
@@ -37,7 +42,6 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 	protected GridView gridView;
 	protected List<GiftCount> giftsList;
 	protected User user;
-	protected GiftsUserActivity activity;
 
 	/*
 	 * (non-Javadoc)
@@ -59,10 +63,9 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		setContentView(R.layout.gifts_layout);
 		gridView = (GridView) findViewById(R.id.gridview);
 		giftsList = new ArrayList<GiftCount>();
-		activity = this;
-		adapter = new GiftsUserAdapter(activity, 0, giftsList);
+		adapter = new GiftsUserAdapter(this, 0, giftsList);
 		gridView.setAdapter(adapter);
-		gridView.setOnItemClickListener(activity);
+		gridView.setOnItemClickListener(this);
 	}
 
 	/*
@@ -92,6 +95,40 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 				setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}.execute();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
+	 */
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		GiftCount gift = giftsList.get(position);
+		// Show a dialog with info
+		Dialog dialog = new Dialog(this);
+
+		dialog.setContentView(R.layout.gift_info_dialog);
+		dialog.setTitle(gift.getGift().getName());
+
+		TextView giftValue = (TextView) dialog.findViewById(R.id.gift_value);
+		giftValue.setText(String.valueOf(gift.getGift().getValue()));
+		TextView giftCount = (TextView) dialog.findViewById(R.id.gift_count);
+		giftCount.setText(String.valueOf(gift.getCount()));
+		TextView giftCountTitlePre = (TextView) dialog.findViewById(R.id.gift_count_title1);
+		String title_pre = user.getId() == Utility.getInstance().userInfo.getId() ? "You've got " : user.getFirstName() + " has got ";
+		giftCountTitlePre.setText(title_pre);
+		ImageView image = (ImageView) dialog.findViewById(R.id.gift_icon);
+
+		// Load the image resource
+		String uri = "drawable/" + gift.getGift().getIconRes();
+		int imageResource = getResources().getIdentifier(uri, null, getPackageName());
+		try {
+			Drawable drawable = getResources().getDrawable(imageResource);
+			image.setImageDrawable(drawable);
+		} catch (NotFoundException e) { // The image wasn't found
+			Log.e(TAG, e.getMessage());
+		}
+		dialog.show();
 	}
 
 	/*
@@ -141,15 +178,5 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
-	 */
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// Show a dialog with info
-
 	}
 }

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:padding="10dp" >
+
+    <ImageView
+        android:id="@+id/gift_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginRight="10dp" />
+
+    <TextView
+        android:id="@+id/gift_value_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:singleLine="true"
+        android:layout_toRightOf="@+id/gift_icon"
+        android:text="Value: " />
+
+    <TextView
+        android:id="@+id/gift_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/gift_value_title"
+        android:layout_marginTop="2dp"
+        android:layout_toRightOf="@+id/gift_value_title"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/gift_count_title1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:singleLine="true"
+        android:layout_alignLeft="@+id/gift_value_title"
+        android:layout_below="@+id/gift_value_title"
+        android:text="You have " />
+
+    <TextView
+        android:id="@+id/gift_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/gift_count_title1"
+        android:layout_marginTop="2dp"
+        android:layout_toRightOf="@+id/gift_count_title1"
+        android:singleLine="true" />
+    
+    <TextView
+        android:id="@+id/gift_count_title2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/gift_count_title1"
+        android:layout_marginTop="2dp"
+        android:layout_toRightOf="@+id/gift_count"
+        android:text=" of these." />
+    
+</RelativeLayout>

@@ -167,16 +167,17 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			return true;
 		case R.id.menu_block: // Show a confirmation dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Block " + userInfo.getName() + "?").setMessage("You'll automatically ignore every action from him")
-					.setCancelable(false).setPositiveButton("Block", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							new BlockTask().execute();
-						}
-					}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.cancel();
-						}
-					}).setIcon(android.R.drawable.ic_dialog_alert);
+			builder.setTitle("Block " + userInfo.getName() + "?").setMessage("You'll automatically ignore every action from him").setCancelable(false).setPositiveButton("Block", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int id) {
+					new BlockTask().execute();
+				}
+			}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			}).setIcon(android.R.drawable.ic_dialog_alert);
 			builder.show();
 			return true;
 		default:
@@ -186,6 +187,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	protected class BlockTask extends AsyncTask<Void, Void, Boolean> {
 
+		@Override
 		protected Boolean doInBackground(Void... v) {
 			try {
 				ServerFacade.block(Utility.getInstance().userInfo.getId(), userInfo.getId());
@@ -196,6 +198,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			return true;
 		}
 
+		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result)
 				Toast.makeText(getBaseContext(), userInfo.getName() + " has been blocked!", Toast.LENGTH_LONG).show();
@@ -235,14 +238,14 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	protected void updateButtons() {
 		// Check if I'm connected to this user
-		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())
-				|| (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID())) {
+		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) || (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID())) {
 			// Show the relevant buttons layout
 			buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
 			buttonsTable.setVisibility(View.VISIBLE);
 			findViewById(R.id.buttons_stranger).setVisibility(View.GONE);
 			// Define the chat button
 			findViewById(R.id.btn_friend_chat).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, ChatActivity.class);
 					intent.putExtra("user", userInfo);
@@ -251,6 +254,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			});
 			// Define the achievements button
 			findViewById(R.id.btn_friend_achievements).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, AchievementsActivity.class);
 					intent.putExtra("user", userInfo);
@@ -259,6 +263,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			});
 			// Define the send gift button
 			findViewById(R.id.btn_friend_send_gift).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsSendActivity.class);
 					intent.putExtra("user", userInfo);
@@ -267,6 +272,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			});
 			// Define the gifts button
 			findViewById(R.id.btn_friend_gifts).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsUserActivity.class);
 					intent.putExtra("user", userInfo);
@@ -280,21 +286,24 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			findViewById(R.id.buttons_friend).setVisibility(View.GONE);
 			// Define the buy button
 			findViewById(R.id.btn_stranger_buy).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					new BuyTask().execute();
 				}
 			});
 			// Define the achievements button
 			findViewById(R.id.btn_stranger_achievements).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					// Move to the achievements activity
-					Intent intent = new Intent().setClass(FriendProfileActivity.this, FriendAchievementsActivity.class);
+					Intent intent = new Intent().setClass(FriendProfileActivity.this, AchievementsActivity.class);
 					intent.putExtra("user", userInfo);
 					startActivity(intent);
 				}
 			});
 			// Define the gift button
 			findViewById(R.id.btn_stranger_chat).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					// Move to the chat activity
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, ChatActivity.class);
@@ -304,6 +313,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			});
 			// Define the gifts button
 			findViewById(R.id.btn_stranger_gifts).setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent().setClass(FriendProfileActivity.this, GiftsUserActivity.class);
 					intent.putExtra("user", userInfo);
@@ -315,6 +325,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	protected class BuyTask extends AsyncTask<Void, Void, Void> {
 
+		@Override
 		protected Void doInBackground(Void... v) {
 			try {
 				ServerFacade.buy(Utility.getInstance().userInfo.getId(), userInfo.getId());
@@ -325,6 +336,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Void v) {
 			refreshAll(); // Refresh
 		}
@@ -397,6 +409,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	class FriendizerTask extends AsyncTask<Long, Void, User> {
 
+		@Override
 		protected User doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.userDetails(userIDs[0]);
@@ -406,6 +419,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(final User newUserInfo) {
 			// Request the user's details from friendizer and update the views accordingly
 			try {
@@ -414,8 +428,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					// Get the owner's name and picture from Facebook
 					Bundle params = new Bundle();
 					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params,
-							new OwnerRequestListener());
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params, new OwnerRequestListener());
 				}
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
@@ -428,6 +441,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	class MatchingTask extends AsyncTask<Long, Void, Integer> {
 
+		@Override
 		protected Integer doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.matching(userIDs[0], userIDs[1]);
@@ -437,6 +451,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(Integer matching) {
 			if (matching > 0) {
 				userInfo.setMatching(matching);
