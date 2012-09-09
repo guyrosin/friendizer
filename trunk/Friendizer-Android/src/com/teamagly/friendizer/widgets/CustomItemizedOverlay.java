@@ -11,12 +11,6 @@
 
 package com.teamagly.friendizer.widgets;
 
-import java.util.ArrayList;
-
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-
 import com.google.android.maps.MapView;
 import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
@@ -24,6 +18,12 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.activities.FriendProfileActivity;
 import com.teamagly.friendizer.activities.FriendizerActivity;
 import com.teamagly.friendizer.utils.Utility;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+
+import java.util.ArrayList;
 
 public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayItem> {
 
@@ -69,11 +69,10 @@ public class CustomItemizedOverlay extends BalloonItemizedOverlay<CustomOverlayI
 			// Move to the user's profile
 			intent = new Intent().setClass(c, FriendProfileActivity.class);
 			intent.putExtra("userID", item.getUserID());
-		} else {
-			intent = new Intent().setClass(c, FriendizerActivity.class);
-			intent.putExtra("tab", R.string.my_profile);
-		}
-		c.startActivity(intent);
+			c.startActivity(intent);
+		} else
+			c.startActivity(new Intent(c, FriendizerActivity.class).putExtra("tab", R.string.my_profile).setFlags(
+					Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
 		return true;
 	}
 

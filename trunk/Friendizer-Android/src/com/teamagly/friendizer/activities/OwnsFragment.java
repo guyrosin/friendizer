@@ -8,7 +8,9 @@ import com.teamagly.friendizer.utils.Utility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -16,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConnectionsFragment extends AbstractFriendsListFragment {
+public class OwnsFragment extends AbstractFriendsListFragment {
 	private final String TAG = getClass().getName();
 	protected FriendsTask task = new FriendsTask();
 
@@ -27,10 +29,19 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		activity.setContentView(R.layout.connections_layout);
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
-		empty.setText("Forever Alone! (you have no connections)");
+		empty.setText("Forever Alone! (you don't own anyone. Go buy someone!)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+	 */
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		// Inflate the layout for this fragment
+		return inflater.inflate(R.layout.connections_layout, container, false);
 	}
 
 	/*
@@ -59,7 +70,7 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 		@Override
 		protected List<User> doInBackground(Long... userIDs) {
 			try {
-				return ServerFacade.getFriends(userIDs[0]);
+				return ServerFacade.ownList(userIDs[0]);
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}

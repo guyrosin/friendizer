@@ -130,8 +130,11 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 
+		myItemizedOverlay.hideAllBalloons();
+		nearbyUsersItemizedOverlay.hideAllBalloons();
 		myItemizedOverlay.clear();
 		nearbyUsersItemizedOverlay.clear();
+
 		mapView.invalidate();
 
 		if (Utility.getInstance().getLocation() != null) {
@@ -201,6 +204,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 
 	class NearbyUsersTask extends AsyncTask<Long, Void, List<User>> {
 
+		@Override
 		protected List<User> doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.nearbyUsers(Utility.getInstance().userInfo.getId());
@@ -210,6 +214,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 			return new ArrayList<User>();
 		}
 
+		@Override
 		protected void onPostExecute(final List<User> nearbyUsers) {
 			if (nearbyUsers.size() > 0) {
 				for (User user : nearbyUsers) {
@@ -226,21 +231,12 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	 * Shows an alert dialog in case the GPS is disabled
 	 */
 	/*
-	 * private void buildAlertMessageNoGPS() {
-	 * final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	 * private void buildAlertMessageNoGPS() { final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	 * builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
-	 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	 * public void onClick(final DialogInterface dialog, final int id) {
-	 * startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-	 * }
-	 * }).setNegativeButton("Skip", new DialogInterface.OnClickListener() {
-	 * public void onClick(final DialogInterface dialog, final int id) {
-	 * dialog.cancel();
-	 * }
-	 * });
-	 * final AlertDialog alert = builder.create();
-	 * alert.show();
-	 * }
+	 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() { public void onClick(final DialogInterface dialog, final
+	 * int id) { startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); } }).setNegativeButton("Skip", new
+	 * DialogInterface.OnClickListener() { public void onClick(final DialogInterface dialog, final int id) { dialog.cancel(); }
+	 * }); final AlertDialog alert = builder.create(); alert.show(); }
 	 */
 
 	/*
@@ -260,6 +256,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	 * (non-Javadoc)
 	 * @see com.actionbarsherlock.app.SherlockMapActivity#onOptionsItemSelected(android.view.MenuItem)
 	 */
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_list: // Move to the nearby users list activity
