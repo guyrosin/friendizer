@@ -1,5 +1,21 @@
 package com.teamagly.friendizer.activities;
 
+import com.actionbarsherlock.app.SherlockActivity;
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
+import com.google.android.gcm.GCMRegistrar;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.SessionEvents;
+import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
+import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
+import com.teamagly.friendizer.utils.SessionStore;
+import com.teamagly.friendizer.utils.Utility;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,22 +38,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
-import com.google.android.gcm.GCMRegistrar;
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.SessionEvents;
-import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
-import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
-import com.teamagly.friendizer.utils.SessionStore;
-import com.teamagly.friendizer.utils.Utility;
-
 /**
  * The login flow is as follows: Facebook login -> GCM registration -> friendizer login
  */
@@ -50,10 +50,12 @@ public class SplashActivity extends SherlockActivity {
 	private Context context = this;
 	private ProgressDialog dialogFriendizer;
 	private long userID;
+	private boolean fbRequestFailed = false;
 
 	// After GCM registration, login to friendizer
 	AsyncTask<Void, Void, Boolean> friendizerLoginTask = new AsyncTask<Void, Void, Boolean>() {
 
+		@Override
 		protected Boolean doInBackground(Void... v) {
 			// Get the registrationID
 			String regID = GCMRegistrar.getRegistrationId(context);
@@ -68,6 +70,7 @@ public class SplashActivity extends SherlockActivity {
 			}
 		}
 
+		@Override
 		protected void onPostExecute(Boolean result) {
 			dialogFriendizer.dismiss(); // Dismiss the progress dialog
 			if (result) {
@@ -78,9 +81,8 @@ public class SplashActivity extends SherlockActivity {
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				finish();
-			} else {
+			} else
 				showErrorDialog("Couldn't connect to friendizer");
-			}
 		}
 	};
 
@@ -125,6 +127,7 @@ public class SplashActivity extends SherlockActivity {
 		// Listener for the login button
 		loginButton = (ImageView) findViewById(R.id.loginButton);
 		loginButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				loginToFacebook();
 			}
@@ -153,11 +156,10 @@ public class SplashActivity extends SherlockActivity {
 	}
 
 	protected void loginToFacebook() {
-		if (!Utility.getInstance().facebook.isSessionValid()) {
-			// Authorize
-			Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_checkins",
-					"user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
-		}
+		// if (!Utility.getInstance().facebook.isSessionValid() || fbRequestFailed)
+		// Authorize
+		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests",
+				"user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
 	}
 
 	/*
@@ -183,6 +185,7 @@ public class SplashActivity extends SherlockActivity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(errorMsg + ". Please restart the app").setCancelable(false)
 				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int id) {
 						finish();
 					}
@@ -208,9 +211,8 @@ public class SplashActivity extends SherlockActivity {
 	public boolean isOnline() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = cm.getActiveNetworkInfo();
-		if (netInfo != null && netInfo.isConnected()) {
+		if (netInfo != null && netInfo.isConnected())
 			return true;
-		}
 		return false;
 	}
 
@@ -226,9 +228,7 @@ public class SplashActivity extends SherlockActivity {
 	public void requestFacebookUserData() {
 		Bundle params = new Bundle();
 		params.putString("fields", "id");
-		// Send a new request only if there are none currently
-		if ((userRequestListener == null) || (!userRequestListener.completed))
-			userRequestListener = new UserRequestListener();
+		userRequestListener = new UserRequestListener();
 		Utility.getInstance().mAsyncRunner.request("me", params, userRequestListener);
 	}
 
@@ -236,7 +236,6 @@ public class SplashActivity extends SherlockActivity {
 	 * Callback for fetching the current user's uid
 	 */
 	public class UserRequestListener extends BaseRequestListener {
-		public boolean completed = false;
 
 		@Override
 		public void onComplete(final String response, final Object state) {
@@ -248,13 +247,17 @@ public class SplashActivity extends SherlockActivity {
 			} catch (JSONException e) {
 				Log.e(TAG, "The response from Facebook: " + response);
 				Log.e(TAG, e.getMessage());
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						showErrorDialog("Couldn't connect to Facebook");
-					}
-				});
-				completed = true;
+				if (!fbRequestFailed) {
+					fbRequestFailed = true;
+					loginToFacebook(); // Try to login
+				} else
+					loginButton.setVisibility(View.VISIBLE);
+				// handler.post(new Runnable() {
+				// @Override
+				// public void run() {
+				// showErrorDialog("Couldn't connect to Facebook");
+				// }
+				// });
 				return;
 			}
 
@@ -277,7 +280,6 @@ public class SplashActivity extends SherlockActivity {
 				GCMRegistrar.register(context, Utility.SENDER_ID);
 			else
 				friendizerLoginTask.execute();
-			completed = true;
 		}
 	}
 

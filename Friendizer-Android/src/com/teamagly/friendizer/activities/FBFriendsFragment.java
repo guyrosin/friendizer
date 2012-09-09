@@ -34,7 +34,6 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you have no Facebook friends)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);

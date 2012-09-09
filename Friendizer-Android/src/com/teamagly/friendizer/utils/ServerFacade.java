@@ -1,15 +1,17 @@
 package com.teamagly.friendizer.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import com.google.android.gcm.GCMRegistrar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.teamagly.friendizer.FriendizerApp;
+import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.AchievementInfo;
+import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.Gift;
+import com.teamagly.friendizer.model.GiftCount;
+import com.teamagly.friendizer.model.Message;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserMatching;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -24,18 +26,16 @@ import org.json.JSONException;
 
 import android.util.Log;
 
-import com.google.android.gcm.GCMRegistrar;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.teamagly.friendizer.FriendizerApp;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.Gift;
-import com.teamagly.friendizer.model.GiftCount;
-import com.teamagly.friendizer.model.Message;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserMatching;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public final class ServerFacade {
 	private final static String TAG = "ServerFacade";
@@ -122,9 +122,8 @@ public final class ServerFacade {
 				// application, it should retry only on unrecoverable errors
 				// (like HTTP error code 503).
 				Log.e(TAG, "Failed to register on attempt " + i, e);
-				if (i == MAX_ATTEMPTS) {
+				if (i == MAX_ATTEMPTS)
 					break;
-				}
 				try {
 					Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
 					Thread.sleep(backoff);
@@ -157,6 +156,15 @@ public final class ServerFacade {
 
 	public static List<User> ownList(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "ownList?userID=" + userID);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		}.getType());
+		in.close();
+		return users;
+	}
+
+	public static List<User> getFriends(long userID) throws IOException {
+		URL url = new URL(fullServerAddress + "getFriends?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
 		}.getType());

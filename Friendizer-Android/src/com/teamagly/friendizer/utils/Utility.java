@@ -92,14 +92,15 @@ public class Utility extends Application {
 	}
 
 	/**
-	 * Converts the given Drawable (image) to greyscale
+	 * Converts the given Drawable to a new greyscale Drawable
 	 */
-	public static Drawable convertToGrayscale(Drawable drawable) {
+	public static Drawable convertToGrayscale(final Drawable drawable) {
 		ColorMatrix matrix = new ColorMatrix();
 		matrix.setSaturation(0);
 		ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-		drawable.setColorFilter(filter);
-		return drawable;
+		Drawable d = drawable.mutate();
+		d.setColorFilter(filter);
+		return d;
 	}
 
 	/**
@@ -125,9 +126,8 @@ public class Utility extends Application {
 		Cursor cursor = context.getContentResolver().query(photoUri, new String[] { MediaStore.Images.ImageColumns.ORIENTATION },
 				null, null, null);
 
-		if (cursor.getCount() != 1) {
+		if (cursor.getCount() != 1)
 			return -1;
-		}
 
 		cursor.moveToFirst();
 		return cursor.getInt(0);
