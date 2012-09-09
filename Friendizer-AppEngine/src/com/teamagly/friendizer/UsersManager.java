@@ -1,19 +1,34 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
-import com.restfb.*;
+import com.restfb.Connection;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
-import com.teamagly.friendizer.model.*;
+import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.Like;
+import com.teamagly.friendizer.model.Page;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserDevice;
 
 @SuppressWarnings("serial")
 public class UsersManager extends HttpServlet {
@@ -33,6 +48,8 @@ public class UsersManager extends HttpServlet {
 			updateStatus(request, response);
 		else if (servlet.intern() == "matching")
 			matching(request, response);
+		else if (servlet.intern() == "mutualLikes")
+			mutualLikes(request, response);
 	}
 
 	@Override
@@ -47,7 +64,7 @@ public class UsersManager extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		String regID = request.getParameter("regID");
 		long userID = Long.parseLong(request.getParameter("userID"));
-		String accessToken = request.getParameter("regID");
+		String accessToken = request.getParameter("accessToken");
 		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
@@ -58,14 +75,13 @@ public class UsersManager extends HttpServlet {
 			user.setSince(new Date());
 			pm.makePersistent(user);
 
-			if (user.isFbUpdate()) { // Check if there's a Facebook data update for this user
+			if (user.isFbUpdate())
 				try {
 					updateUserFromFacebook(user, Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
 					user.setFbUpdate(false);
 				} catch (Exception e) {
 					log.severe(e.getMessage());
 				}
-			}
 
 			// TODO: temporary, remove this later
 			if (user.getPicture() == null || user.getPicture().length() == 0)
@@ -120,7 +136,7 @@ public class UsersManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
 			User user = pm.getObjectById(User.class, userID);
-			response.getWriter().println(new Gson().toJson(new UserMatching(user, 0)));
+			response.getWriter().println(new Gson().toJson(user));
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("User doesn't exist");
 		} finally {
@@ -257,9 +273,9 @@ public class UsersManager extends HttpServlet {
 			FacebookClient facebookClient2 = new DefaultFacebookClient(user2.getToken());
 
 			// Get the likes of user1
-			Connection<Like> user1Likes = facebookClient1.fetchConnection("me/likes", Like.class);
+			Connection<Like> user1Likes = facebookClient1.fetchConnection("me/likes", Like.class, Parameter.with("fields", "id"));
 			// Get the likes of user2
-			Connection<Like> user2Likes = facebookClient2.fetchConnection("me/likes", Like.class);
+			Connection<Like> user2Likes = facebookClient2.fetchConnection("me/likes", Like.class, Parameter.with("fields", "id"));
 
 			if (user1Likes == null || user2Likes == null || user1Likes.getData() == null || user2Likes.getData() == null)
 				return;
@@ -310,5 +326,74 @@ public class UsersManager extends HttpServlet {
 		} catch (Exception e) {
 			log.severe(e.getMessage());
 		}
+	}
+
+	private void mutualLikes(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
+
+		long user1ID = Long.parseLong(request.getParameter("userID1"));
+		long user2ID = Long.parseLong(request.getParameter("userID2"));
+
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+
+		/* Get the details of user1 from the database */
+		User user1;
+		try {
+			user1 = pm.getObjectById(User.class, user1ID);
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User1 doesn't exist");
+			return;
+		}
+		/* Get the details of user2 from the database */
+		User user2;
+		try {
+			user2 = pm.getObjectById(User.class, user2ID);
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("User2 doesn't exist");
+			return;
+		} finally {
+			pm.close();
+		}
+		FacebookClient facebookClient1 = null;
+		Connection<Like> user1Likes = null;
+		Connection<Like> user2Likes = null;
+		try {
+			// Get the access token of user1
+			facebookClient1 = new DefaultFacebookClient(user1.getToken());
+			// Get the access token of user2
+			FacebookClient facebookClient2 = new DefaultFacebookClient(user2.getToken());
+
+			// Get the likes of user1
+			user1Likes = facebookClient1.fetchConnection("me/likes", Like.class, Parameter.with("fields", "id"));
+			// Get the likes of user2
+			user2Likes = facebookClient2.fetchConnection("me/likes", Like.class, Parameter.with("fields", "id"));
+		} catch (FacebookException e) {
+			log.severe(e.getMessage());
+		}
+		if (user1Likes == null || user2Likes == null || user1Likes.getData() == null || user2Likes.getData() == null)
+			return;
+
+		List<Like> user1LikesList = user1Likes.getData();
+		List<Like> user2LikesList = user2Likes.getData();
+		HashSet<String> mutualLikesIDs = new HashSet<String>();
+
+		/*
+		 * The loops goes over the likes of the users and counts common likes
+		 */
+		for (Like like1 : user1LikesList) {
+			String like1ID = like1.getId();
+			for (Like like2 : user2LikesList)
+				// If both users have the same like - add to the set
+				if (like1ID.equals(like2.getId())) {
+					mutualLikesIDs.add(like1ID);
+					break;
+				}
+		}
+		String mutualLikesStr = StringUtils.join(mutualLikesIDs.toArray(new String[mutualLikesIDs.size()]));
+		String query = "SELECT page_id, pic_square, name, type FROM page WHERE page_id IN (" + mutualLikesStr + ")";
+		List<Page> likes = facebookClient1.executeQuery(query, Page.class);
+
+		response.getWriter().println(new Gson().toJson(likes));
 	}
 }

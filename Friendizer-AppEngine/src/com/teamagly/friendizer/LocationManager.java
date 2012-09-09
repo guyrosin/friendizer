@@ -1,17 +1,25 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.*;
+import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class LocationManager extends HttpServlet {
@@ -81,7 +89,7 @@ public class LocationManager extends HttpServlet {
 			double longitudeDiff = user.getLongitude() - nearbyUser.getLongitude();
 			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff > 1)
 				continue;
-			
+
 			query2 = pm.newQuery(Action.class);
 			query2.setFilter("date < updatedDate && (buyerID == nearbyUserID && boughtID == userID)");
 			query2.declareParameters("java.util.Date updatedDate, long userID, long nearbyUserID");
@@ -145,7 +153,7 @@ public class LocationManager extends HttpServlet {
 		List<User> result = (List<User>) query.execute(updated);
 		query.closeAll();
 
-		ArrayList<UserMatching> nearbyUsers = new ArrayList<UserMatching>();
+		ArrayList<User> nearbyUsers = new ArrayList<User>();
 
 		/*
 		 * The loop goes over the users and adds only the nearby users to a list
@@ -155,10 +163,8 @@ public class LocationManager extends HttpServlet {
 				continue;
 			double latitudeDiff = user.getLatitude() - nearbyUser.getLatitude();
 			double longitudeDiff = user.getLongitude() - nearbyUser.getLongitude();
-			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff <= 1) {
-				UserMatching userMatching = new UserMatching(nearbyUser, 0);
-				nearbyUsers.add(userMatching);
-			}
+			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff <= 1)
+				nearbyUsers.add(nearbyUser);
 		}
 
 		pm.close();
