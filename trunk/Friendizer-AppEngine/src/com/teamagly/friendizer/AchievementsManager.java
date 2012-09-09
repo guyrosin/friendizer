@@ -133,10 +133,6 @@ public class AchievementsManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	public static void someoneBoughtUser(User user, ServletContext context) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + user.getId() + " && achievementID == 30001");
-		List<UserAchievement> result = (List<UserAchievement>) query.execute();
-		query.closeAll();
 
 		Achievement achv;
 		/* Get the achievement from the database */
@@ -144,9 +140,8 @@ public class AchievementsManager extends HttpServlet {
 			achv = pm.getObjectById(Achievement.class, 30001);
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("This achievement doesn't exist");
-			return;
-		} finally {
 			pm.close();
+			return;
 		}
 
 		// Reward the user with money
@@ -159,6 +154,10 @@ public class AchievementsManager extends HttpServlet {
 		// check for level up
 		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
+		Query query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + user.getId() + " && achievementID == 30001");
+		List<UserAchievement> result = (List<UserAchievement>) query.execute();
+		query.closeAll();
 		if (result.isEmpty()) {
 			pm = PMF.get().getPersistenceManager();
 			pm.makePersistent(new UserAchievement(user.getId(), 30001));
