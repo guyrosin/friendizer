@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.teamagly.friendizer"
     android:installLocation="auto"
-    android:versionCode="12"
-    android:versionName="1.0.8" >
+    android:versionCode="13"
+    android:versionName="1.0.9" >
 
     <!-- GCM requires Android SDK version 2.2 (API level 8) or above -->
     <uses-sdk
@@ -67,7 +67,6 @@
             android:name=".activities.FriendizerActivity"
             android:launchMode="singleTop" />
         <activity android:name=".activities.FriendProfileActivity" />
-        <activity android:name=".activities.FBFriendsActivity" />
         <activity android:name=".activities.ChatActivity" />
         <activity android:name=".activities.AchievementsActivity" />
         <activity android:name=".activities.FriendAchievementsActivity" />
@@ -75,7 +74,7 @@
         <activity android:name=".activities.GiftsSendActivity" />
         <activity android:name=".activities.GiftsUserActivity" />
         <activity android:name=".activities.ActionHistoryActivity" />
-        <activity android:name=".activities.OwnsActivity" />
+        <activity android:name=".activities.BaseFragmentActivity" />
         <activity
             android:name=".activities.FriendsPrefs"
             android:label="@string/settings_title" >

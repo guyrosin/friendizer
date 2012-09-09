@@ -40,6 +40,7 @@ import com.teamagly.friendizer.widgets.TextProgressBar;
 public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	private final String TAG = getClass().getName();
+	SherlockFragmentActivity activity = this;
 	ActionBar actionBar;
 	User userInfo;
 	long userID;
@@ -100,6 +101,13 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			updateViews();
 			updateButtons();
 		}
+
+		txtMatching.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", MutualLikesFragment.class.getName()).putExtra("user", userInfo));
+			}
+		});
 	}
 
 	/*

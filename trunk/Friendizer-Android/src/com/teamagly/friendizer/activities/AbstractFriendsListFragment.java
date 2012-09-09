@@ -3,6 +3,20 @@
  */
 package com.teamagly.friendizer.activities;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
+
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -16,20 +30,6 @@ import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Comparators;
 import com.teamagly.friendizer.utils.Utility;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Note: the child class has to call activity.setSupportProgressBarIndeterminateVisibility(false) after it's done reloading the
@@ -142,8 +142,8 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		case R.id.menu_refresh:
 			onResume();
 			return true;
-		case R.id.menu_facebook_friends: // Move to my Facebook friends activity
-			startActivity(new Intent(activity, FBFriendsActivity.class));
+		case R.id.menu_facebook_friends: // Move to my Facebook friends fragment
+			startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", FBFriendsFragment.class.getName()));
 			return true;
 		case R.id.menu_sort:
 			final String[] options = { "Alphabeth", "Value" };

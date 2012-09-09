@@ -34,6 +34,7 @@ import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.Message;
+import com.teamagly.friendizer.model.Page;
 import com.teamagly.friendizer.model.User;
 
 public final class ServerFacade {
@@ -191,6 +192,15 @@ public final class ServerFacade {
 			in.close();
 		}
 		return matching;
+	}
+
+	public static List<Page> mutualLikes(long userID1, long userID2) throws IOException {
+		URL url = new URL(fullServerAddress + "mutualLikes?userID1=" + userID1 + "&userID2=" + userID2);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		List<Page> pages = new Gson().fromJson(in.readLine(), new TypeToken<List<Page>>() {
+		}.getType());
+		in.close();
+		return pages;
 	}
 
 	public static List<User> nearbyUsers(long userID) throws IOException {

@@ -3,19 +3,7 @@
  */
 package com.teamagly.friendizer.activities;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.BaseRequestListener;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
-import com.teamagly.friendizer.widgets.TextProgressBar;
+import java.io.IOException;
 
 import org.json.JSONObject;
 
@@ -34,7 +22,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseRequestListener;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.TextProgressBar;
 
 public class MyProfileFragment extends SherlockFragment {
 
@@ -96,7 +96,7 @@ public class MyProfileFragment extends SherlockFragment {
 		owns.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(activity, OwnsActivity.class));
+				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", OwnsFragment.class.getName()));
 			}
 		});
 	}
@@ -299,8 +299,7 @@ public class MyProfileFragment extends SherlockFragment {
 					// Get the owner's name and picture from Facebook
 					Bundle params = new Bundle();
 					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(newUserInfo.getOwnerID()), params,
-							new OwnerRequestListener());
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(newUserInfo.getOwnerID()), params, new OwnerRequestListener());
 				}
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
