@@ -1,148 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     File created by the Android Action Bar Style Generator
+
+     Copyright (C) 2012 readyState Software Ltd
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
 <resources>
 
-	<!-- Remember to reference each actionbar related item twice!! -->
+    <style name="Theme.friendizer" parent="@style/Theme.Sherlock.Light.DarkActionBar">
 
-	<style
-		name="Theme.friendizer"
-		parent="@style/Theme.Sherlock">
-		<item name="android:windowBackground">@drawable/app_background</item>
-		<item name="android:listViewStyle">@style/TransparentListView</item>
-		<item name="android:expandableListViewStyle">@style/TransparentExpandableListView</item>
-		<item name="android:textColor">#4F4F4F</item>
+        <!-- <item name="android:windowBackground">@drawable/app_background</item> -->
+        <!--
+        <item name="android:listViewStyle">@style/TransparentListView</item>
+        <item name="android:expandableListViewStyle">@style/TransparentExpandableListView</item>
+        -->
 
-		<!-- Action Bar style -->
 
-		<item name="actionBarItemBackground">@drawable/selectable_background_friendizer</item>
-		<item name="android:selectableItemBackground">@drawable/selectable_background_friendizer</item>
-		<item name="popupMenuStyle">@style/friendizer_PopupMenu</item>
-		<item name="android:popupMenuStyle">@style/friendizer_PopupMenu</item>
-		<item name="dropDownListViewStyle">@style/friendizer_DropDownListView</item>
-		<item name="android:dropDownListViewStyle">@style/friendizer_DropDownListView</item>
-		<item name="actionBarTabStyle">@style/friendizer_ActionBarTabStyle</item>
-		<item name="android:actionBarTabStyle">@style/friendizer_ActionBarTabStyle</item>
-		<item name="actionDropDownStyle">@style/friendizer_DropDownNav</item>
-		<item name="android:actionDropDownStyle">@style/friendizer_DropDownNav</item>
-		<item name="actionBarStyle">@style/friendizer_solid_ActionBar</item>
-		<item name="android:actionBarStyle">@style/friendizer_solid_ActionBar</item>
-		<item name="actionBarTabTextStyle">@style/friendizer_ActionBarTabTextStyle</item>
-		<item name="android:actionBarTabTextStyle">@style/friendizer_ActionBarTabTextStyle</item>
-		<item name="android:panelBackground">@drawable/menu_hardkey_panel_friendizer</item>
-	</style>
+        <!-- Action Bar style -->
+        <item name="actionBarItemBackground">@drawable/selectable_background_friendizer</item>
+        <item name="popupMenuStyle">@style/friendizer_PopupMenu</item>
+        <item name="dropDownListViewStyle">@style/friendizer_DropDownListView</item>
+        <item name="actionBarTabStyle">@style/friendizer_ActionBarTabStyle</item>
+        <item name="actionDropDownStyle">@style/friendizer_DropDownNav</item>
+        <item name="actionBarStyle">@style/friendizer_solid_ActionBar</item>
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_friendizer</item>
+        <item name="android:popupMenuStyle">@style/friendizer_PopupMenu</item>
+        <item name="android:dropDownListViewStyle">@style/friendizer_DropDownListView</item>
+        <item name="android:actionBarTabStyle">@style/friendizer_ActionBarTabStyle</item>
+        <item name="android:actionDropDownStyle">@style/friendizer_DropDownNav</item>
+        <item name="android:actionBarStyle">@style/friendizer_solid_ActionBar</item>
+        <item name="android:panelBackground">@drawable/menu_hardkey_panel_friendizer</item>
 
-	<style
-		name="friendizer_solid_ActionBar"
-		parent="@style/Widget.Sherlock.ActionBar.Solid">
-		<item name="background">@drawable/ab_solid_friendizer</item>
-		<item name="backgroundStacked">@drawable/ab_stacked_solid_friendizer</item>
-		<item name="backgroundSplit">@drawable/ab_bottom_solid_friendizer</item>
-		<item name="progressBarStyle">@style/friendizer_ProgressBar</item>
-		<item name="indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small</item>
+        <!-- Light.DarkActionBar specific -->
+        <item name="actionBarWidgetTheme">@style/Theme.friendizer.widget</item>
+        <item name="android:actionBarWidgetTheme">@style/Theme.friendizer.widget</item>
+        <item name="spinnerDropDownItemStyle">@style/friendizer_DropDownItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/friendizer_DropDownItem</item>
+        <item name="spinnerItemStyle">@style/friendizer_SpinnerItem</item>
+        <item name="android:spinnerItemStyle">@style/friendizer_SpinnerItem</item>
+    </style>
 
-		<item name="android:background">@drawable/ab_solid_friendizer</item>
-		<item name="android:backgroundStacked">@drawable/ab_stacked_solid_friendizer</item>
-		<item name="android:backgroundSplit">@drawable/ab_bottom_solid_friendizer</item>
-		<item name="android:progressBarStyle">@style/friendizer_ProgressBar</item>
-		<item name="android:indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small</item>
-	</style>
+    <style name="ButtonText">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#606060</item>
+        <item name="android:gravity">center</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:textSize">18sp</item>
+    </style>
 
-	<style
-		name="friendizer_transparent_ActionBar"
-		parent="@style/Widget.Sherlock.ActionBar">
-		<item name="background">@drawable/ab_transparent_friendizer</item>
-		<item name="progressBarStyle">@style/friendizer_ProgressBar</item>
+    <style name="LeftAlignedButtonText" parent="ButtonText">
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:layout_height">50dp</item>
+    </style>
 
-		<item name="android:background">@drawable/ab_transparent_friendizer</item>
-		<item name="android:progressBarStyle">@style/friendizer_ProgressBar</item>
-	</style>
+    <!--
+    <style name="TransparentListView" parent="@style/Widget.Sherlock.ListView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
 
-	<style
-		name="friendizer_PopupMenu"
-		parent="@android:style/Widget.Holo.ListPopupWindow">
-		<item name="android:popupBackground">@drawable/menu_dropdown_panel_friendizer</item>
-	</style>
+    <style name="TransparentGridView" parent="@style/Widget.Sherlock.GridView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
 
-	<style
-		name="friendizer_DropDownListView"
-		parent="@style/Widget.Sherlock.ListView.DropDown">
-		<item name="android:listSelector">@drawable/selectable_background_friendizer</item>
-	</style>
+    <style name="TransparentExpandableListView" parent="@style/Widget.Sherlock.ExpandableListView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+    </style>
+    -->
 
-	<style
-		name="friendizer_ActionBarTabStyle"
-		parent="@style/Widget.Sherlock.ActionBar.TabView">
-		<item name="background">@drawable/tab_indicator_ab_friendizer</item>
+    <style name="friendizer_solid_ActionBar" parent="@style/Widget.Sherlock.Light.ActionBar.Solid.Inverse">
+        <item name="background">@drawable/ab_solid_friendizer</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_friendizer</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_friendizer</item>
+        <item name="progressBarStyle">@style/friendizer_ProgressBar</item>
+        <item name="indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small.Inverse</item>
+        <item name="android:background">@drawable/ab_solid_friendizer</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_friendizer</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_friendizer</item>
+        <item name="android:progressBarStyle">@style/friendizer_ProgressBar</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small.Inverse</item>
+    </style>
 
-		<item name="android:background">@drawable/tab_indicator_ab_friendizer</item>
-		<item name="android:textSize">12dp</item>
-	</style>
+    <style name="friendizer_transparent_ActionBar" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="background">@drawable/ab_transparent_friendizer</item>
+        <item name="progressBarStyle">@style/friendizer_ProgressBar</item>
+        <item name="android:background">@drawable/ab_transparent_friendizer</item>
+        <item name="android:progressBarStyle">@style/friendizer_ProgressBar</item>
+    </style>
 
-	<style
-		name="friendizer_ActionBarTabTextStyle"
-		parent="Widget.Sherlock.ActionBar.TabText">
-		<item name="android:textSize">12sp</item>
-	</style>
+    <style name="friendizer_PopupMenu" parent="@style/Widget.Sherlock.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_friendizer</item>
+    </style>
 
-	<style
-		name="friendizer_DropDownNav"
-		parent="@style/Widget.Sherlock.Spinner.DropDown.ActionBar">
-		<item name="background">@drawable/spinner_background_ab_friendizer</item>
+    <style name="friendizer_DropDownListView" parent="@style/Widget.Sherlock.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_friendizer</item>
+    </style>
 
-		<item name="android:background">@drawable/spinner_background_ab_friendizer</item>
-		<item name="android:popupBackground">@drawable/menu_dropdown_panel_friendizer</item>
-		<item name="android:dropDownSelector">@drawable/selectable_background_friendizer</item>
-	</style>
+    <style name="friendizer_ActionBarTabStyle" parent="@style/Widget.Sherlock.ActionBar.TabView">
+        <item name="background">@drawable/tab_indicator_ab_friendizer</item>
+        <item name="android:background">@drawable/tab_indicator_ab_friendizer</item>
+    </style>
 
-	<style
-		name="friendizer_ProgressBar"
-		parent="@style/Widget.Sherlock.ProgressBar.Horizontal">
-		<item name="android:progressDrawable">@drawable/progress_horizontal_friendizer</item>
-	</style>
+    <style name="friendizer_DropDownNav" parent="@style/Widget.Sherlock.Spinner.DropDown.ActionBar">
+        <item name="background">@drawable/spinner_background_ab_friendizer</item>
+        <item name="android:background">@drawable/spinner_background_ab_friendizer</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_friendizer</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_friendizer</item>
+    </style>
 
-	<style
-		name="TransparentListView"
-		parent="@android:style/Widget.ListView">
-		<item name="android:cacheColorHint">@android:color/transparent</item>
-	</style>
+    <style name="friendizer_ProgressBar" parent="@style/Widget.Sherlock.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_friendizer</item>
+    </style>
 
-	<style
-		name="TransparentGridView"
-		parent="@android:style/Widget.GridView">
-		<item name="android:cacheColorHint">@android:color/transparent</item>
-	</style>
-
-	<style
-		name="TransparentExpandableListView"
-		parent="@android:style/Widget.ExpandableListView">
-		<item name="android:cacheColorHint">@android:color/transparent</item>
-	</style>
-
-	<style name="DashboardButton">
-		<item name="android:layout_gravity">center_vertical</item>
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:gravity">center_horizontal</item>
-		<item name="android:drawablePadding">2dp</item>
-		<item name="android:textSize">14sp</item>
-		<item name="android:textStyle">bold</item>
-		<item name="android:textColor">#000</item>
-		<item name="android:background">@null</item>
-	</style>
-
-	<style name="ButtonText">
-		<item name="android:layout_width">fill_parent</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textColor">#606060</item>
-		<item name="android:gravity">center</item>
-		<item name="android:shadowColor">#000000</item>
-		<item name="android:textSize">18sp</item>
-	</style>
-
-	<style
-		name="LeftAlignedButtonText"
-		parent="ButtonText">
-		<item name="android:gravity">left|center_vertical</item>
-		<item name="android:layout_height">50dp</item>
-	</style>
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.friendizer.widget" parent="@style/Theme.Sherlock">
+        <item name="popupMenuStyle">@style/friendizer_PopupMenu</item>
+        <item name="dropDownListViewStyle">@style/friendizer_DropDownListView</item>
+        <item name="android:popupMenuStyle">@style/friendizer_PopupMenu</item>
+        <item name="android:dropDownListViewStyle">@style/friendizer_DropDownListView</item>
+    </style>
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="friendizer_DropDownItem" parent="@style/Widget.Sherlock.Light.DropDownItem.Spinner">
+        <item name="android:textAppearance">?android:attr/textAppearanceInverse</item>
+    </style>
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="friendizer_SpinnerItem" parent="@style/Widget.Sherlock.TextView.SpinnerItem">
+        <item name="android:textAppearance">?android:attr/textAppearanceInverse</item>
+    </style>
 
 </resources>

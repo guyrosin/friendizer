@@ -58,8 +58,7 @@ public class User implements Serializable {
 	int matching = 0;
 
 	public enum FBQueryType {
-		GRAPH,
-		FQL
+		GRAPH, FQL
 	}
 
 	private static final long serialVersionUID = 8643574985757595599L;
@@ -197,7 +196,7 @@ public class User implements Serializable {
 	 *            the picture to set
 	 */
 	public void setPicURL(String picURL) {
-		this.picture = picURL;
+		picture = picURL;
 	}
 
 	/**
@@ -242,7 +241,7 @@ public class User implements Serializable {
 	 *            the level to set
 	 */
 	public void setLevel(int level) {
-		this.points = level;
+		points = level;
 	}
 
 	/**
@@ -272,7 +271,7 @@ public class User implements Serializable {
 	 *            the owner to set
 	 */
 	public void setOwnerID(long ownerID) {
-		this.owner = ownerID;
+		owner = ownerID;
 	}
 
 	/**

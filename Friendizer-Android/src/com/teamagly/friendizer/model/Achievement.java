@@ -18,6 +18,16 @@ public class Achievement {
 
 	public boolean earned;
 
+	public Achievement(Achievement achv, boolean earned) {
+		id = achv.id;
+		title = achv.title;
+		description = achv.description;
+		iconRes = achv.iconRes;
+		reward = achv.reward;
+		points = achv.points;
+		this.earned = earned;
+	}
+
 	public long getId() {
 		return id;
 	}

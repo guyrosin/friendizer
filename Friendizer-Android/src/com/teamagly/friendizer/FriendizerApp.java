@@ -41,9 +41,8 @@ public class FriendizerApp extends Application {
 
 		// Initialize the Image Loader
 		// Create default options which will be used for every displayImage() call
-		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory().cacheOnDisc().build();
-		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
-				.defaultDisplayImageOptions(defaultOptions).build();
+		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory().cacheOnDisc().showStubImage(R.drawable.stub_image).build();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).defaultDisplayImageOptions(defaultOptions).build();
 		ImageLoader.getInstance().init(config);
 	}
 }
