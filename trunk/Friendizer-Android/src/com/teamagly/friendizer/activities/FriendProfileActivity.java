@@ -88,8 +88,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtLevel = (TextView) findViewById(R.id.level);
 		xpBar = (TextProgressBar) findViewById(R.id.xp_bar);
 
-		userInfo = (User) intent.getSerializableExtra("user");
-		if (userInfo == null) {
+		Object userObject = intent.getSerializableExtra("user");
+		if (userObject == null) {
 			// If passed the user's ID, fetching the details will be done in onResume()
 			if (intent.getLongExtra("userID", 0) > 0)
 				userID = intent.getLongExtra("userID", 0);
@@ -98,6 +98,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				finish();
 			}
 		} else {
+			userInfo = (User) userObject;
 			updateViews();
 			updateButtons();
 		}
@@ -105,7 +106,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtMatching.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", MutualLikesFragment.class.getName()).putExtra("user", userInfo));
+				if (userInfo.getMatching() > 0)
+					startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", MutualLikesFragment.class.getName()).putExtra("user", userInfo));
 			}
 		});
 	}

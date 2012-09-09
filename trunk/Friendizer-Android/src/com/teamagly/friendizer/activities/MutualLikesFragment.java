@@ -46,20 +46,23 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
+
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("No mutual likes");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
 		Bundle args = getArguments();
 		if (args != null)
 			user = (User) args.getSerializable("user");
+
+		ActionBar actionBar = activity.getSupportActionBar();
+		actionBar.setTitle(user.getName());
+		actionBar.setSubtitle("Mutual Likes");
+
 		pagesList = new ArrayList<Page>();
 		adapter = new PageImageAdapter(activity, 0, pagesList);
 		adapter.setNotifyOnChange(true);
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(this);
-		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
-		actionBar.setTitle(user.getName());
-		actionBar.setSubtitle("Mutual Likes");
 
 		// Restore scroll position
 		//		if (savedInstanceState != null)
