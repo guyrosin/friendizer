@@ -6,9 +6,6 @@ package com.teamagly.friendizer.adapters;
 import java.util.List;
 
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +13,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.Achievement;
 import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.utils.Utility;
 
 public class ActionsAdapter extends ArrayAdapter<Action> {
+	@SuppressWarnings("unused")
 	private final String TAG = getClass().getName();
 	protected static LayoutInflater inflater = null;
 
