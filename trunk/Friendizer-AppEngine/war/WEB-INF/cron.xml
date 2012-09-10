@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/dailyBonus</url>
+    <description>Give a daily bonus to logged in users</description>
+    <schedule>every day 00:00</schedule>
+  </cron>
+</cronentries>

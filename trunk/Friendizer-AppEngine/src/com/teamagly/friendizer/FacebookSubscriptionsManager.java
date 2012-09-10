@@ -1,17 +1,33 @@
 package com.teamagly.friendizer;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.stream.JsonReader;
-import com.restfb.*;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
 import com.restfb.FacebookClient.AccessToken;
+import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
@@ -22,7 +38,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 	private static final String APP_ID = "273844699335189"; // Facebook app ID
 	private static final String APP_SECRET = "b2d90b5989dfdf082742e12d365053b9"; // Facebook app secret
 	private static final String BASE_URL = "http://friendizer.appspot.com/";
-	
+
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 
 	private static final String VERIFY_TOKEN = "FRIENDIZER";
@@ -149,9 +165,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		String callbackURL = BASE_URL + "facebookSubscriptions";
 		OutputStream output = null;
 		try {
-			String query = String.format("access_token=%s&object=%s&fields=%s&callback_url=%s&verify_token=%s&method=post",
-					URLEncoder.encode(accessToken.getAccessToken(), charset), URLEncoder.encode(object, charset),
-					URLEncoder.encode(fields, charset), URLEncoder.encode(callbackURL, charset),
+			String query = String.format("access_token=%s&object=%s&fields=%s&callback_url=%s&verify_token=%s&method=post", URLEncoder.encode(accessToken.getAccessToken(), charset), URLEncoder.encode(object, charset), URLEncoder.encode(fields, charset), URLEncoder.encode(callbackURL, charset),
 					URLEncoder.encode(VERIFY_TOKEN, charset));
 			url = url + "?" + query;
 
@@ -170,12 +184,11 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if (output != null) {
+			if (output != null)
 				try {
 					output.close();
 				} catch (IOException logOrIgnore) {
 				}
-			}
 		}
 	}
 
@@ -211,9 +224,8 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 			String line;
 
-			while ((line = reader.readLine()) != null) {
+			while ((line = reader.readLine()) != null)
 				writer.println(line);
-			}
 			reader.close();
 
 		} catch (MalformedURLException e) {
@@ -228,13 +240,14 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		List<User> users = (List<User>) query.execute();
-		for (User user : users) {
+		query.closeAll();
+		for (User user : users)
 			try {
 				requestFBData(String.valueOf(user.getId()), Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
 			} catch (Exception e) {
 				log.info(e.getMessage());
 			}
-		}
+		pm.close();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -242,18 +255,16 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);
 		List<User> users = (List<User>) query.execute();
-		for (User user : users) {
+		query.closeAll();
+		for (User user : users)
 			// Request an extended access token
 			try {
 				FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 				AccessToken accessToken = facebook.obtainExtendedAccessToken(APP_ID, APP_SECRET, user.getToken());
 				user.setToken(accessToken.getAccessToken());
-				pm.makePersistent(user);
 			} catch (Exception e) {
-				pm.makePersistent(user);
 				log.info("Error when extending access token for " + user.getId() + ": " + e.getMessage());
 			}
-		}
 		pm.close();
 	}
 }

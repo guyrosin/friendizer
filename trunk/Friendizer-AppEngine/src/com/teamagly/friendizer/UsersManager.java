@@ -3,6 +3,7 @@ package com.teamagly.friendizer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import com.teamagly.friendizer.model.UserDevice;
 @SuppressWarnings("serial")
 public class UsersManager extends HttpServlet {
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final int DAILY_BONUS_POINTS = 50;
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -50,6 +52,8 @@ public class UsersManager extends HttpServlet {
 			matching(request, response);
 		else if (servlet.intern() == "mutualLikes")
 			mutualLikes(request, response);
+		else if (servlet.intern() == "dailyBonus")
+			dailyBonus(request, response);
 	}
 
 	@Override
@@ -73,7 +77,6 @@ public class UsersManager extends HttpServlet {
 			user.setToken(accessToken);
 			// Update the current date
 			user.setSince(new Date());
-			pm.makePersistent(user);
 
 			if (user.isFbUpdate())
 				try {
@@ -93,7 +96,6 @@ public class UsersManager extends HttpServlet {
 			pm.makePersistent(user);
 		}
 
-		pm.makePersistent(user);
 		response.getWriter().println(new Gson().toJson(user));
 
 		// Create/update the device registration
@@ -104,13 +106,11 @@ public class UsersManager extends HttpServlet {
 				device.setUserID(userID); // Update the user ID
 			} catch (JDOObjectNotFoundException e) {
 				device = new UserDevice(regID, userID);
-			} finally {
-				if (device != null)
-					pm.makePersistent(device);
-				pm.close();
+				pm.makePersistent(device);
 			}
 		} else
 			log.severe("No reg ID in the request");
+		pm.close();
 	}
 
 	private void updateUserFromFacebook(User user) {
@@ -224,7 +224,6 @@ public class UsersManager extends HttpServlet {
 		try {
 			User user = pm.getObjectById(User.class, userID);
 			user.setStatus(status);
-			pm.makePersistent(user);
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("User doesn't exist");
 		} finally {
@@ -395,5 +394,29 @@ public class UsersManager extends HttpServlet {
 		List<Page> likes = facebookClient1.executeQuery(query, Page.class);
 
 		response.getWriter().println(new Gson().toJson(likes));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void dailyBonus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.DATE, -1);
+		Date yesterdayDate = cal.getTime();
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+
+		Query query = pm.newQuery(User.class);
+		query.setFilter("since > yesterdayDate");
+		query.declareParameters("java.util.Date yesterdayDate");
+		List<User> users = (List<User>) query.execute(yesterdayDate);
+		query.closeAll();
+
+		for (User user : users)
+			try {
+				user.setMoney(user.getMoney() + DAILY_BONUS_POINTS);
+			} catch (Exception e) {
+				log.info(e.getMessage());
+			}
+
+		pm.close();
 	}
 }

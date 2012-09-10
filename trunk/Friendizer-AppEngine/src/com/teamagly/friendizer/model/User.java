@@ -2,16 +2,19 @@ package com.teamagly.friendizer.model;
 
 import java.util.Date;
 
-import javax.jdo.annotations.*;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
 
 import com.restfb.json.JsonObject;
 
-@PersistenceCapable
+@PersistenceCapable(detachable = "true")
 public class User {
+
 	/*
 	 * Facebook data
 	 */
-	
+
 	@PrimaryKey
 	@Persistent
 	private Long id; // Facebook ID
@@ -67,15 +70,15 @@ public class User {
 	 */
 	public User(long id, String token) {
 		this.id = id;
-		this.owner = 0;
-		this.points = 100;
-		this.level = 1;
-		this.money = 1000;
-		this.latitude = -1;
-		this.longitude = -1;
-		this.since = new Date();
+		owner = 0;
+		points = 100;
+		level = 1;
+		money = 1000;
+		latitude = -1;
+		longitude = -1;
+		since = new Date();
 		this.token = token;
-		this.status = "";
+		status = "";
 		fbUpdate = false;
 	}
 

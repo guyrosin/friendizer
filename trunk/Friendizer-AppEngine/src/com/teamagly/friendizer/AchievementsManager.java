@@ -68,16 +68,22 @@ public class AchievementsManager extends HttpServlet {
 		response.getWriter().println(new Gson().toJson(achvInfos));
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * @param user
+	 *            a detached User
+	 * @param context
+	 */
 	public static void userBoughtSomeone(User user, ServletContext context) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(UserAchievement.class);
 		query.setFilter("userID == " + user.getId() + " && achievementID == 28001");
+		@SuppressWarnings("unchecked")
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 
+		/* Get the achievement from the database */
 		Achievement achv;
-		/* Get the achievement from the database */try {
+		try {
 			achv = pm.getObjectById(Achievement.class, 28001);
 		} catch (JDOObjectNotFoundException e) {
 			pm.close();
@@ -89,33 +95,27 @@ public class AchievementsManager extends HttpServlet {
 		user.setMoney(user.getMoney() + achv.getReward());
 		// Reward the user with points
 		user.setPoints(user.getPoints() + achv.getPoints());
-		// Check for another achievement
-		AchievementsManager.userValueIncreased(user, context);
 		// check for level up
 		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
+		pm.makePersistent(user); // Necessary since the user is detached
+
+		// Check for another achievement
+		AchievementsManager.userValueIncreased(user, context);
 
 		if (result.isEmpty()) {
-			pm.makePersistent(new UserAchievement(user.getId(), 28001));
-			notificate(user, 28001, context);
+			pm.makePersistent(new UserAchievement(user.getId(), achv.getId()));
+			notificate(user, achv, context);
 		}
 		pm.close();
 	}
 
-	@SuppressWarnings("unchecked")
 	private void getAchievement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long achvID = Long.parseLong(request.getParameter("achvID"));
-		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserAchievement.class);
 		query.setFilter("userID == " + userID + " && achievementID == " + achvID);
+		@SuppressWarnings("unchecked")
 		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		try {
@@ -124,13 +124,16 @@ public class AchievementsManager extends HttpServlet {
 			response.getWriter().println(new Gson().toJson(achvInfo));
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("Achievement doesn't exist");
-			return;
 		} finally {
 			pm.close();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * @param user
+	 *            a detached User
+	 * @param context
+	 */
 	public static void someoneBoughtUser(User user, ServletContext context) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
@@ -148,24 +151,30 @@ public class AchievementsManager extends HttpServlet {
 		user.setMoney(user.getMoney() + achv.getReward());
 		// Reward the user with points
 		user.setPoints(user.getPoints() + achv.getPoints());
+		// check for level up
+		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
+		pm.makePersistent(user); // Necessary since the user is detached
 
 		// Check for another achievement
 		AchievementsManager.userValueIncreased(user, context);
-		// check for level up
-		user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
 		Query query = pm.newQuery(UserAchievement.class);
 		query.setFilter("userID == " + user.getId() + " && achievementID == 30001");
+		@SuppressWarnings("unchecked")
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		if (result.isEmpty()) {
-			pm = PMF.get().getPersistenceManager();
-			pm.makePersistent(new UserAchievement(user.getId(), 30001));
-			pm.close();
-			notificate(user, 30001, context);
+			pm.makePersistent(new UserAchievement(user.getId(), achv.getId()));
+			notificate(user, achv, context);
 		}
+		pm.close();
 	}
 
+	/**
+	 * @param user
+	 *            a detached User
+	 * @param context
+	 */
 	@SuppressWarnings("unchecked")
 	public static void userValueIncreased(User user, ServletContext context) {
 		if (user.getPoints() >= 1000) {
@@ -175,14 +184,14 @@ public class AchievementsManager extends HttpServlet {
 			List<UserAchievement> result = (List<UserAchievement>) query.execute();
 			query.closeAll();
 
+			/* Get the achievement from the database */
 			Achievement achv;
-			/* Get the achievement from the database */try {
+			try {
 				achv = pm.getObjectById(Achievement.class, 29001);
 			} catch (JDOObjectNotFoundException e) {
 				log.severe("This achievement doesn't exist");
-				return;
-			} finally {
 				pm.close();
+				return;
 			}
 
 			// Reward the user with money
@@ -192,32 +201,27 @@ public class AchievementsManager extends HttpServlet {
 			// check for level up
 			user.setLevel(Util.calculateLevel(user.getLevel(), user.getPoints()));
 
+			pm.makePersistent(user); // Necessary since the user is detached
+
 			if (result.isEmpty()) {
-				pm = PMF.get().getPersistenceManager();
-				pm.makePersistent(new UserAchievement(user.getId(), 29001));
-				notificate(user, 29001, context);
-				pm.close();
+				pm.makePersistent(new UserAchievement(user.getId(), achv.getId()));
+				notificate(user, achv, context);
 			}
+			pm.close();
 		}
 	}
 
-	private static void notificate(User user, int achievementID, ServletContext context) {
-		Achievement achievement;
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			achievement = pm.getObjectById(Achievement.class, new Long(achievementID));
-		} catch (JDOObjectNotFoundException e) {
-			log.severe("Achievement was not found");
-			return;
-		} finally {
-			pm.close();
-		}
-
+	/**
+	 * @param user
+	 * @param achv
+	 * @param context
+	 */
+	private static void notificate(User user, Achievement achv, ServletContext context) {
 		Builder msg = new Builder();
 		msg.addData("type", NotificationType.ACH.toString());
 		msg.addData("userID", String.valueOf(user.getId()));
-		msg.addData("title", achievement.getTitle());
-		msg.addData("iconRes", achievement.getIconRes());
+		msg.addData("title", achv.getTitle());
+		msg.addData("iconRes", achv.getIconRes());
 		SendMessage.sendMessage(user.getId(), msg.build());
 	}
 }

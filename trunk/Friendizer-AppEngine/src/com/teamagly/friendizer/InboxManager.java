@@ -1,11 +1,15 @@
 package com.teamagly.friendizer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
-import javax.jdo.*;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
@@ -42,7 +46,7 @@ public class InboxManager extends HttpServlet {
 
 		pm.makePersistent(message);
 		pm.close();
-		out.println(message);
+		out.println(new Gson().toJson(message));
 
 		Builder msg = new Builder();
 		msg.addData("type", NotificationType.CHAT.toString());
@@ -71,9 +75,14 @@ public class InboxManager extends HttpServlet {
 		query.declareParameters("long user1, long user2");
 
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(user1, user2);
-		if (!messages.isEmpty())
-			out.println(new Gson().toJson(messages));
 		query.closeAll();
+		if (!messages.isEmpty()) {
+			out.println(new Gson().toJson(messages));
+			for (ChatMessage m : messages)
+				m.setUnread(false);
+		}
+
+		pm.close();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,14 +100,13 @@ public class InboxManager extends HttpServlet {
 		query.declareParameters("long dest");
 
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(destination);
-		query.closeAll();
 		if (!messages.isEmpty()) {
-			for (ChatMessage m : messages) {
-				m.setUnread(false);
-				pm.makePersistent(m);
-			}
 			out.println(new Gson().toJson(messages));
+			for (ChatMessage m : messages)
+				m.setUnread(false);
 		}
+
+		query.closeAll();
 		pm.close();
 	}
 
@@ -117,15 +125,13 @@ public class InboxManager extends HttpServlet {
 		query.declareParameters("long src");
 
 		List<ChatMessage> messages = (List<ChatMessage>) query.execute(userId);
-		query.closeAll();
 		if (!messages.isEmpty()) {
-			for (ChatMessage m : messages) {
-				out.println(m);
-				m.setUnread(false);
-				pm.makePersistent(m);
-			}
 			out.println(new Gson().toJson(messages));
+			for (ChatMessage m : messages)
+				m.setUnread(false);
 		}
+
+		query.closeAll();
 		pm.close();
 	}
 }
