@@ -16,44 +16,25 @@
 
 package com.teamagly.friendizer.utils;
 
-import com.facebook.android.Facebook;
-
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 
 public class SessionStore {
 
-    private static final String TOKEN = "access_token";
-    private static final String EXPIRES = "expires_in";
-    private static final String KEY = "facebook-session";
+	private static final String ID_KEY = "facebook_id";
 
-    /*
-     * Save the access token and expiry date so you don't have to fetch it each
-     * time
-     */
+	public static final String PREFERENCE_NAME = "friendizer_preferences"; // Preferences file name
+	public static final String SECURE_PREFS_KEY = "friendizer_key"; // Secure key for the preferences
 
-    public static boolean save(Facebook session, Context context) {
-        Editor editor = context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
-        editor.putString(TOKEN, session.getAccessToken());
-        editor.putLong(EXPIRES, session.getAccessExpires());
-        return editor.commit();
-    }
+	public static void saveID(long userID, Context context) {
+		SecurePreferences preferences = new SecurePreferences(context, PREFERENCE_NAME, SECURE_PREFS_KEY, true);
+		preferences.put(ID_KEY, String.valueOf(userID));
+	}
 
-    /*
-     * Restore the access token and the expiry date from the shared preferences.
-     */
-    public static boolean restore(Facebook session, Context context) {
-        SharedPreferences savedSession = context.getSharedPreferences(KEY, Context.MODE_PRIVATE);
-        session.setAccessToken(savedSession.getString(TOKEN, null));
-        session.setAccessExpires(savedSession.getLong(EXPIRES, 0));
-        return session.isSessionValid();
-    }
-
-    public static void clear(Context context) {
-        Editor editor = context.getSharedPreferences(KEY, Context.MODE_PRIVATE).edit();
-        editor.clear();
-        editor.commit();
-    }
-
+	public static long restoreID(Context context) {
+		SecurePreferences preferences = new SecurePreferences(context, PREFERENCE_NAME, SECURE_PREFS_KEY, true);
+		String userID = preferences.getString(ID_KEY);
+		if (userID == null || userID.length() == 0)
+			return 0;
+		return Long.parseLong(userID);
+	}
 }

@@ -38,10 +38,6 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	protected User user;
 	int savedPosition = -1;
 
-	/*
-	 * (non-Javadoc)
-	 * @see com.teamagly.friendizer.activities.AbstractFriendsListFragment#onActivityCreated(android.os.Bundle)
-	 */
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -120,7 +116,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	}
 
 	protected void requestMutualLikes() {
-		pagesList.clear();
+		adapter.clear();
 
 		task = new MutualLikesTask();
 		task.execute(user.getId());
@@ -146,7 +142,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 			if (pages.size() == 0)
 				empty.setVisibility(View.VISIBLE);
 			else {
-				pagesList.addAll(pages);
+				adapter.addAll(pages);
 				empty.setVisibility(View.GONE);
 			}
 			adapter.notifyDataSetChanged();
@@ -156,7 +152,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Page page = pagesList.get(position);
+		Page page = adapter.getItem(position);
 		// Show a dialog with info
 		Dialog dialog = new Dialog(activity);
 

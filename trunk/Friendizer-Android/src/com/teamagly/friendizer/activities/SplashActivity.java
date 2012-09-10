@@ -15,7 +15,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -34,58 +33,85 @@ import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.SessionEvents;
-import com.teamagly.friendizer.utils.SessionEvents.AuthListener;
-import com.teamagly.friendizer.utils.SessionEvents.LogoutListener;
 import com.teamagly.friendizer.utils.SessionStore;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
- * The login flow is as follows: Facebook login -> GCM registration -> friendizer login
+ * The login flow is as follows: GCM registration -> if FB user ID is saved, friendizer login. Else, FB login to acquire the user ID and then friendizer login
  */
 public class SplashActivity extends SherlockActivity {
 	private final String TAG = getClass().getName();
-	private Handler handler;
 	private ImageView loginButton;
 	UserRequestListener userRequestListener;
 	private String requestID;
 	private Context context = this;
 	private ProgressDialog dialogFriendizer;
 	private long userID;
-	private boolean fbRequestFailed = false;
+	private String regID;
 
-	// After GCM registration, login to friendizer
-	AsyncTask<Void, Void, Boolean> friendizerLoginTask = new AsyncTask<Void, Void, Boolean>() {
+	private void afterGCM() {
+		// Get the registrationID
+		regID = GCMRegistrar.getRegistrationId(context);
+		if (regID == null || regID.length() == 0)
+			return;
+
+		userID = SessionStore.restoreID(context);
+		Log.w(TAG, "UserID from prefs = " + userID);
+		if (userID == 0) { // Need to login to Facebook
+			if (loginButton.getVisibility() == View.GONE) {
+				loginButton.setVisibility(View.VISIBLE);
+				return;
+			} else
+				// Force login
+				loginToFacebook();
+		} else
+			loginWithoutTokenTask.execute();
+
+	}
+
+	AsyncTask<Void, Void, Boolean> loginWithoutTokenTask = new AsyncTask<Void, Void, Boolean>() {
 
 		@Override
 		protected Boolean doInBackground(Void... v) {
-			// Get the registrationID
-			String regID = GCMRegistrar.getRegistrationId(context);
-			if (regID == null || regID.length() == 0)
-				return false;
-			User userInfo = ServerFacade.login(userID, Utility.getInstance().facebook.getAccessToken(), regID);
-			if (userInfo == null)
-				return false;
-			else {
-				Utility.getInstance().userInfo = userInfo;
-				return true;
-			}
+			// Use the ID from the preferences to login
+			User userInfo = ServerFacade.login(userID, regID);
+			Utility.getInstance().userInfo = userInfo;
+			return (userInfo != null);
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			dialogFriendizer.dismiss(); // Dismiss the progress dialog
-			if (result) {
-				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
-				// Continue to the main activity
-				Intent intent = new Intent(SplashActivity.this, NearbyMapActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-				finish();
-			} else
+			String accessToken = Utility.getInstance().userInfo.getToken();
+			if (accessToken == null || accessToken.length() == 0) {
+				loginToFacebook(); // If there's no token, login to Facebook from the start
+				return;
+			}
+			Utility.getInstance().facebook.setAccessToken(accessToken);
+			Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
+			//TODO
+			if (result)
+				continueToFriendizer();
+			else {
+				dialogFriendizer.dismiss(); // Dismiss the progress dialog
 				showErrorDialog("Couldn't connect to friendizer");
+			}
 		}
 	};
+
+	private void continueToFriendizer() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				dialogFriendizer.dismiss(); // Dismiss the progress dialog
+				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
+			}
+		});
+		// Continue to the main activity
+		Intent intent = new Intent(SplashActivity.this, NearbyMapActivity.class);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
+	}
 
 	/**
 	 * A {@link BroadcastReceiver} to receive the response from a register or unregister request, and to update the UI.
@@ -93,7 +119,7 @@ public class SplashActivity extends SherlockActivity {
 	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			friendizerLoginTask.execute();
+			afterGCM();
 		}
 	};
 
@@ -102,7 +128,6 @@ public class SplashActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		getSupportActionBar().hide(); // Hide the action bar
 		setContentView(R.layout.splash);
-		handler = new Handler();
 
 		if (!isOnline()) {
 			TextView txtStatus = (TextView) findViewById(R.id.status);
@@ -140,29 +165,37 @@ public class SplashActivity extends SherlockActivity {
 			return;
 		}
 
-		SessionEvents.addAuthListener(new FBLoginListener());
-		SessionEvents.addLogoutListener(new FBLogoutListener());
-
 		dialogFriendizer = new ProgressDialog(context);
 		dialogFriendizer.setMessage("Logging in, please wait...");
 
 		// Force a locationInfo update
 		LocationLibrary.forceLocationUpdate(FriendizerApp.getContext());
 
-		// Restore the Facebook session if one exists
-		if (SessionStore.restore(Utility.getInstance().facebook, this)) {
-			// Already logged in to Facebook -> extend access token and request Facebook data to proceed
-			Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
-			requestFacebookUserData();
-		} else
-			// Not logged in to Facebook -> wait for user action
-			loginButton.setVisibility(View.VISIBLE);
+		dialogFriendizer.show();
+		/*
+		 * Login/Register to GCM
+		 */
+		GCMRegistrar.checkDevice(context);
+		// Make sure the manifest was properly set - comment out this line
+		// while developing the app, then uncomment it when it's ready.
+		// GCMRegistrar.checkManifest(context);
+		String regID = GCMRegistrar.getRegistrationId(context);
+		if (regID.equals("")) // Need to register to GCM
+			GCMRegistrar.register(context, Utility.SENDER_ID);
+		else
+			// Continue
+			afterGCM();
 	}
 
 	protected void loginToFacebook() {
-		// if (!Utility.getInstance().facebook.isSessionValid() || fbRequestFailed)
-		// Authorize
-		Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				// if (!Utility.getInstance().facebook.isSessionValid() || fbRequestFailed)
+				// Authorize
+				Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
+			}
+		});
 	}
 
 	/*
@@ -177,8 +210,8 @@ public class SplashActivity extends SherlockActivity {
 
 	@Override
 	public void onDestroy() {
-		if (friendizerLoginTask != null)
-			friendizerLoginTask.cancel(true);
+		//		if (friendizerLoginTask != null)
+		//			friendizerLoginTask.cancel(true);
 		unregisterReceiver(mHandleMessageReceiver);
 		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
@@ -199,9 +232,8 @@ public class SplashActivity extends SherlockActivity {
 	 */
 	private void logout() {
 		try {
-			SessionEvents.onLogoutBegin();
 			AsyncFacebookRunner asyncRunner = new AsyncFacebookRunner(Utility.getInstance().facebook);
-			asyncRunner.logout(getBaseContext(), new LogoutRequestListener());
+			asyncRunner.logout(getBaseContext(), null);
 		} catch (Exception e) {
 			Log.e(TAG, e.getMessage());
 		}
@@ -227,7 +259,7 @@ public class SplashActivity extends SherlockActivity {
 	/*
 	 * Request user details from Facebook
 	 */
-	public void requestFacebookUserData() {
+	public void requestFacebookUserID() {
 		Bundle params = new Bundle();
 		params.putString("fields", "id");
 		userRequestListener = new UserRequestListener();
@@ -245,75 +277,30 @@ public class SplashActivity extends SherlockActivity {
 			try {
 				jsonObject = new JSONObject(response);
 				userID = Long.parseLong(jsonObject.getString("id"));
-				Log.w(TAG, "ID = " + userID);
+				Log.w(TAG, "User ID = " + userID);
+				SessionStore.saveID(userID, SplashActivity.this);
+				Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
 			} catch (JSONException e) {
-				Log.e(TAG, "The response from Facebook: " + response);
+				Log.e(TAG, "Error when requesting FB ID: " + response);
 				Log.e(TAG, e.getMessage());
-				if (!fbRequestFailed) {
-					fbRequestFailed = true;
-					loginToFacebook(); // Try to login
-				} else
-					loginButton.setVisibility(View.VISIBLE);
 				return;
 			}
-
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					dialogFriendizer.show();
-				}
-			});
-
-			/*
-			 * Login/Register to GCM
-			 */
-			GCMRegistrar.checkDevice(context);
-			// Make sure the manifest was properly set - comment out this line
-			// while developing the app, then uncomment it when it's ready.
-			GCMRegistrar.checkManifest(context);
-			final String regID = GCMRegistrar.getRegistrationId(context);
-			if (regID.equals("")) // Register to GCM
-				GCMRegistrar.register(context, Utility.SENDER_ID);
-			else
-				friendizerLoginTask.execute();
-		}
-	}
-
-	/*
-	 * The Callback for notifying the application when authorization succeeds or fails.
-	 */
-
-	public class FBLoginListener implements AuthListener {
-
-		@Override
-		public void onAuthSucceed() {
-			SessionStore.save(Utility.getInstance().facebook, SplashActivity.this);
-			requestFacebookUserData();
-		}
-
-		@Override
-		public void onAuthFail(String error) {
-			Log.e(TAG, error);
-		}
-	}
-
-	/*
-	 * The Callback for notifying the application when log out starts and finishes.
-	 */
-	public class FBLogoutListener implements LogoutListener {
-		@Override
-		public void onLogoutBegin() {
-			SessionStore.clear(SplashActivity.this);
-		}
-
-		@Override
-		public void onLogoutFinish() {
+			// Login to friendizer (with the access token)
+			User userInfo = ServerFacade.login(userID, Utility.getInstance().facebook.getAccessToken(), regID);
+			if (userInfo != null) {
+				Utility.getInstance().userInfo = userInfo;
+				continueToFriendizer();
+			} else {
+				Log.e(TAG, "User is null");
+				showErrorDialog("Couldn't connect to friendizer");
+			}
 		}
 	}
 
 	private final class LoginDialogListener implements DialogListener {
 		@Override
 		public void onComplete(Bundle values) {
+			requestFacebookUserID();
 			// Process any available request
 			if (requestID != null) {
 				// Just delete the request
@@ -323,37 +310,20 @@ public class SplashActivity extends SherlockActivity {
 				Utility.getInstance().mAsyncRunner.request(requestID, params, new RequestIDDeleteRequestListener());
 			}
 
-			SessionEvents.onLoginSuccess();
 		}
 
 		@Override
 		public void onFacebookError(FacebookError error) {
-			SessionEvents.onLoginError(error.getMessage());
+			Log.e(TAG, error.getMessage());
 		}
 
 		@Override
 		public void onError(DialogError error) {
-			SessionEvents.onLoginError(error.getMessage());
+			Log.e(TAG, error.getMessage());
 		}
 
 		@Override
 		public void onCancel() {
-			SessionEvents.onLoginError("Action Canceled");
-		}
-	}
-
-	private class LogoutRequestListener extends BaseRequestListener {
-		@Override
-		public void onComplete(String response, final Object state) {
-			/*
-			 * callback should be run in the original thread, not the background thread
-			 */
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					SessionEvents.onLogoutFinish();
-				}
-			});
 		}
 	}
 

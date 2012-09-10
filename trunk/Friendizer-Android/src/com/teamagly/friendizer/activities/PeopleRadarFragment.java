@@ -1,13 +1,8 @@
 package com.teamagly.friendizer.activities;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.squareup.seismic.ShakeDetector;
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
@@ -19,9 +14,14 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.squareup.seismic.ShakeDetector;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
 
 public class PeopleRadarFragment extends AbstractFriendsListFragment implements ShakeDetector.Listener {
 	private final String TAG = getClass().getName();
@@ -91,7 +91,6 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 	 */
 	@Override
 	protected void requestFriends() {
-		usersList.clear();
 		task = new NearbyUsersTask();
 		task.execute(Utility.getInstance().userInfo.getId());
 	}
@@ -111,8 +110,7 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_map: // Move to the map activity
-			startActivity(new Intent(activity, NearbyMapActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+			startActivity(new Intent(activity, NearbyMapActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
 			activity.overridePendingTransition(0, 0);
 			activity.finish();
 			return true;
@@ -135,12 +133,13 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 
 		@Override
 		protected void onPostExecute(final List<User> nearbyUsers) {
+			friendsAdapter.clear();
 			TextView empty = (TextView) activity.findViewById(R.id.empty);
 			if (nearbyUsers.size() == 0)
 				empty.setVisibility(View.VISIBLE);
 			else {
-				usersList.addAll(nearbyUsers);
-				sort();
+				friendsAdapter.addAll(nearbyUsers);
+				//				sort();
 				empty.setVisibility(View.GONE);
 			}
 			activity.setSupportProgressBarIndeterminateVisibility(false);

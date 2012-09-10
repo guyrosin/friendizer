@@ -140,6 +140,44 @@ public final class ServerFacade {
 		return null;
 	}
 
+	public static User login(long userID, String regID) {
+
+		String serverUrl = fullServerAddress + "login";
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair(REG_ID, regID));
+		params.add(new BasicNameValuePair(USER_ID, String.valueOf(userID)));
+		String res = "";
+		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+		for (int i = 1; i <= MAX_ATTEMPTS; i++) {
+			Log.d(TAG, "Attempt #" + i + " to login");
+			try {
+				res = post(serverUrl, params);
+				GCMRegistrar.setRegisteredOnServer(FriendizerApp.getContext(), true);
+				User user = new Gson().fromJson(res, User.class);
+				return user;
+			} catch (IOException e) {
+				// Here we are simplifying and retrying on any error; in a real
+				// application, it should retry only on unrecoverable errors
+				// (like HTTP error code 503).
+				Log.e(TAG, "Failed to register on attempt " + i, e);
+				if (i == MAX_ATTEMPTS)
+					break;
+				try {
+					Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
+					Thread.sleep(backoff);
+				} catch (InterruptedException e1) {
+					// Activity finished before we complete - exit.
+					Log.d(TAG, "Thread interrupted: abort remaining retries!");
+					Thread.currentThread().interrupt();
+					return null;
+				}
+				// Increase backoff exponentially
+				backoff *= 2;
+			}
+		}
+		return null;
+	}
+
 	public static User userDetails(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "userDetails?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
@@ -346,4 +384,14 @@ public final class ServerFacade {
 		in.close();
 		return blockedUsers;
 	}
+
+	public static List<User> getLeaderboard(String type) throws IOException {
+		URL url = new URL(fullServerAddress + "getLeaderboard?type=" + type);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
+		}.getType());
+		in.close();
+		return users;
+	}
+
 }
