@@ -78,8 +78,12 @@ public class UsersManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
 			user = pm.getObjectById(User.class, userID);
-			// Update the new access token of the user
-			user.setToken(accessToken);
+			log.info("User " + userID + " exists, with an access token");
+			if (accessToken != null && accessToken.length() > 0) {
+				log.info("Got a new access token");
+				// Update the new access token of the user
+				user.setToken(accessToken);
+			}
 			// Update the current date
 			user.setSince(new Date());
 
@@ -95,9 +99,12 @@ public class UsersManager extends HttpServlet {
 			if (user.getPicture() == null || user.getPicture().length() == 0)
 				updateUserFromFacebook(user);
 		} catch (JDOObjectNotFoundException e) {
+			log.info("Registering " + userID);
 			// Create a new user with the given ID and access token
 			user = new User(userID, accessToken);
 			updateUserFromFacebook(user);
+			if (accessToken == null || accessToken.length() == 0)
+				user.setFbUpdate(true); // Update the user's missing details next time
 			pm.makePersistent(user);
 		}
 
@@ -424,7 +431,7 @@ public class UsersManager extends HttpServlet {
 
 		pm.close();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void achievements(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));

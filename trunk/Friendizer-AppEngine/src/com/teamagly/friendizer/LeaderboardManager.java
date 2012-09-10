@@ -1,11 +1,15 @@
 package com.teamagly.friendizer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
-import javax.jdo.*;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 import com.teamagly.friendizer.model.User;
@@ -16,15 +20,14 @@ public class LeaderboardManager extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
-		if (servlet.intern() == "pointsLeaderboard")
-			getLeaderboard(request, response, "points");
-		else
-			getLeaderboard(request, response, "money");
+		if (servlet.intern() == "getLeaderboard")
+			getLeaderboard(request, response);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void getLeaderboard(HttpServletRequest request, HttpServletResponse response, String type) throws ServletException, IOException {
+	private void getLeaderboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
+		String type = request.getParameter("type");
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(User.class);

@@ -125,8 +125,7 @@
 	
 	<servlet-mapping>
 	    <servlet-name>LeaderboardManager</servlet-name>
-	    <url-pattern>/pointsLeaderboard</url-pattern>
-	    <url-pattern>/moneyLeaderboard</url-pattern>
+	    <url-pattern>/getLeaderboard</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
