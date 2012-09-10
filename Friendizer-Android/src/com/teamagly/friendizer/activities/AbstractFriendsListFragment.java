@@ -5,6 +5,7 @@ package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -153,7 +154,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 				@Override
 				public void onClick(DialogInterface dialog, int item) {
 					if (item != sortBy) {
-						sort(item);
+						//						sort(item);
 						sortBy = item;
 						// Save the new order
 						SharedPreferences settings = Utility.getSharedPreferences();
@@ -181,13 +182,13 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		}
 	}
 
-	protected void sort(int sortBy) {
+	protected void sort(List<User> users, int sortBy) {
 		switch (sortBy) {
 		case 0:
-			Collections.sort(usersList, (new Comparators()).new AlphabetComparator());
+			Collections.sort(users, (new Comparators()).new AlphabetComparator());
 			break;
 		case 1:
-			Collections.sort(usersList, (new Comparators()).new ValueComparator());
+			Collections.sort(users, (new Comparators()).new ValueComparator());
 			break;
 		}
 		activity.runOnUiThread(new Runnable() {
@@ -201,8 +202,8 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 	/**
 	 * Sorts the users list by default
 	 */
-	protected void sort() {
-		sort(sortBy);
+	protected void sort(List<User> users) {
+		sort(users, sortBy);
 	}
 
 	/*

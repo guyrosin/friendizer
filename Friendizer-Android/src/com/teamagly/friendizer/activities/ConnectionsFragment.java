@@ -1,9 +1,8 @@
 package com.teamagly.friendizer.activities;
 
-import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.utils.ServerFacade;
-import com.teamagly.friendizer.utils.Utility;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,9 +11,10 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.ServerFacade;
+import com.teamagly.friendizer.utils.Utility;
 
 public class ConnectionsFragment extends AbstractFriendsListFragment {
 	private final String TAG = getClass().getName();
@@ -48,7 +48,7 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 	 */
 	@Override
 	protected void requestFriends() {
-		usersList.clear();
+		friendsAdapter.clear();
 
 		task = new FriendsTask();
 		task.execute(Utility.getInstance().userInfo.getId());
@@ -74,8 +74,8 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 			if (friends.size() == 0)
 				empty.setVisibility(View.VISIBLE);
 			else {
-				usersList.addAll(friends);
-				sort();
+				friendsAdapter.addAll(friends);
+				//				sort();
 				empty.setVisibility(View.GONE);
 			}
 			activity.setSupportProgressBarIndeterminateVisibility(false);

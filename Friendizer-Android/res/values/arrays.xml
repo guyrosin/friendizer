@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="leaderboard_types_titles">
+        <item>Highest Value</item>
+        <item>Richest</item>
+    </string-array>
+
+</resources>

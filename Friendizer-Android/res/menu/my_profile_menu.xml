@@ -8,5 +8,12 @@
         android:menuCategory="alternative"
         android:title="Change Status">
     </item>
+    <item
+        android:id="@+id/menu_leaderboard"
+        android:icon="@drawable/ic_action_leaderboard"
+        android:menuCategory="alternative"
+        android:showAsAction="ifRoom"
+        android:title="Leaderboard">
+    </item>
 
 </menu>

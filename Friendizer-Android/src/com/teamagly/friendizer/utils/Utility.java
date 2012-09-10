@@ -123,8 +123,7 @@ public class Utility extends Application {
 
 	public static int getOrientation(Context context, Uri photoUri) {
 		/* it's on the external media. */
-		Cursor cursor = context.getContentResolver().query(photoUri, new String[] { MediaStore.Images.ImageColumns.ORIENTATION },
-				null, null, null);
+		Cursor cursor = context.getContentResolver().query(photoUri, new String[] { MediaStore.Images.ImageColumns.ORIENTATION }, null, null, null);
 
 		if (cursor.getCount() != 1)
 			return -1;

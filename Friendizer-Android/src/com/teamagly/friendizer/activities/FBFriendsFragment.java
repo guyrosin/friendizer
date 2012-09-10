@@ -90,7 +90,6 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				Log.e(TAG, "", e);
 				return;
 			}
-			usersList.clear();
 			final TextView empty = (TextView) activity.findViewById(R.id.empty);
 			final int len = jsonArray.length();
 			activity.runOnUiThread(new Runnable() {
@@ -121,15 +120,25 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 
 		@Override
 		protected Void doInBackground(List<Long>... userIDsPass) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					friendsAdapter.clear();
+				}
+			});
 			List<Long> userIDs = userIDsPass[0];
 			for (long userID : userIDs)
 				try {
 					if (isCancelled())
 						return null;
-					User user = ServerFacade.userDetails(userID);
+					final User user = ServerFacade.userDetails(userID);
 					if (user != null)
-						usersList.add(user);
-					sort();
+						activity.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								friendsAdapter.add(user);
+							}
+						});
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}
@@ -140,6 +149,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 		protected void onPostExecute(Void v) {
 			if (isCancelled())
 				return;
+			//			sort(users);
 			activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
 		}
 	}

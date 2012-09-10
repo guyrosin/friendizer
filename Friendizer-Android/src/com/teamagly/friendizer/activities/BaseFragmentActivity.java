@@ -47,7 +47,9 @@ public class BaseFragmentActivity extends SherlockFragmentActivity {
 			Bundle bundle = new Bundle();
 			bundle.putSerializable("user", getIntent().getSerializableExtra("user"));
 			newFragment.setArguments(bundle);
-		}
+		} else if (fragmentName.equals(LeaderboardFragment.class.getName()))
+			newFragment = new LeaderboardFragment();
+
 		if (newFragment != null) {
 			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 			transaction.add(R.id.fragment_container, newFragment);

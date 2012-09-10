@@ -264,7 +264,7 @@ public class MyProfileFragment extends SherlockFragment {
 							@Override
 							public void onClick(View v) {
 								// Move to the owner's profile
-								Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
+								Intent intent = new Intent(activity, FriendProfileActivity.class);
 								intent.putExtra("userID", Utility.getInstance().userInfo.getOwnerID());
 								startActivity(intent);
 							}
@@ -331,6 +331,10 @@ public class MyProfileFragment extends SherlockFragment {
 			return true;
 		case R.id.menu_change_status:
 			showStatusDialog();
+			return true;
+		case R.id.menu_leaderboard: // Move to the leaderboard fragment
+			Intent intent = new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", LeaderboardFragment.class.getName());
+			startActivity(intent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

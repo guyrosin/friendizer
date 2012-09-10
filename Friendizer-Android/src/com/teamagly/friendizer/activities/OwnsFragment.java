@@ -63,8 +63,6 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 	 */
 	@Override
 	protected void requestFriends() {
-		usersList.clear();
-
 		task = new FriendsTask();
 		task.execute(Utility.getInstance().userInfo.getId());
 	}
@@ -85,12 +83,13 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 		protected void onPostExecute(final List<User> friends) {
 			if (isCancelled())
 				return;
+			friendsAdapter.clear();
 			TextView empty = (TextView) activity.findViewById(R.id.empty);
 			if (friends.size() == 0)
 				empty.setVisibility(View.VISIBLE);
 			else {
-				usersList.addAll(friends);
-				sort();
+				friendsAdapter.addAll(friends);
+				//				sort();
 				empty.setVisibility(View.GONE);
 			}
 			activity.setSupportProgressBarIndeterminateVisibility(false);

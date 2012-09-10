@@ -3,6 +3,7 @@ package com.teamagly.friendizer;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
@@ -29,10 +30,11 @@ public class GCMIntentService extends GCMBaseIntentService {
 		if ("SERVICE_NOT_AVAILABLE".equals(errorId)) {
 			// optionally retry using exponential back-off
 			// (see Advanced Topics)
-		} else {
+		} else if (errorId.equals("ACCOUNT_MISSING"))
+			startActivity(new Intent(Settings.ACTION_ADD_ACCOUNT).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+		else
 			// Unrecoverable error, log it
 			Log.i(TAG, "Received error: " + errorId);
-		}
 	}
 
 	/*
