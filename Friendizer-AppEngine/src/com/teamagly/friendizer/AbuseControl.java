@@ -30,47 +30,40 @@ public class AbuseControl extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long blockedID = Long.parseLong(request.getParameter("blockedID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + userID + " || id == " + blockedID);
-		List<User> result1 = (List<User>) query.execute();
-		query.closeAll();
-		User user = null, blocked = null;
-		for (User u : result1) {
-			if (u.getId() == userID)
-				user = u;
-			else
-				blocked = u;
-		}
-		if (user == null) {
+		try {
+			pm.getObjectById(User.class, userID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
 			log.severe("User doesn't exist");
 			return;
 		}
-		if (blocked == null) {
+		try {
+			pm.getObjectById(User.class, blockedID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
 			log.severe("The user you want to block doesn't exist");
 			return;
 		}
-		query = pm.newQuery(UserBlock.class);
+		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
-		List<UserBlock> result2 = (List<UserBlock>) query.execute();
+		List<UserBlock> result = (List<UserBlock>) query.execute();
 		query.closeAll();
-		if (!result2.isEmpty()) {
+		if (!result.isEmpty()) {
 			pm.close();
-			log.severe("You've already blocked " + blocked.getName());
-			response.getWriter().println("You've already blocked " + blocked.getName());
+			log.severe("You've already blocked this user");
 			return;
 		}
 		pm.makePersistent(new UserBlock(userID, blockedID));
 		pm.close();
-		response.getWriter().println("You've successfully blocked " + blocked.getName());
+		response.getWriter().println("You've successfully blocked the user");
 	}
 
 	@SuppressWarnings("unchecked")
 	private void blockList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try { // Check if the user exists
+		// Check if the user exists
+		try {
 			pm.getObjectById(User.class, userID);
 		} catch (JDOObjectNotFoundException e) {
 			pm.close();

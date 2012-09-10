@@ -77,6 +77,7 @@ public class ActionsManager extends HttpServlet {
 		SendMessage.sendMessage(buyID, msg.build());
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean isPurchaseLegal(User buyer, User buy) {
 		if (buy.getOwner() == buyer.getId()) {
 			log.severe("You already own the user you want to buy");
@@ -86,6 +87,29 @@ public class ActionsManager extends HttpServlet {
 			log.severe("You don't have enough money to buy this user");
 			return false;
 		}
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserBlock.class);
+		query.setFilter("userID == " + buy.getId() + " && blockedID == " + buyer.getId());
+		List<UserBlock> result1 = (List<UserBlock>) query.execute();
+		query.closeAll();
+		if (!result1.isEmpty()) {
+			log.severe("You are not allowed to buy this user");
+			return false;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.HOUR_OF_DAY, -1);
+		Date lastAllowed = cal.getTime();
+		query = pm.newQuery(Action.class);
+		query.setFilter("buyerID == " + buyer.getId() + " && boughtID == " + buy.getId() + " && date > lastAllowed");
+		query.declareParameters("java.util.Date lastAllowed");
+		List<Action> result2 = (List<Action>) query.execute(lastAllowed);
+		query.closeAll();
+		if (!result2.isEmpty()) {
+			log.severe("You are not allowed to buy this user");
+			return false;
+		}
+		pm.close();
 		return true;
 	}
 	
