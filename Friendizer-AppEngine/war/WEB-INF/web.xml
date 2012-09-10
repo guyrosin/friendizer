@@ -55,6 +55,7 @@
 		<url-pattern>/updateStatus</url-pattern>
 		<url-pattern>/matching</url-pattern>
 		<url-pattern>/mutualLikes</url-pattern>
+		<url-pattern>/dailyBonus</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.jdo.*;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.PersistenceManager;
+import javax.jdo.Query;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.teamagly.friendizer.Notifications.NotificationType;
@@ -31,12 +35,11 @@ public class MarketManager extends HttpServlet {
 		List<User> result = (List<User>) query.execute();
 		query.closeAll();
 		User buyer = null, buy = null;
-		for (User user : result) {
+		for (User user : result)
 			if (user.getId() == userID)
 				buyer = user;
 			else
 				buy = user;
-		}
 		if (buyer == null) {
 			pm.close();
 			log.severe("User doesn't exist");
@@ -64,24 +67,18 @@ public class MarketManager extends HttpServlet {
 		// Check for level up
 		buyer.setLevel(Util.calculateLevel(buyer.getLevel(), buyer.getPoints()));
 		ActionsManager.madeBuy(userID, buyID);
-		AchievementsManager.userBoughtSomeone(buyer, getServletContext());
-		pm.makePersistent(buyer);
-		if (buy.getOwner() > 0) {
-			User preOwner;
+		AchievementsManager.userBoughtSomeone(pm.detachCopy(buyer), getServletContext());
+		if (buy.getOwner() > 0)
 			try {
-				preOwner = pm.getObjectById(User.class, buy.getOwner());
+				User preOwner = pm.getObjectById(User.class, buy.getOwner());
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
-				pm.makePersistent(preOwner);
 			} catch (JDOObjectNotFoundException e) {
 			}
-		}
 		buy.setPoints(buy.getPoints() + 20);
 		// Check for level up
 		buy.setLevel(Util.calculateLevel(buy.getLevel(), buy.getPoints()));
 		buy.setOwner(userID);
-		AchievementsManager.userValueIncreased(buy, getServletContext());
-		AchievementsManager.someoneBoughtUser(buy, getServletContext());
-		pm.makePersistent(buy);
+		AchievementsManager.someoneBoughtUser(pm.detachCopy(buy), getServletContext());
 		pm.close();
 		response.getWriter().println("Purchase Done");
 

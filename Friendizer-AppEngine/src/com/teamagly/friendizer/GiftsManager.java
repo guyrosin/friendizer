@@ -138,15 +138,9 @@ public class GiftsManager extends HttpServlet {
 			return;
 		}
 		sender.setMoney(sender.getMoney() - gift.getValue());
-		pm.makePersistent(sender);
 
 		UserGift userGift = new UserGift(receiverID, senderID, giftID);
-		query = pm.newQuery(UserGift.class);
-		query.setFilter("receiverID == " + receiverID + " && giftID == " + giftID);
-		List<UserGift> result3 = (List<UserGift>) query.execute();
-		query.closeAll();
-		if (result3.isEmpty())
-			pm.makePersistent(userGift);
+		pm.makePersistent(userGift);
 		pm.close();
 		response.getWriter().println("The gift has been sent");
 

@@ -52,7 +52,6 @@ public class LocationManager extends HttpServlet {
 		user.setLongitude(longitude);
 		user.setSince(new Date());
 
-		pm.makePersistent(user);
 		pm.close();
 
 		// TODO: Put it in a new thread
