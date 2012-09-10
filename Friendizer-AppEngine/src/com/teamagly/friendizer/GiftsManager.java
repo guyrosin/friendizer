@@ -36,7 +36,7 @@ public class GiftsManager extends HttpServlet {
 			userGifts(request, response);
 		else if (servlet.intern() == "sendGift")
 			sendGift(request, response);
-		else if (servlet.intern() == "getGift")
+		else
 			getGift(request, response);
 	}
 

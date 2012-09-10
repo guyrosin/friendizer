@@ -30,16 +30,6 @@
 		<url-pattern>/changeLocation</url-pattern>
 		<url-pattern>/nearbyUsers</url-pattern>
 	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>MarketManager</servlet-name>
-		<servlet-class>com.teamagly.friendizer.MarketManager</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>MarketManager</servlet-name>
-		<url-pattern>/buy</url-pattern>
-	</servlet-mapping>
 	
 	<servlet>
 		<servlet-name>UsersManager</servlet-name>
@@ -56,6 +46,7 @@
 		<url-pattern>/matching</url-pattern>
 		<url-pattern>/mutualLikes</url-pattern>
 		<url-pattern>/dailyBonus</url-pattern>
+		<url-pattern>/achievements</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -69,17 +60,6 @@
 		<url-pattern>/getConversation</url-pattern>
 		<url-pattern>/getUnread</url-pattern>
 		<url-pattern>/getInbox</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>AchievementsManager</servlet-name>
-		<servlet-class>com.teamagly.friendizer.AchievementsManager</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>AchievementsManager</servlet-name>
-		<url-pattern>/achievements</url-pattern>
-		<url-pattern>/getAchievement</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -99,6 +79,7 @@
 
 	<servlet-mapping>
 		<servlet-name>ActionsManager</servlet-name>
+		<url-pattern>/buy</url-pattern>
 		<url-pattern>/actionHistory</url-pattern>
 	</servlet-mapping>
 	
