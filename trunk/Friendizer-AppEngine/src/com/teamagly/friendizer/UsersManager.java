@@ -25,10 +25,13 @@ import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
+import com.teamagly.friendizer.model.Achievement;
+import com.teamagly.friendizer.model.AchievementInfo;
 import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.Like;
 import com.teamagly.friendizer.model.Page;
 import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserAchievement;
 import com.teamagly.friendizer.model.UserDevice;
 
 @SuppressWarnings("serial")
@@ -54,6 +57,8 @@ public class UsersManager extends HttpServlet {
 			mutualLikes(request, response);
 		else if (servlet.intern() == "dailyBonus")
 			dailyBonus(request, response);
+		else if (servlet.intern() == "achievements")
+			achievements(request, response);
 	}
 
 	@Override
@@ -418,5 +423,37 @@ public class UsersManager extends HttpServlet {
 			}
 
 		pm.close();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void achievements(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(User.class, userID); // Check if the user exists
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		Query query = pm.newQuery(Achievement.class);
+		List<Achievement> achvs = (List<Achievement>) query.execute();
+		query.closeAll();
+		query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + userID);
+		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
+		query.closeAll();
+		List<AchievementInfo> achvInfos = new ArrayList<AchievementInfo>();
+		for (Achievement achv : achvs) {
+			boolean earned = false;
+			for (UserAchievement userAchv : userAchvs)
+				if (userAchv.getAchievementID() == achv.getId()) {
+					earned = true;
+					break;
+				}
+			achvInfos.add(new AchievementInfo(achv, earned));
+		}
+		pm.close();
+		response.getWriter().println(new Gson().toJson(achvInfos));
 	}
 }
