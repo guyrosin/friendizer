@@ -90,6 +90,16 @@ public class ChatActivity extends SherlockActivity {
 		});
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent.getSerializableExtra("user") != null) {
+			User user = (User) intent.getSerializableExtra("user");
+			if (user != null)
+				destUser = user;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.app.Activity#onResume()
@@ -99,6 +109,7 @@ public class ChatActivity extends SherlockActivity {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					messages = ServerFacade.getConversation(destUser.getId(), 0, 20);
@@ -167,6 +178,7 @@ public class ChatActivity extends SherlockActivity {
 	protected class SendTask extends AsyncTask<Message, Void, Void> {
 		Message msg;
 
+		@Override
 		protected Void doInBackground(Message... msgs) {
 			msg = msgs[0];
 			try {
@@ -177,6 +189,7 @@ public class ChatActivity extends SherlockActivity {
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Void v) {
 			newMsgText.setText(""); // Clear the edit text field
 			messages.add(msg);
