@@ -93,6 +93,7 @@ public class ActionsManager extends HttpServlet {
 		List<UserBlock> result1 = (List<UserBlock>) query.execute();
 		query.closeAll();
 		if (!result1.isEmpty()) {
+			pm.close();
 			log.severe("You are not allowed to buy this user");
 			return false;
 		}
@@ -106,6 +107,7 @@ public class ActionsManager extends HttpServlet {
 		List<Action> result2 = (List<Action>) query.execute(lastAllowed);
 		query.closeAll();
 		if (!result2.isEmpty()) {
+			pm.close();
 			log.severe("You are not allowed to buy this user");
 			return false;
 		}

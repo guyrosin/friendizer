@@ -1,38 +1,19 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.google.gson.Gson;
-import com.restfb.Connection;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
+import com.restfb.*;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.Like;
-import com.teamagly.friendizer.model.Page;
-import com.teamagly.friendizer.model.User;
-import com.teamagly.friendizer.model.UserAchievement;
-import com.teamagly.friendizer.model.UserDevice;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class UsersManager extends HttpServlet {
@@ -220,6 +201,21 @@ public class UsersManager extends HttpServlet {
 			} catch (JDOObjectNotFoundException e) {
 				log.severe("User " + friendID + " doesn't exist");
 			}
+		}
+		
+		query = pm.newQuery(UserBlock.class);
+		query.setFilter("userID == " + userID);
+		List<UserBlock> blockList = (List<UserBlock>) query.execute();
+		query.closeAll();
+		for (UserBlock userBlock : blockList) {
+			int i = 0;
+			for (User friend : friends) {
+				if (friend.getId() == userBlock.getBlockedID())
+					break;
+				i++;
+			}
+			if (i < friends.size())
+				friends.remove(i);
 		}
 
 		response.getWriter().println(new Gson().toJson(friends));
