@@ -21,6 +21,8 @@ public class AbuseControl extends HttpServlet {
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
 		if (servlet.intern() == "block")
 			block(request, response);
+		else if (servlet.intern() == "unblock")
+			unblock(request, response);
 		else
 			blockList(request, response);
 	}
@@ -56,6 +58,39 @@ public class AbuseControl extends HttpServlet {
 		pm.makePersistent(new UserBlock(userID, blockedID));
 		pm.close();
 		response.getWriter().println("You've successfully blocked the user");
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void unblock(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		long blockedID = Long.parseLong(request.getParameter("blockedID"));
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			pm.getObjectById(User.class, userID);
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("User doesn't exist");
+			return;
+		}
+		try {
+			pm.getObjectById(User.class, blockedID);
+		} catch (JDOObjectNotFoundException e) {
+			pm.close();
+			log.severe("The user you want to block doesn't exist");
+			return;
+		}
+		Query query = pm.newQuery(UserBlock.class);
+		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
+		List<UserBlock> result = (List<UserBlock>) query.execute();
+		query.closeAll();
+		if (result.isEmpty()) {
+			pm.close();
+			log.severe("You didn't block this user");
+			return;
+		}
+		pm.deletePersistent(result.get(0));
+		pm.close();
+		response.getWriter().println("You've successfully unblocked the user");
 	}
 
 	@SuppressWarnings("unchecked")

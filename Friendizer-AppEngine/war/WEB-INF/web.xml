@@ -104,6 +104,7 @@
 	<servlet-mapping>
 	    <servlet-name>AbuseControl</servlet-name>
 	    <url-pattern>/block</url-pattern>
+	    <url-pattern>/unblock</url-pattern>
 	    <url-pattern>/blockList</url-pattern>
 	</servlet-mapping>
 	

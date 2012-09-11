@@ -1,22 +1,16 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.ChatMessage;
-import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.*;
 
-public class RelRankingManager extends HttpServlet{
+@SuppressWarnings("serial")
+public class RelRankingManager extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -27,7 +21,6 @@ public class RelRankingManager extends HttpServlet{
 	}
 
 	private void ranking(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		// TODO Auto-generated method stub
 		long user1ID = Long.parseLong(request.getParameter("user1ID"));
 		long user2ID = Long.parseLong(request.getParameter("user2ID"));
 		
@@ -57,6 +50,7 @@ public class RelRankingManager extends HttpServlet{
 
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double actionRanking(long user1ID, long user2ID) {
 		
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -94,6 +88,7 @@ public class RelRankingManager extends HttpServlet{
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double chatRanking(long user1ID, long user2ID) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		
