@@ -3,21 +3,21 @@ package com.teamagly.friendizer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.logging.Logger;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.google.android.gcm.server.Message.Builder;
 import com.google.gson.Gson;
 import com.teamagly.friendizer.Notifications.NotificationType;
-import com.teamagly.friendizer.model.ChatMessage;
+import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String address = request.getRequestURI();
@@ -39,6 +39,9 @@ public class InboxManager extends HttpServlet {
 		long source = Long.parseLong(request.getParameter("src"));
 		long destination = Long.parseLong(request.getParameter("dest"));
 		String text = request.getParameter("text");
+		
+		if (!isSendingLegal(source, destination))
+			return;
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
@@ -53,6 +56,22 @@ public class InboxManager extends HttpServlet {
 		msg.addData("userID", String.valueOf(source));
 		msg.addData("text", message.getText());
 		SendMessage.sendMessage(destination, msg.build());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean isSendingLegal(long source, long destination) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserBlock.class);
+		query.setFilter("userID == " + destination + " && blockedID == " + source);
+		List<UserBlock> result = (List<UserBlock>) query.execute();
+		query.closeAll();
+		if (!result.isEmpty()) {
+			pm.close();
+			log.severe("You are not allowed to send a message to this user");
+			return false;
+		}
+		pm.close();
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")

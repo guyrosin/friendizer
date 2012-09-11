@@ -20,6 +20,7 @@ import com.teamagly.friendizer.Notifications.NotificationType;
 import com.teamagly.friendizer.model.Gift;
 import com.teamagly.friendizer.model.GiftCount;
 import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.UserBlock;
 import com.teamagly.friendizer.model.UserGift;
 
 @SuppressWarnings("serial")
@@ -95,28 +96,23 @@ public class GiftsManager extends HttpServlet {
 		response.getWriter().println(new Gson().toJson(giftCounts));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void sendGift(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long senderID = Long.parseLong(request.getParameter("senderID"));
 		long receiverID = Long.parseLong(request.getParameter("receiverID"));
 		long giftID = Long.parseLong(request.getParameter("giftID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(User.class);
-		query.setFilter("id == " + senderID + " || id == " + receiverID);
-		List<User> result1 = (List<User>) query.execute();
-		query.closeAll();
-		User sender = null, receiver = null;
-		for (User user : result1)
-			if (user.getId() == senderID)
-				sender = user;
-			else
-				receiver = user;
-		if (sender == null) {
+		User sender;
+		try {
+			sender = pm.getObjectById(User.class, senderID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
 			log.severe("The sender doesn't exist");
 			return;
 		}
-		if (receiver == null) {
+		User receiver;
+		try {
+			receiver = pm.getObjectById(User.class, senderID);
+		} catch (JDOObjectNotFoundException e) {
 			pm.close();
 			log.severe("The receiver doesn't exist");
 			return;
@@ -131,10 +127,8 @@ public class GiftsManager extends HttpServlet {
 			response.getWriter().println("This gift doesn't exist");
 			return;
 		}
-		if (sender.getMoney() < gift.getValue()) {
+		if (!isPurchaseLegal(sender, receiver, gift)) {
 			pm.close();
-			log.info("The sender doesn't have enough money to send this gift");
-			response.getWriter().println("Sorry, you don't have enough money to buy this gift");
 			return;
 		}
 		sender.setMoney(sender.getMoney() - gift.getValue());
@@ -150,6 +144,26 @@ public class GiftsManager extends HttpServlet {
 		msg.addData("giftID", String.valueOf(userGift.getGiftID()));
 		msg.addData("giftName", String.valueOf(gift.getName()));
 		SendMessage.sendMessage(receiverID, msg.build());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean isPurchaseLegal(User sender, User receiver, Gift gift) {
+		if (sender.getMoney() < gift.getValue()) {
+			log.severe("The sender doesn't have enough money to send this gift");
+			return false;
+		}
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Query query = pm.newQuery(UserBlock.class);
+		query.setFilter("userID == " + receiver.getId() + " && blockedID == " + sender.getId());
+		List<UserBlock> result = (List<UserBlock>) query.execute();
+		query.closeAll();
+		if (!result.isEmpty()) {
+			pm.close();
+			log.severe("You are not allowed to send a gift to this user");
+			return false;
+		}
+		pm.close();
+		return true;
 	}
 
 	private Gift getGift(List<Gift> gifts, long giftID) {
