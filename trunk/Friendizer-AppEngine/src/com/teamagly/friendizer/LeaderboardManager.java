@@ -26,6 +26,7 @@ public class LeaderboardManager extends HttpServlet {
 
 	@SuppressWarnings("unchecked")
 	private void getLeaderboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
 		String type = request.getParameter("type");
 

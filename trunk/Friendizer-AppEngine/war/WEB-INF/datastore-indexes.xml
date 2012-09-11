@@ -6,4 +6,8 @@
         <property name="source" direction="asc"/>
         <property name="time" direction="desc"/>
     </datastore-index>
+    <datastore-index kind="ChatMessage" ancestor="false" source="manual">
+        <property name="source" direction="asc"/>
+        <property name="__key__" direction="desc"/>
+    </datastore-index>
 </datastore-indexes>
