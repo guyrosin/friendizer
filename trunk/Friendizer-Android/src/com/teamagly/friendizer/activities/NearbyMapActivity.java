@@ -115,9 +115,8 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 
 	protected void zoomMyLocation() {
 		if (Utility.getInstance().getLocation() != null) {
-			Log.w(TAG, "zooming, loc:" + Utility.getInstance().getLocation());
 			mapView.getController().animateTo(Utility.getInstance().getLocation());
-			mapView.getController().setZoom(17);
+			mapView.getController().setZoom(16);
 		} else
 			Toast.makeText(this, "Waiting for location...", Toast.LENGTH_SHORT).show();
 	}
@@ -141,7 +140,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		if (Utility.getInstance().getLocation() != null) {
 			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().userInfo, markerLayout);
 			myItemizedOverlay.addOverlay(myOverlayItem);
-			Log.w(TAG, "added my location, loc:" + Utility.getInstance().getLocation());
 			zoomMyLocation();
 		}
 		mapView.invalidate();
@@ -157,7 +155,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	public BroadcastReceiver locationReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.w(TAG, "Got a location update");
+			// Log.w(TAG, "Got a location update");
 			onResume();
 		}
 	};

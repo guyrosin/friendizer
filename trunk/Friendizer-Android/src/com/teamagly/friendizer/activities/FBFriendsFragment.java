@@ -36,7 +36,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
-		empty.setText("Forever Alone! (you have no Facebook friends)");
+		empty.setText("Forever Alone! (None of your Facebook friends are using friendizer!)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
 
 		ActionBar actionBar = activity.getSupportActionBar();
@@ -90,18 +90,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				Log.e(TAG, "", e);
 				return;
 			}
-			final TextView empty = (TextView) activity.findViewById(R.id.empty);
 			final int len = jsonArray.length();
-			activity.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (len == 0)
-						empty.setVisibility(View.VISIBLE);
-					else
-						empty.setVisibility(View.GONE);
-				}
-			});
-
 			List<Long> ids = new ArrayList<Long>();
 			for (int i = 0; i < len; i++)
 				try {
@@ -120,17 +109,19 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 
 		@Override
 		protected Void doInBackground(List<Long>... userIDsPass) {
+			final List<Long> userIDs = userIDsPass[0];
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					friendsAdapter.clear();
+					if (userIDs.size() == 0)
+						gridView.setEmptyView(activity.findViewById(R.id.empty));
 				}
 			});
-			List<Long> userIDs = userIDsPass[0];
-			for (long userID : userIDs)
+			for (long userID : userIDs) {
+				if (isCancelled())
+					return null;
 				try {
-					if (isCancelled())
-						return null;
 					final User user = ServerFacade.userDetails(userID);
 					if (user != null)
 						activity.runOnUiThread(new Runnable() {
@@ -142,14 +133,12 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				} catch (IOException e) {
 					Log.e(TAG, e.getMessage());
 				}
+			}
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void v) {
-			if (isCancelled())
-				return;
-			//			sort(users);
 			activity.setSupportProgressBarIndeterminateVisibility(false); // Done loading the data
 		}
 	}

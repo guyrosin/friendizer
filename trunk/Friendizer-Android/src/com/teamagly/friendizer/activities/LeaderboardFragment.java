@@ -21,6 +21,9 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.LeaderboardListAdapter;
@@ -38,6 +41,15 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 	protected List<User> usersList;
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+		types = new String[] { "points", "money" };
+		usersList = new ArrayList<User>();
+		selectedType = types[0];
+	}
+
+	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
@@ -47,7 +59,6 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 		ActionBar actionBar = activity.getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 
-		types = new String[] { "points", "money" };
 		Context context = actionBar.getThemedContext();
 		ArrayAdapter<CharSequence> navListAdapter = ArrayAdapter.createFromResource(context, R.array.leaderboard_types_titles, com.actionbarsherlock.R.layout.sherlock_spinner_item);
 		navListAdapter.setDropDownViewResource(com.actionbarsherlock.R.layout.sherlock_spinner_dropdown_item);
@@ -55,8 +66,6 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		actionBar.setListNavigationCallbacks(navListAdapter, this);
 
-		usersList = new ArrayList<User>();
-		selectedType = "points";
 		adapter = new LeaderboardListAdapter(activity, 0, usersList, types[0]);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
@@ -64,9 +73,11 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 
 	@Override
 	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-		selectedType = types[itemPosition];
-		adapter.setLeaderboardType(selectedType);
-		onResume();
+		if (!selectedType.equals(types[itemPosition])) {
+			selectedType = types[itemPosition];
+			adapter.setLeaderboardType(selectedType);
+			onResume();
+		}
 		return true;
 	}
 
@@ -103,14 +114,11 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 	}
 
 	protected void requestLeaderboard() {
-		adapter.clear();
-
 		task = new LeaderboardTask();
 		task.execute(selectedType);
 	}
 
 	class LeaderboardTask extends AsyncTask<String, Void, List<User>> {
-
 		@Override
 		protected List<User> doInBackground(String... types) {
 			try {
@@ -125,18 +133,34 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 		protected void onPostExecute(List<User> users) {
 			if (isCancelled())
 				return;
+			adapter.clear();
 			adapter.addAll(users);
-			adapter.notifyDataSetChanged();
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		User userInfo = usersList.get(position);
+		User userInfo = adapter.getItem(position);
 		// Create an intent with the friend's data
 		Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
 		intent.putExtra("user", userInfo);
 		startActivity(intent);
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_refresh:
+			onResume();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }

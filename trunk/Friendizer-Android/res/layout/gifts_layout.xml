@@ -19,4 +19,14 @@
         android:stretchMode="columnWidth"
         android:verticalSpacing="5dp" />
 
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:paddingBottom="20dp"
+        android:paddingTop="30dp"
+        android:text="No gifts"
+        android:visibility="gone" />
 </LinearLayout>

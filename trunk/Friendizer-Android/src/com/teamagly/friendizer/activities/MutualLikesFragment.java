@@ -20,6 +20,9 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.PageImageAdapter;
@@ -39,6 +42,13 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	int savedPosition = -1;
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+		pagesList = new ArrayList<Page>();
+	}
+
+	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
@@ -54,9 +64,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		actionBar.setTitle(user.getName());
 		actionBar.setSubtitle("Mutual Likes");
 
-		pagesList = new ArrayList<Page>();
 		adapter = new PageImageAdapter(activity, 0, pagesList);
-		adapter.setNotifyOnChange(true);
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(this);
 
@@ -116,8 +124,6 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	}
 
 	protected void requestMutualLikes() {
-		adapter.clear();
-
 		task = new MutualLikesTask();
 		task.execute(user.getId());
 	}
@@ -138,14 +144,10 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		protected void onPostExecute(final List<Page> pages) {
 			if (isCancelled())
 				return;
-			TextView empty = (TextView) activity.findViewById(R.id.empty);
-			if (pages.size() == 0)
-				empty.setVisibility(View.VISIBLE);
-			else {
-				adapter.addAll(pages);
-				empty.setVisibility(View.GONE);
-			}
+			adapter.clear();
+			adapter.addAll(pages);
 			adapter.notifyDataSetChanged();
+			gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}
@@ -163,5 +165,21 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		TextView giftValue = (TextView) dialog.findViewById(R.id.page_type);
 		giftValue.setText(String.valueOf(page.getType()));
 		dialog.show();
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_refresh:
+			onResume();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }
