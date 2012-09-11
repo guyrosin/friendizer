@@ -20,7 +20,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -31,6 +30,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.BaseRequestListener;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
@@ -139,11 +139,8 @@ public class MyProfileFragment extends SherlockFragment {
 		activity.findViewById(R.id.btn_action_history).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO
-				Toast.makeText(activity, "Coming soon!", Toast.LENGTH_SHORT).show();
-				// Intent intent = new Intent(activity, ActionHistoryActivity.class);
-				// intent.putExtra("user", Utility.getInstance().userInfo);
-				// startActivity(intent);
+				// startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
+				// ActionHistoryFragment.class.getName()));
 			}
 		});
 		// Define the status change button
@@ -299,8 +296,10 @@ public class MyProfileFragment extends SherlockFragment {
 					// Get the owner's name and picture from Facebook
 					Bundle params = new Bundle();
 					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(newUserInfo.getOwnerID()), params, new OwnerRequestListener());
-				}
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(newUserInfo.getOwnerID()), params,
+							new OwnerRequestListener());
+				} else
+					activity.setSupportProgressBarIndeterminateVisibility(false);
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
 			}
@@ -316,7 +315,9 @@ public class MyProfileFragment extends SherlockFragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
+		menu.clear();
 		inflater.inflate(R.menu.my_profile_menu, menu);
+		inflater.inflate(R.menu.main_menu, menu);
 	}
 
 	/*
@@ -333,8 +334,23 @@ public class MyProfileFragment extends SherlockFragment {
 			showStatusDialog();
 			return true;
 		case R.id.menu_leaderboard: // Move to the leaderboard fragment
-			Intent intent = new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", LeaderboardFragment.class.getName());
+			Intent intent = new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
+					LeaderboardFragment.class.getName());
 			startActivity(intent);
+			return true;
+		case R.id.menu_block_list: // Move to the block list fragment
+			intent = new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", BlockListFragment.class.getName());
+			startActivity(intent);
+			return true;
+		case R.id.menu_settings: // Move to the settings activity
+			startActivity(new Intent(activity, FriendsPrefs.class));
+			return true;
+		case R.id.menu_feedback:
+			return Utility.startFeedback(activity);
+		case R.id.menu_invite: // Show the Facebook invitation dialog
+			Bundle params = new Bundle();
+			params.putString("message", getString(R.string.invitation_msg));
+			Utility.getInstance().facebook.dialog(activity, "apprequests", params, new BaseDialogListener());
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

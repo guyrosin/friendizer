@@ -84,9 +84,9 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 			if (isCancelled())
 				return;
 			friendsAdapter.clear();
-			friendsAdapter.addAll(friends);
-			if (friends.size() == 0)
-				gridView.setEmptyView(activity.findViewById(R.id.empty));
+			if (friends != null)
+				friendsAdapter.addAll(friends);
+			gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

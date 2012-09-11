@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -108,8 +109,15 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_map: // Move to the map activity
-			startActivity(new Intent(activity, NearbyMapActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+		case R.id.menu_map:
+			// Update the selection in the preferences
+			SharedPreferences settings = Utility.getSharedPreferences();
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean(Utility.PREFER_NEARBY_MAP, true);
+			editor.commit();
+			// Move to the map activity
+			startActivity(new Intent(activity, NearbyMapActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+					| Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
 			activity.overridePendingTransition(0, 0);
 			activity.finish();
 			return true;
@@ -133,9 +141,9 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 		@Override
 		protected void onPostExecute(final List<User> nearbyUsers) {
 			friendsAdapter.clear();
-			friendsAdapter.addAll(nearbyUsers);
-			if (nearbyUsers.size() == 0)
-				gridView.setEmptyView(activity.findViewById(R.id.empty));
+			if (nearbyUsers != null)
+				friendsAdapter.addAll(nearbyUsers);
+			gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

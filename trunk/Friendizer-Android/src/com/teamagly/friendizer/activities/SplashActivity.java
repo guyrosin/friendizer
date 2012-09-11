@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -37,7 +38,8 @@ import com.teamagly.friendizer.utils.SessionStore;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
- * The login flow is as follows: GCM registration -> if FB user ID is saved, friendizer login. Else, FB login to acquire the user ID and then friendizer login
+ * The login flow is as follows: GCM registration -> if FB user ID is saved, friendizer login. Else, FB login to acquire the user
+ * ID and then friendizer login
  */
 public class SplashActivity extends SherlockActivity {
 	private final String TAG = getClass().getName();
@@ -103,11 +105,17 @@ public class SplashActivity extends SherlockActivity {
 			@Override
 			public void run() {
 				dialogFriendizer.dismiss(); // Dismiss the progress dialog
-				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG).show();
+				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
+						.show();
 			}
 		});
 		// Continue to the main activity
-		Intent intent = new Intent(SplashActivity.this, NearbyMapActivity.class);
+		Intent intent = new Intent();
+		SharedPreferences settings = Utility.getSharedPreferences();
+		if (settings.getBoolean(Utility.PREFER_NEARBY_MAP, true))
+			intent.setClass(SplashActivity.this, NearbyMapActivity.class);
+		else
+			intent.setClass(SplashActivity.this, FriendizerActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 		finish();
@@ -193,7 +201,8 @@ public class SplashActivity extends SherlockActivity {
 			public void run() {
 				// if (!Utility.getInstance().facebook.isSessionValid() || fbRequestFailed)
 				// Authorize
-				Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests", "user_likes", "user_birthday", "user_relationships" }, 0, new LoginDialogListener());
+				Utility.getInstance().facebook.authorize(SplashActivity.this, new String[] { "user_activities", "user_interests",
+						"user_likes", "user_birthday", "user_relationships", "email" }, 0, new LoginDialogListener());
 			}
 		});
 	}
@@ -210,8 +219,8 @@ public class SplashActivity extends SherlockActivity {
 
 	@Override
 	public void onDestroy() {
-		//		if (friendizerLoginTask != null)
-		//			friendizerLoginTask.cancel(true);
+		// if (friendizerLoginTask != null)
+		// friendizerLoginTask.cancel(true);
 		unregisterReceiver(mHandleMessageReceiver);
 		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
@@ -219,12 +228,15 @@ public class SplashActivity extends SherlockActivity {
 
 	protected void showErrorDialog(String errorMsg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(errorMsg + ". Please restart the app").setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int id) {
-				finish();
-			}
-		}).show();
+		builder.setMessage(errorMsg + ". Please restart the app")
+				.setCancelable(false)
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						finish();
+					}
+				})
+				.show();
 	}
 
 	/**

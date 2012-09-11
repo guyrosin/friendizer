@@ -44,7 +44,9 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	ActionBar actionBar;
 	User userInfo;
 	long userID;
+	private boolean blocked = false;
 
+	private Menu menu;
 	private ImageView userPic;
 	private TextView txtName;
 	private TextView txtStatus;
@@ -88,6 +90,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtLevel = (TextView) findViewById(R.id.level);
 		xpBar = (TextProgressBar) findViewById(R.id.xp_bar);
 
+		blocked = intent.getBooleanExtra("blocked", false);
 		Object userObject = intent.getSerializableExtra("user");
 		if (userObject == null) {
 			// If passed the user's ID, fetching the details will be done in onResume()
@@ -107,7 +110,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			@Override
 			public void onClick(View v) {
 				if (userInfo.getMatching() > 0)
-					startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", MutualLikesFragment.class.getName()).putExtra("user", userInfo));
+					startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
+							MutualLikesFragment.class.getName()).putExtra("user", userInfo));
 			}
 		});
 	}
@@ -145,6 +149,10 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.friend_menu, menu);
+		this.menu = menu;
+		MenuItem blockItem = menu.findItem(R.id.menu_block);
+		if (blockItem != null)
+			blockItem.setTitle(blocked ? "Unblock" : "Block");
 		return true;
 	}
 
@@ -177,17 +185,32 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			return true;
 		case R.id.menu_block: // Show a confirmation dialog
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Block " + userInfo.getName() + "?").setMessage("You'll automatically ignore every action from him").setCancelable(false).setPositiveButton("Block", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int id) {
-					new BlockTask().execute();
-				}
-			}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			builder.setCancelable(false);
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();
 				}
-			}).setIcon(android.R.drawable.ic_dialog_alert);
+			});
+			builder.setIcon(android.R.drawable.ic_dialog_alert);
+			if (blocked)
+				builder.setTitle("Unblock " + userInfo.getName() + "?")
+						.setMessage("You'll be able to get connected again")
+						.setPositiveButton("Unlock", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int id) {
+								new UnblockTask().execute();
+							}
+						});
+			else
+				builder.setTitle("Block " + userInfo.getName() + "?")
+						.setMessage("You won't hear anything from " + userInfo.getFirstName())
+						.setPositiveButton("Block", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int id) {
+								new BlockTask().execute();
+							}
+						});
 			builder.show();
 			return true;
 		default:
@@ -210,9 +233,33 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if (result)
+			if (result) {
 				Toast.makeText(getBaseContext(), userInfo.getName() + " has been blocked!", Toast.LENGTH_LONG).show();
-			else
+				blocked = true;
+			} else
+				Toast.makeText(getBaseContext(), "Couldn't block " + userInfo.getName(), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	protected class UnblockTask extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Void... v) {
+			try {
+				ServerFacade.unblock(Utility.getInstance().userInfo.getId(), userInfo.getId());
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (result) {
+				Toast.makeText(getBaseContext(), userInfo.getName() + " has been unblocked!", Toast.LENGTH_LONG).show();
+				blocked = false;
+			} else
 				Toast.makeText(getBaseContext(), "Couldn't block " + userInfo.getName(), Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -244,11 +291,16 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			// txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
 			txtGender.setText(genderStr);
 		}
+		if (menu != null) {
+			MenuItem blockItem = menu.findItem(R.id.menu_block);
+			if (blockItem != null)
+				blockItem.setTitle(blocked ? "Unblock" : "Block");
+		}
 	}
 
 	protected void updateButtons() {
-		// Check if I'm connected to this user
-		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId()) || (userInfo.getId() == Utility.getInstance().userInfo.getOwnerID())) {
+		// Check if I bought this user (TODO: temporary! currently the only diff is the buy button)
+		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())) {
 			// Show the relevant buttons layout
 			buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
 			buttonsTable.setVisibility(View.VISIBLE);
@@ -438,7 +490,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					// Get the owner's name and picture from Facebook
 					Bundle params = new Bundle();
 					params.putString("fields", "name, picture");
-					Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params, new OwnerRequestListener());
+					Utility.getInstance().mAsyncRunner.request(String.valueOf(userInfo.getOwnerID()), params,
+							new OwnerRequestListener());
 				}
 			} catch (Exception e) {
 				Log.w(TAG, "", e);

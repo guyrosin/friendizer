@@ -214,7 +214,8 @@ public final class ServerFacade {
 	}
 
 	public static void changeLocation(long userID, double latitude, double longitude) throws IOException {
-		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude=" + longitude);
+		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude="
+				+ longitude);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}
@@ -251,7 +252,8 @@ public final class ServerFacade {
 	}
 
 	public static void sendMessage(Message msg) throws IOException, URISyntaxException {
-		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text=" + msg.getText();
+		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text="
+				+ msg.getText();
 		// Use URI to escape characters (whitespace and non-ASCII characters)
 		URI uri = new URI(scheme, serverAddress, "/send", params, null);
 		URL url = new URL(uri.toASCIIString());
@@ -285,7 +287,8 @@ public final class ServerFacade {
 	 * @throws Exception
 	 */
 	public static List<Message> getConversation(long userID, long from, long to) throws IOException {
-		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2=" + userID + "&from=" + from + "&to=" + to);
+		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2="
+				+ userID + "&from=" + from + "&to=" + to);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
 		}.getType());
@@ -372,6 +375,12 @@ public final class ServerFacade {
 
 	public static void block(long userID, long blockedID) throws IOException {
 		URL url = new URL(fullServerAddress + "block?userID=" + userID + "&blockedID=" + blockedID);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		in.close();
+	}
+
+	public static void unblock(long userID, long blockedID) throws IOException {
+		URL url = new URL(fullServerAddress + "unblock?userID=" + userID + "&blockedID=" + blockedID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}

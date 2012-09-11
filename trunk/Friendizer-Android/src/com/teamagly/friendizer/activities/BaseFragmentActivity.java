@@ -49,6 +49,10 @@ public class BaseFragmentActivity extends SherlockFragmentActivity {
 			newFragment.setArguments(bundle);
 		} else if (fragmentName.equals(LeaderboardFragment.class.getName()))
 			newFragment = new LeaderboardFragment();
+		else if (fragmentName.equals(BlockListFragment.class.getName()))
+			newFragment = new BlockListFragment();
+		else if (fragmentName.equals(ActionHistoryFragment.class.getName()))
+			newFragment = new ActionHistoryFragment();
 
 		if (newFragment != null) {
 			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -79,9 +83,9 @@ public class BaseFragmentActivity extends SherlockFragmentActivity {
 		case android.R.id.home:
 			finish();
 			return true;
-			//		case R.id.menu_refresh:
-			//			onResume();
-			//			return true;
+			// case R.id.menu_refresh:
+			// onResume();
+			// return true;
 		case R.id.menu_feedback:
 			return Utility.startFeedback(this);
 		case R.id.menu_settings: // Move to the settings activity

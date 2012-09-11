@@ -68,6 +68,7 @@ public class Utility extends Application {
 	 * Key for shared preferences.
 	 */
 	private static final String SHARED_PREFS = "friendizer".toUpperCase(Locale.ENGLISH) + "_PREFS";
+	public static final String PREFER_NEARBY_MAP = "prefer_nearby_map";
 
 	/**
 	 * Helper method to get a SharedPreferences instance.
@@ -123,7 +124,8 @@ public class Utility extends Application {
 
 	public static int getOrientation(Context context, Uri photoUri) {
 		/* it's on the external media. */
-		Cursor cursor = context.getContentResolver().query(photoUri, new String[] { MediaStore.Images.ImageColumns.ORIENTATION }, null, null, null);
+		Cursor cursor = context.getContentResolver().query(photoUri, new String[] { MediaStore.Images.ImageColumns.ORIENTATION },
+				null, null, null);
 
 		if (cursor.getCount() != 1)
 			return -1;

@@ -85,8 +85,10 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 			@Override
 			protected void onPostExecute(List<Gift> gifts) {
 				giftsList.clear();
-				giftsList.addAll(gifts);
-				adapter.notifyDataSetChanged();
+				if (gifts != null) {
+					giftsList.addAll(gifts);
+					adapter.notifyDataSetChanged();
+				}
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 				setSupportProgressBarIndeterminateVisibility(false);
 			}
@@ -101,17 +103,20 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 		final Gift gift = giftsList.get(position);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?").setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int id) {
-				new SendGiftTask().execute(gift);
-			}
-		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
+		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?")
+				.setCancelable(false)
+				.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						new SendGiftTask().execute(gift);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
 		builder.show();
 	}
 
