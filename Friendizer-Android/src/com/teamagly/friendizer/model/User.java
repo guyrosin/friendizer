@@ -51,14 +51,19 @@ public class User implements Serializable {
 
 	private boolean fbUpdate;
 
-	List<User> ownsList = new ArrayList<User>();
+	private List<User> ownsList = new ArrayList<User>();
 
-	long distance = 0;
+	private int ownsNum = 0;
 
-	int matching = 0;
+	private long distance = 0;
+
+	private int matching = 0;
+
+	private boolean blocked = false;
 
 	public enum FBQueryType {
-		GRAPH, FQL
+		GRAPH,
+		FQL
 	}
 
 	private static final long serialVersionUID = 8643574985757595599L;
@@ -392,6 +397,22 @@ public class User implements Serializable {
 	 */
 	public void setFbUpdate(boolean fbUpdate) {
 		this.fbUpdate = fbUpdate;
+	}
+
+	public int getOwnsNum() {
+		return ownsNum;
+	}
+
+	public void setOwnsNum(int ownsNum) {
+		this.ownsNum = ownsNum;
+	}
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean blocked) {
+		this.blocked = blocked;
 	}
 
 	public void updateFacebookData(JSONObject jsonObject) {

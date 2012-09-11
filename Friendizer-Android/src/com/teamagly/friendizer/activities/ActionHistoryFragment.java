@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -25,19 +21,19 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
-import com.teamagly.friendizer.adapters.PageImageAdapter;
-import com.teamagly.friendizer.model.Page;
+import com.teamagly.friendizer.adapters.ActionsAdapter;
+import com.teamagly.friendizer.model.Action;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class MutualLikesFragment extends SherlockFragment implements OnItemClickListener {
+public class ActionHistoryFragment extends SherlockFragment {
 	private final String TAG = getClass().getName();
-	protected MutualLikesTask task = new MutualLikesTask();
+	protected ActionHistoryTask task = new ActionHistoryTask();
 	SherlockFragmentActivity activity;
-	PageImageAdapter adapter;
+	ActionsAdapter adapter;
 	protected GridView gridView;
-	protected List<Page> pagesList;
+	protected List<Action> ActionsList;
 	protected User user;
 	int savedPosition = -1;
 
@@ -45,7 +41,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		pagesList = new ArrayList<Page>();
+		ActionsList = new ArrayList<Action>();
 	}
 
 	@Override
@@ -54,24 +50,16 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		activity = getSherlockActivity();
 
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
-		empty.setText("No mutual likes");
+		empty.setText("No history");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-		Bundle args = getArguments();
-		if (args != null)
-			user = (User) args.getSerializable("user");
+		user = Utility.getInstance().userInfo;
 
 		ActionBar actionBar = activity.getSupportActionBar();
 		actionBar.setTitle(user.getName());
 		actionBar.setSubtitle("Mutual Likes");
 
-		adapter = new PageImageAdapter(activity, 0, pagesList);
+		adapter = new ActionsAdapter(activity, 0, ActionsList);
 		gridView.setAdapter(adapter);
-		gridView.setOnItemClickListener(this);
-
-		// Restore scroll position
-		// if (savedInstanceState != null)
-		// savedPosition = savedInstanceState.getInt("savedPosition");
-		// int savedListTop = savedInstanceState.getInt("savedListTop");
 	}
 
 	/*
@@ -92,9 +80,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
-		// if (savedPosition >= 0) // initialized to -1
-		// gridView.setSelection(savedPosition);
-		requestMutualLikes();
+		requestHistory();
 	}
 
 	/*
@@ -108,65 +94,35 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		ImageLoader.getInstance().stop(); // Stop loading the images
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		// Save scroll position
-		int savedPosition = gridView.getFirstVisiblePosition();
-		View firstVisibleView = gridView.getChildAt(0);
-		int savedListTop = (firstVisibleView == null) ? 0 : firstVisibleView.getTop();
-		outState.putInt("savedListTop", savedListTop);
-		outState.putInt("savedPosition", savedPosition);
-	}
-
-	protected void requestMutualLikes() {
-		task = new MutualLikesTask();
+	protected void requestHistory() {
+		task = new ActionHistoryTask();
 		task.execute(user.getId());
 	}
 
-	class MutualLikesTask extends AsyncTask<Long, Void, List<Page>> {
+	class ActionHistoryTask extends AsyncTask<Long, Void, List<Action>> {
 
 		@Override
-		protected List<Page> doInBackground(Long... userIDs) {
+		protected List<Action> doInBackground(Long... userIDs) {
 			try {
-				return ServerFacade.mutualLikes(Utility.getInstance().userInfo.getId(), userIDs[0]);
+				return ServerFacade.actionHistory(userIDs[0]);
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
-			return new ArrayList<Page>();
+			return new ArrayList<Action>();
 		}
 
 		@Override
-		protected void onPostExecute(final List<Page> pages) {
+		protected void onPostExecute(final List<Action> Actions) {
 			if (isCancelled())
 				return;
 			adapter.clear();
-			if (pages != null) {
-				adapter.addAll(pages);
+			if (Actions != null) {
+				adapter.addAll(Actions);
 				adapter.notifyDataSetChanged();
 			}
 			gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Page page = adapter.getItem(position);
-		// Show a dialog with info
-		Dialog dialog = new Dialog(activity);
-
-		dialog.setContentView(R.layout.page_info_dialog);
-		ImageView image = (ImageView) dialog.findViewById(R.id.page_pic);
-		ImageLoader.getInstance().displayImage(page.getPicURL(), image);
-		dialog.setTitle(page.getName());
-		TextView giftValue = (TextView) dialog.findViewById(R.id.page_type);
-		giftValue.setText(String.valueOf(page.getType()));
-		dialog.show();
 	}
 
 	@Override

@@ -35,9 +35,11 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 		int selectedTab = 0;
 		if (savedInstanceState != null)
 			selectedTab = savedInstanceState.getInt("tab");
-		selectedTab = getIntent().getIntExtra("tab", selectedTab);
-		if (getIntent().getBooleanExtra("nearby_list", false))
-			selectedTab = -1;
+		if (selectedTab == 0) {
+			selectedTab = getIntent().getIntExtra("tab", selectedTab);
+			if (getIntent().getBooleanExtra("nearby_list", false))
+				selectedTab = -1;
+		}
 		setTabs(selectedTab);
 	}
 
@@ -59,6 +61,7 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.replace(android.R.id.content, Fragment.instantiate(this, PeopleRadarFragment.class.getName()));
 			ft.commit();
+			getIntent().removeExtra("nearby_list"); // Reset
 		} else {
 			int tab = getIntent().getIntExtra("tab", 0);
 			if (tab > 0) // Move to the given tab

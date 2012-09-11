@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.utils.Utility;
 
 public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 	private final String TAG = getClass().getName();
@@ -54,14 +54,20 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 		int imageResource = getContext().getResources().getIdentifier(uri, null, getContext().getPackageName());
 		try {
 			Drawable image = getContext().getResources().getDrawable(imageResource);
-			if (!achievement.isEarned()) // If the achievement is earned, display a grayscale icon
-				image = Utility.convertToGrayscale(image);
+			// if (!achievement.isEarned()) // If the achievement is earned, display a grayscale icon
+			// image = Utility.convertToGrayscale(image);
 			holder.icon.setImageDrawable(image);
 		} catch (NotFoundException e) { // The image wasn't found
 			Log.e(TAG, e.getMessage());
 		}
 
-		holder.title.setText(achievement.getTitle());
+		String titleWithEarned = "";
+		if (achievement.isEarned())
+			titleWithEarned = "<b><font color='#00CC00'>&#10003;<font></b> " + achievement.getTitle();
+		else
+			titleWithEarned = "<b><font color='#5C0000'>&#10007;<font></b> " + achievement.getTitle();
+		holder.title.setText(Html.fromHtml(titleWithEarned));
+
 		holder.description.setText(achievement.getDescription());
 		holder.reward.setText(String.valueOf(achievement.getReward()));
 		return hView;

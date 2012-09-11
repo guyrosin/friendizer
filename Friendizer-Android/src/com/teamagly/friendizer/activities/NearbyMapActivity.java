@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
@@ -258,7 +259,13 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_list: // Move to the nearby users list activity
+		case R.id.menu_list:
+			// Update the selection in the preferences
+			SharedPreferences settings = Utility.getSharedPreferences();
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putBoolean(Utility.PREFER_NEARBY_MAP, false);
+			editor.commit();
+			// Move to the nearby users list activity
 			Intent intent = new Intent(this, FriendizerActivity.class).putExtra("nearby_list", true);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(intent);
@@ -312,7 +319,8 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		int selectedTabID = tabs.get(tab.getPosition());
 		if (selectedTabID != R.string.nearby) {
-			startActivity(new Intent(this, FriendizerActivity.class).putExtra("tab", selectedTabID).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+			startActivity(new Intent(this, FriendizerActivity.class).putExtra("tab", selectedTabID).setFlags(
+					Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NO_ANIMATION));
 			overridePendingTransition(0, 0);
 			finish();
 		}
