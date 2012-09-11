@@ -35,7 +35,13 @@ public class MessageHandler {
 	private final static String TAG = "MessageHandler";
 	private final static int APP_ICON_RES_ID = R.drawable.ic_launcher;
 
-	public static enum NotificationType {
+	private long userID;
+	private NotificationType type;
+	private Context context;
+	private Builder builder;
+	private User user;
+
+	public enum NotificationType {
 		CHAT,
 		BUY,
 		GFT,
@@ -45,57 +51,68 @@ public class MessageHandler {
 	}
 
 	public void handleMessage(Intent intent) {
-		Context context = FriendizerApp.getContext();
-		NotificationType type = NotificationType.valueOf(intent.getStringExtra("type"));
+		context = FriendizerApp.getContext();
+		type = NotificationType.valueOf(intent.getStringExtra("type"));
 		String userIDStr = intent.getStringExtra(Utility.USER_ID);
-		Long userID = Long.valueOf(userIDStr);
+		userID = Long.valueOf(userIDStr);
 		if (type == NotificationType.CHAT) { // Chat message
 			String chatMsg = intent.getStringExtra("text");
-			chat(context, userID, chatMsg);
+			chat(chatMsg);
 		} else if (type == NotificationType.ACH) { // Achievement earned
 			String title = intent.getStringExtra("title");
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, AchievementsActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "Achievement Earned", title, null, notificationIntent, "Achievement earned!");
+			generateNotification("Achievement Earned", title, null, notificationIntent, "Achievement earned!");
 		} else if (type == NotificationType.BUY)
 			bought(context, userID);
 		else if (type == NotificationType.GFT) { // Received a gift
 			String giftName = intent.getStringExtra("giftName");
-			gift(context, userID, giftName);
+			gift(giftName);
 		} else if (type == NotificationType.NEARBY) { // There's a nearby friend
 			String text = intent.getStringExtra("text");
-			nearby(context, userID, text);
+			nearby(text);
 		}
 	}
 
 	/**
 	 * Display a notification containing the given string.
 	 */
-	public static void generateNotification(Context context, String title, String message, String picURL, Intent intent, String tickerText) {
+	public void generateNotification(String title, String message, String picURL, Intent intent, String tickerText) {
 		final long when = System.currentTimeMillis();
+		builder = new Builder(context);
+		builder.setContentTitle(title);
+		builder.setContentText(message);
+		builder.setSmallIcon(APP_ICON_RES_ID);
+		builder.setTicker(tickerText);
+		int requestCode = 0;
+		if (type == NotificationType.CHAT) {
+			requestCode = Long.valueOf(userID).hashCode(); // Create a unique code for chat notifications
+			builder.setContentIntent(PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT
+					| Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+		} else
+			builder.setContentIntent(PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT
+					| Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+		builder.setWhen(when);
+		builder.setAutoCancel(true);
+
 		if (picURL != null && picURL.length() > 0)
 			try {
 				// Fetch the image
 				URL url = new URL(picURL);
-				Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
-				new FetchImageTask(context, builder).execute(url);
+				new FetchImageTask(this).execute(url);
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
-		else {
-			Builder builder = new Builder(context).setContentTitle(title).setContentText(message).setSmallIcon(APP_ICON_RES_ID).setTicker(tickerText).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setWhen(when).setAutoCancel(true);
+		else
 			notify(context, builder);
-		}
 	}
 
 	static class FetchImageTask extends AsyncTask<URL, Void, Bitmap> {
-		Builder builder;
-		Context context;
+		MessageHandler messageHandler;
 
-		public FetchImageTask(Context context, Builder builder) {
-			this.builder = builder;
-			this.context = context;
+		public FetchImageTask(MessageHandler messageHandler) {
+			this.messageHandler = messageHandler;
 		}
 
 		@Override
@@ -111,28 +128,36 @@ public class MessageHandler {
 		@Override
 		protected void onPostExecute(Bitmap bitmap) {
 			try {
-				builder.setLargeIcon(bitmap);
-				MessageHandler.notify(context, builder);
+				messageHandler.builder.setLargeIcon(bitmap);
+				messageHandler.notify(messageHandler.context, messageHandler.builder);
 			} catch (Exception e) {
 				Log.w(TAG, "", e);
 			}
 		}
 	}
 
-	private static void notify(Context context, Builder builder) {
-		SharedPreferences settings = Utility.getSharedPreferences();
-		int notificatonID = settings.getInt("notificationID", 0);
-
+	private void notify(Context context, Builder builder) {
 		NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(notificatonID, builder.build());
+		int notificationID;
+		if (type == NotificationType.CHAT) { // For chat notifications, stack all messages from one user
+			notificationID = Long.valueOf(userID).hashCode(); // Convert the long ID to a unique integer
+			nm.cancel(notificationID); // Cancel the old notification (because we want the new ticker to appear)
+		} else { // For other notifications, just use a unique ID
+			SharedPreferences settings = Utility.getSharedPreferences();
+			notificationID = settings.getInt("notificationID", 0);
+		}
+		nm.notify(notificationID, builder.build());
 
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("notificationID", ++notificatonID % 32);
-		editor.commit();
-		playNotificationSound(context);
+		if (type != NotificationType.CHAT) {
+			SharedPreferences settings = Utility.getSharedPreferences();
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putInt("notificationID", ++notificationID % 32);
+			editor.commit();
+		}
+		playNotificationSound();
 	}
 
-	private static void playNotificationSound(Context context) {
+	private void playNotificationSound() {
 		Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		if (uri != null) {
 			Ringtone rt = RingtoneManager.getRingtone(context, uri);
@@ -143,16 +168,15 @@ public class MessageHandler {
 		}
 	}
 
-	private void chat(Context context, long userID, final String msg) {
+	private void chat(final String msg) {
 		try {
 			// Load the user's details
-			final User user = ServerFacade.userDetails(userID);
+			user = ServerFacade.userDetails(userID);
 			// Send a broadcast intent to the chat activity
 			Intent broadcastIntent = new Intent(ChatActivity.ACTION_UPDATE_CHAT);
-			broadcastIntent.putExtra("userID", user.getId());
+			broadcastIntent.putExtra("userID", userID);
 			broadcastIntent.putExtra("text", msg);
 			context.sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
-
 				@Override
 				public void onReceive(Context context, Intent intent) {
 					int result = getResultCode();
@@ -160,7 +184,8 @@ public class MessageHandler {
 						// Show a status bar notification
 						Intent notificationIntent = new Intent(context, ChatActivity.class);
 						notificationIntent.putExtra("user", user);
-						generateNotification(context, user.getName(), msg, user.getPicURL(), notificationIntent, "New message from " + user.getFirstName());
+						generateNotification(user.getName(), msg, user.getPicURL(), notificationIntent, "New message from "
+								+ user.getFirstName());
 					}
 				}
 			}, null, Activity.RESULT_CANCELED, null, null);
@@ -169,28 +194,29 @@ public class MessageHandler {
 		}
 	}
 
-	private void gift(Context context, long userID, String giftName) {
+	private void gift(String giftName) {
 		// Load the user's details
 		try {
 			User user = ServerFacade.userDetails(userID);
 			// Show a status bar notification
-			// TODO: put the gift ID in the intent...
+			// TODO: put the gift ID in the intent and show a cool dialog...
 			Intent notificationIntent = new Intent(context, GiftsUserActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, "Received a " + giftName, "From " + user.getName(), user.getPicURL(), notificationIntent, "New gift from " + user.getFirstName());
+			generateNotification("Received a " + giftName, "From " + user.getName(), user.getPicURL(), notificationIntent,
+					"New gift from " + user.getFirstName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void nearby(Context context, long userID, String text) {
+	private void nearby(String text) {
 		// Load the user's details
 		try {
-			User user = ServerFacade.userDetails(userID);
+			user = ServerFacade.userDetails(userID);
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
 			notificationIntent.putExtra("user", Utility.getInstance().userInfo);
-			generateNotification(context, user.getName(), text, user.getPicURL(), notificationIntent, user.getFirstName() + " is nearby!");
+			generateNotification(user.getName(), text, user.getPicURL(), notificationIntent, user.getFirstName() + " is nearby!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}
@@ -199,11 +225,12 @@ public class MessageHandler {
 	private void bought(Context context, long userID) {
 		// Load the user's details
 		try {
-			User user = ServerFacade.userDetails(userID);
+			user = ServerFacade.userDetails(userID);
 			// Show a status bar notification
 			Intent notificationIntent = new Intent(context, FriendProfileActivity.class);
 			notificationIntent.putExtra("user", user);
-			generateNotification(context, "You've been bought in friendizer", "By " + user.getName(), user.getPicURL(), notificationIntent, user.getFirstName() + " has just bought you!");
+			generateNotification("You've been bought in friendizer", "By " + user.getName(), user.getPicURL(),
+					notificationIntent, user.getFirstName() + " has just bought you!");
 		} catch (IOException e) {
 			Log.e(TAG, "", e);
 		}
