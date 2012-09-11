@@ -56,7 +56,7 @@ public class SplashActivity extends SherlockActivity {
 			return;
 
 		userID = SessionStore.restoreID(context);
-		Log.w(TAG, "UserID from prefs = " + userID);
+		Log.w(TAG, "User ID from prefs = " + userID);
 		if (userID == 0) { // Need to login to Facebook
 			if (loginButton.getVisibility() == View.GONE) {
 				loginButton.setVisibility(View.VISIBLE);
@@ -88,7 +88,7 @@ public class SplashActivity extends SherlockActivity {
 			}
 			Utility.getInstance().facebook.setAccessToken(accessToken);
 			Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
-			//TODO
+
 			if (result)
 				continueToFriendizer();
 			else {

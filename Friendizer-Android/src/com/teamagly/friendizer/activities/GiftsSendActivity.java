@@ -71,7 +71,6 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		giftsList.clear();
 		new AsyncTask<Void, Void, List<Gift>>() {
 			@Override
 			protected List<Gift> doInBackground(Void... params) {
@@ -85,8 +84,10 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 
 			@Override
 			protected void onPostExecute(List<Gift> gifts) {
+				giftsList.clear();
 				giftsList.addAll(gifts);
 				adapter.notifyDataSetChanged();
+				gridView.setEmptyView(activity.findViewById(R.id.empty));
 				setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}.execute();
@@ -100,21 +101,23 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
 		final Gift gift = giftsList.get(position);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?")
-				.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						new SendGiftTask().execute(gift);
-					}
-				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
+		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?").setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				new SendGiftTask().execute(gift);
+			}
+		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 		builder.show();
 	}
 
 	protected class SendGiftTask extends AsyncTask<Gift, Void, Void> {
 
+		@Override
 		protected Void doInBackground(Gift... gifts) {
 			try {
 				ServerFacade.sendGift(Utility.getInstance().userInfo.getId(), destUser.getId(), gifts[0].getId());
@@ -125,6 +128,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Void v) {
 			Toast.makeText(activity, "Gift sent!", Toast.LENGTH_LONG).show();
 		}

@@ -76,7 +76,6 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
-		giftsList.clear();
 		new AsyncTask<Void, Void, List<GiftCount>>() {
 			@Override
 			protected List<GiftCount> doInBackground(Void... params) {
@@ -90,6 +89,7 @@ public class GiftsUserActivity extends SherlockActivity implements OnItemClickLi
 
 			@Override
 			protected void onPostExecute(List<GiftCount> gifts) {
+				giftsList.clear();
 				giftsList.addAll(gifts);
 				adapter.notifyDataSetChanged();
 				setSupportProgressBarIndeterminateVisibility(false);

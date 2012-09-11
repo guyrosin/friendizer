@@ -4,8 +4,6 @@
 package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -29,7 +27,6 @@ import com.teamagly.friendizer.adapters.FriendsAdapter;
 import com.teamagly.friendizer.adapters.FriendsImageAdapter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
-import com.teamagly.friendizer.utils.Comparators;
 import com.teamagly.friendizer.utils.Utility;
 
 /**
@@ -37,7 +34,7 @@ import com.teamagly.friendizer.utils.Utility;
  * data in order to stop the loading indicator
  */
 public abstract class AbstractFriendsListFragment extends SherlockFragment implements OnItemClickListener {
-	protected static String SORT_BY = "sort";
+	protected static String SORT_BY = FriendsAdapter.SORT_BY;
 	@SuppressWarnings("unused")
 	private final String TAG = "AbstractFriendsListFragment";
 	protected GridView gridView;
@@ -71,7 +68,6 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		sortBy = settings.getInt(SORT_BY, 0);
 
 		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
-		friendsAdapter.setNotifyOnChange(true);
 
 		// Restore scroll position
 		if (savedInstanceState != null)
@@ -154,8 +150,8 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 				@Override
 				public void onClick(DialogInterface dialog, int item) {
 					if (item != sortBy) {
-						//						sort(item);
 						sortBy = item;
+						friendsAdapter.setSortBy(sortBy);
 						// Save the new order
 						SharedPreferences settings = Utility.getSharedPreferences();
 						SharedPreferences.Editor editor = settings.edit();
@@ -182,37 +178,13 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		}
 	}
 
-	protected void sort(List<User> users, int sortBy) {
-		switch (sortBy) {
-		case 0:
-			Collections.sort(users, (new Comparators()).new AlphabetComparator());
-			break;
-		case 1:
-			Collections.sort(users, (new Comparators()).new ValueComparator());
-			break;
-		}
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				friendsAdapter.notifyDataSetChanged(); // Notify the adapter
-			}
-		});
-	}
-
-	/**
-	 * Sorts the users list by default
-	 */
-	protected void sort(List<User> users) {
-		sort(users, sortBy);
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
 	 */
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
-		User userInfo = usersList.get(position);
+		User userInfo = friendsAdapter.getItem(position);
 		// Create an intent with the friend's data
 		Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
 		intent.putExtra("user", userInfo);

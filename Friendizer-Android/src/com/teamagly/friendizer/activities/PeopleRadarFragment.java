@@ -10,7 +10,6 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -134,14 +133,9 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 		@Override
 		protected void onPostExecute(final List<User> nearbyUsers) {
 			friendsAdapter.clear();
-			TextView empty = (TextView) activity.findViewById(R.id.empty);
+			friendsAdapter.addAll(nearbyUsers);
 			if (nearbyUsers.size() == 0)
-				empty.setVisibility(View.VISIBLE);
-			else {
-				friendsAdapter.addAll(nearbyUsers);
-				//				sort();
-				empty.setVisibility(View.GONE);
-			}
+				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

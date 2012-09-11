@@ -7,7 +7,6 @@ import java.util.List;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -48,8 +47,6 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 	 */
 	@Override
 	protected void requestFriends() {
-		friendsAdapter.clear();
-
 		task = new FriendsTask();
 		task.execute(Utility.getInstance().userInfo.getId());
 	}
@@ -70,14 +67,9 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 		protected void onPostExecute(final List<User> friends) {
 			if (isCancelled())
 				return;
-			TextView empty = (TextView) activity.findViewById(R.id.empty);
-			if (friends.size() == 0)
-				empty.setVisibility(View.VISIBLE);
-			else {
-				friendsAdapter.addAll(friends);
-				//				sort();
-				empty.setVisibility(View.GONE);
-			}
+			friendsAdapter.clear();
+			friendsAdapter.addAll(friends);
+			gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

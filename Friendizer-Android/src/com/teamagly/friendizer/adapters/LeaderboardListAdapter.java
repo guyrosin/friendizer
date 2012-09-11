@@ -21,7 +21,7 @@ public class LeaderboardListAdapter extends FriendsAdapter {
 	private String leaderboardType;
 
 	public LeaderboardListAdapter(Context context, int textViewResourceId, List<User> objects, String leaderboardType) {
-		super(context, textViewResourceId, objects);
+		super(context, textViewResourceId, objects, false);
 		this.leaderboardType = leaderboardType;
 	}
 
@@ -56,7 +56,7 @@ public class LeaderboardListAdapter extends FriendsAdapter {
 			fieldTitle = "Points: ";
 			field = String.valueOf(userInfo.getPoints());
 		} else if (leaderboardType.equals("money")) {
-			fieldTitle = "Money: ";
+			fieldTitle = "Coins: ";
 			field = String.valueOf(userInfo.getMoney());
 		}
 		holder.fieldTitle.setText(fieldTitle);
