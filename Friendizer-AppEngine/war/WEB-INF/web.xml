@@ -144,4 +144,14 @@
 	    <url-pattern>/extendAccessTokens</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+	    <servlet-name>WelcomeServlet</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.WelcomeServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>WelcomeServlet</servlet-name>
+	    <url-pattern>/welcome_email</url-pattern>
+	</servlet-mapping>
+	
 </web-app>

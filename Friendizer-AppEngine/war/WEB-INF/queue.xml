@@ -18,4 +18,11 @@
     <name>c2dm</name>
     <rate>10/s</rate>
   </queue>
+  <queue>
+    <name>welcome-email</name>
+    <rate>2/m</rate>
+    <retry-parameters>
+      <task-retry-limit>2</task-retry-limit>
+    </retry-parameters>
+  </queue>
 </queue-entries>
