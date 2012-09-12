@@ -28,14 +28,7 @@ import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.teamagly.friendizer.FriendizerApp;
-import com.teamagly.friendizer.model.Achievement;
-import com.teamagly.friendizer.model.AchievementInfo;
-import com.teamagly.friendizer.model.Action;
-import com.teamagly.friendizer.model.Gift;
-import com.teamagly.friendizer.model.GiftCount;
-import com.teamagly.friendizer.model.Message;
-import com.teamagly.friendizer.model.Page;
-import com.teamagly.friendizer.model.User;
+import com.teamagly.friendizer.model.*;
 
 public final class ServerFacade {
 	private final static String TAG = "ServerFacade";
@@ -102,7 +95,6 @@ public final class ServerFacade {
 	}
 
 	public static User login(long userID, String accessToken, String regID) {
-
 		String serverUrl = fullServerAddress + "login";
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair(REG_ID, regID));
@@ -141,7 +133,6 @@ public final class ServerFacade {
 	}
 
 	public static User login(long userID, String regID) {
-
 		String serverUrl = fullServerAddress + "login";
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair(REG_ID, regID));
@@ -192,8 +183,7 @@ public final class ServerFacade {
 	public static List<User> ownList(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "ownList?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
-		}.getType());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {}.getType());
 		in.close();
 		return users;
 	}
@@ -201,8 +191,7 @@ public final class ServerFacade {
 	public static List<User> getFriends(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "getFriends?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
-		}.getType());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {}.getType());
 		in.close();
 		return users;
 	}
@@ -214,8 +203,7 @@ public final class ServerFacade {
 	}
 
 	public static void changeLocation(long userID, double latitude, double longitude) throws IOException {
-		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude="
-				+ longitude);
+		URL url = new URL(fullServerAddress + "changeLocation?userID=" + userID + "&latitude=" + latitude + "&longitude=" + longitude);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		in.close();
 	}
@@ -236,8 +224,7 @@ public final class ServerFacade {
 	public static List<Page> mutualLikes(long userID1, long userID2) throws IOException {
 		URL url = new URL(fullServerAddress + "mutualLikes?userID1=" + userID1 + "&userID2=" + userID2);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Page> pages = new Gson().fromJson(in.readLine(), new TypeToken<List<Page>>() {
-		}.getType());
+		List<Page> pages = new Gson().fromJson(in.readLine(), new TypeToken<List<Page>>() {}.getType());
 		in.close();
 		return pages;
 	}
@@ -245,15 +232,13 @@ public final class ServerFacade {
 	public static List<User> nearbyUsers(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "nearbyUsers?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
-		}.getType());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {}.getType());
 		in.close();
 		return users;
 	}
 
 	public static void sendMessage(Message msg) throws IOException, URISyntaxException {
-		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text="
-				+ msg.getText();
+		String params = "src=" + Utility.getInstance().userInfo.getId() + "&dest=" + msg.getDestination() + "&text=" + msg.getText();
 		// Use URI to escape characters (whitespace and non-ASCII characters)
 		URI uri = new URI(scheme, serverAddress, "/send", params, null);
 		URL url = new URL(uri.toASCIIString());
@@ -270,8 +255,7 @@ public final class ServerFacade {
 	public static List<Message> getUnread() throws IOException {
 		URL url = new URL(fullServerAddress + "getUnread?userID=" + Utility.getInstance().userInfo.getId());
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
-		}.getType());
+		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {}.getType());
 		in.close();
 		return messages;
 	}
@@ -287,11 +271,9 @@ public final class ServerFacade {
 	 * @throws Exception
 	 */
 	public static List<Message> getConversation(long userID, long from, long to) throws IOException {
-		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2="
-				+ userID + "&from=" + from + "&to=" + to);
+		URL url = new URL(fullServerAddress + "getConversation?user1=" + Utility.getInstance().userInfo.getId() + "&user2=" + userID + "&from=" + from + "&to=" + to);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {
-		}.getType());
+		List<Message> messages = new Gson().fromJson(in.readLine(), new TypeToken<List<Message>>() {}.getType());
 		in.close();
 		Collections.reverse(messages);
 		return messages;
@@ -301,8 +283,7 @@ public final class ServerFacade {
 	public static List<Achievement> getAchievements(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "achievements?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<AchievementInfo> achvInfos = new Gson().fromJson(in.readLine(), new TypeToken<List<AchievementInfo>>() {
-		}.getType());
+		List<AchievementInfo> achvInfos = new Gson().fromJson(in.readLine(), new TypeToken<List<AchievementInfo>>() {}.getType());
 		in.close();
 		// Convert from the server's AchievementInfo type to Achievement
 		List<Achievement> achvs = new ArrayList<Achievement>();
@@ -330,11 +311,10 @@ public final class ServerFacade {
 		in.close();
 	}
 
-	public static List<Action> actionHistory(long userID) throws IOException {
+	public static List<ActionInfo> actionHistory(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "actionHistory?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Action> actions = new Gson().fromJson(in.readLine(), new TypeToken<List<Action>>() {
-		}.getType());
+		List<ActionInfo> actions = new Gson().fromJson(in.readLine(), new TypeToken<List<ActionInfo>>() {}.getType());
 		in.close();
 		return actions;
 	}
@@ -342,8 +322,7 @@ public final class ServerFacade {
 	public static List<Gift> getAllGifts() throws IOException {
 		URL url = new URL(fullServerAddress + "allGifts");
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<Gift> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<Gift>>() {
-		}.getType());
+		List<Gift> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<Gift>>() {}.getType());
 		in.close();
 		return gifts;
 	}
@@ -351,8 +330,7 @@ public final class ServerFacade {
 	public static List<GiftCount> getUserGifts(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "userGifts?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<GiftCount> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<GiftCount>>() {
-		}.getType());
+		List<GiftCount> gifts = new Gson().fromJson(in.readLine(), new TypeToken<List<GiftCount>>() {}.getType());
 		in.close();
 		if (gifts == null)
 			gifts = new ArrayList<GiftCount>();
@@ -388,8 +366,7 @@ public final class ServerFacade {
 	public static List<User> blockList(long userID) throws IOException {
 		URL url = new URL(fullServerAddress + "blockList?userID=" + userID);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> blockedUsers = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
-		}.getType());
+		List<User> blockedUsers = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {}.getType());
 		in.close();
 		return blockedUsers;
 	}
@@ -397,8 +374,7 @@ public final class ServerFacade {
 	public static List<User> getLeaderboard(String type) throws IOException {
 		URL url = new URL(fullServerAddress + "getLeaderboard?type=" + type);
 		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {
-		}.getType());
+		List<User> users = new Gson().fromJson(in.readLine(), new TypeToken<List<User>>() {}.getType());
 		in.close();
 		return users;
 	}
