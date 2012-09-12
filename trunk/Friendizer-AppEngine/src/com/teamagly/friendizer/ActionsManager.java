@@ -15,7 +15,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class ActionsManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(ActionsManager.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -121,13 +121,6 @@ public class ActionsManager extends HttpServlet {
 	private void actionHistory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
 		query.setOrdering("date desc");
