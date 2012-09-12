@@ -61,7 +61,7 @@ public class UsersManager extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
 			user = pm.getObjectById(User.class, userID);
-			log.info("User " + userID + " exists, with an access token");
+			log.info("User " + userID + " exists");
 			if (accessToken != null && accessToken.length() > 0) {
 				log.info("Got a new access token");
 				// Update the new access token of the user
@@ -439,7 +439,7 @@ public class UsersManager extends HttpServlet {
 
 		pm.close();
 	}
-	
+
 	/**
 	 * 
 	 * The function calculates the level according to the given points
