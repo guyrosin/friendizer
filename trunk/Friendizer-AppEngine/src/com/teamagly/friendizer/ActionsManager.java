@@ -53,8 +53,9 @@ public class ActionsManager extends HttpServlet {
 		}
 		buyer.setMoney(buyer.getMoney() - buy.getPoints());
 		buyer.setPoints(buyer.getPoints() + 10);
+		AchievementsManager.userValueIncreased(pm.detachCopy(buyer));
 		// Check for level up
-		buyer.setLevel(calculateLevel(buyer.getLevel(), buyer.getPoints()));
+		buyer.setLevel(UsersManager.calculateLevel(buyer.getLevel(), buyer.getPoints()));
 		if (buy.getOwner() > 0) {
 			try {
 				User preOwner = pm.getObjectById(User.class, buy.getOwner());
@@ -63,11 +64,12 @@ public class ActionsManager extends HttpServlet {
 			}
 		}
 		buy.setPoints(buy.getPoints() + 20);
+		AchievementsManager.userValueIncreased(pm.detachCopy(buy));
 		// Check for level up
-		buy.setLevel(calculateLevel(buy.getLevel(), buy.getPoints()));
+		buy.setLevel(UsersManager.calculateLevel(buy.getLevel(), buy.getPoints()));
 		buy.setOwner(userID);
 		pm.makePersistent(new Action(userID, buyID, new Date()));
-		giveAchievements(pm.detachCopy(buyer), pm.detachCopy(buy));
+		AchievementsManager.purchaseMade(pm.detachCopy(buyer), pm.detachCopy(buy));
 		pm.close();
 		response.getWriter().println("Purchase Done");
 
@@ -113,143 +115,6 @@ public class ActionsManager extends HttpServlet {
 		}
 		pm.close();
 		return true;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void giveAchievements(User buyer, User buy) {
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + buyer.getId() + " && achievementID == 28001");
-		List<UserAchievement> result = (List<UserAchievement>) query.execute();
-		query.closeAll();
-		
-		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 28001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
-			
-			// Reward the user with money
-			buyer.setMoney(buyer.getMoney() + achv.getReward());
-			// Reward the user with points
-			buyer.setPoints(buyer.getPoints() + achv.getPoints());
-			// check for level up
-			buyer.setLevel(calculateLevel(buyer.getLevel(), buyer.getPoints()));
-			pm.makePersistent(buyer); // Necessary since the user is detached
-			
-			// Check for another achievement
-			userValueIncreased(buyer);
-			
-			pm.makePersistent(new UserAchievement(buyer.getId(), achv.getId()));
-			notificate(buyer, achv);
-		}
-		
-		query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + buy.getId() + " && achievementID == 30001");
-		result = (List<UserAchievement>) query.execute();
-		query.closeAll();
-		
-		if (result.isEmpty()) {
-			Achievement achv;
-			// Get the achievement from the database
-			try {
-				achv = pm.getObjectById(Achievement.class, 30001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
-			
-			// Reward the user with money
-			buy.setMoney(buy.getMoney() + achv.getReward());
-			// Reward the user with points
-			buy.setPoints(buy.getPoints() + achv.getPoints());
-			// check for level up
-			buy.setLevel(calculateLevel(buy.getLevel(), buy.getPoints()));
-			pm.makePersistent(buy); // Necessary since the user is detached
-			
-			// Check for another achievement
-			userValueIncreased(buy);
-			
-			pm.makePersistent(new UserAchievement(buy.getId(), achv.getId()));
-			notificate(buy, achv);
-		}
-		
-		pm.close();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void userValueIncreased(User user) {
-		if (user.getPoints() < 1000)
-			return;
-		
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + user.getId() + " && achievementID == 29001");
-		List<UserAchievement> result = (List<UserAchievement>) query.execute();
-		query.closeAll();
-		
-		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 29001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
-	
-			// Reward the user with money
-			user.setMoney(user.getMoney() + achv.getReward());
-			// Reward the user with points
-			user.setPoints(user.getPoints() + achv.getPoints());
-			// check for level up
-			user.setLevel(calculateLevel(user.getLevel(), user.getPoints()));
-			pm.makePersistent(user); // Necessary since the user is detached
-	
-			pm.makePersistent(new UserAchievement(user.getId(), achv.getId()));
-			notificate(user, achv);
-		}
-		
-		pm.close();
-	}
-	
-	/**
-	 * 
-	 * The function calculates the level according to the given points
-	 * 
-	 * @param currentLevel
-	 *            - the current level of the user
-	 * @param points
-	 *            - the updated points of the user
-	 * @return the new level of the user (his current level if the points are not enough and the next level otherwise)
-	 */
-	private static int calculateLevel(int currentLevel, long points) {
-		// Calculate the threshold for next level
-		double threshold = 200 * Math.pow(currentLevel, 1.5);
-
-		// If the user has enough points for the next level - return the next level
-		if (points >= threshold)
-			return currentLevel + 1;
-		else
-			return currentLevel;
-	}
-	
-	private static void notificate(User user, Achievement achv) {
-		Builder msg = new Builder();
-		msg.addData("type", NotificationType.ACH.toString());
-		msg.addData("userID", String.valueOf(user.getId()));
-		msg.addData("title", achv.getTitle());
-		msg.addData("iconRes", achv.getIconRes());
-		SendMessage.sendMessage(user.getId(), msg.build());
 	}
 	
 	@SuppressWarnings("unchecked")

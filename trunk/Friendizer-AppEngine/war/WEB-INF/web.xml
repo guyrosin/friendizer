@@ -46,7 +46,6 @@
 		<url-pattern>/matching</url-pattern>
 		<url-pattern>/mutualLikes</url-pattern>
 		<url-pattern>/dailyBonus</url-pattern>
-		<url-pattern>/achievements</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -152,6 +151,16 @@
 	<servlet-mapping>
 	    <servlet-name>WelcomeServlet</servlet-name>
 	    <url-pattern>/welcome_email</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>AchievementsManager</servlet-name>
+		<servlet-class>com.teamagly.friendizer.AchievementsManager</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>AchievementsManager</servlet-name>
+	    <url-pattern>/achievements</url-pattern>
 	</servlet-mapping>
 	
 </web-app>

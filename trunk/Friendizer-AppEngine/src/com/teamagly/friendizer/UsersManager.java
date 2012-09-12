@@ -8,8 +8,7 @@ import javax.jdo.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.*;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.gson.Gson;
@@ -43,8 +42,6 @@ public class UsersManager extends HttpServlet {
 			mutualLikes(request, response);
 		else if (servlet.intern() == "dailyBonus")
 			dailyBonus(request, response);
-		else if (servlet.intern() == "achievements")
-			achievements(request, response);
 	}
 
 	@Override
@@ -442,36 +439,25 @@ public class UsersManager extends HttpServlet {
 
 		pm.close();
 	}
+	
+	/**
+	 * 
+	 * The function calculates the level according to the given points
+	 * 
+	 * @param currentLevel
+	 *            - the current level of the user
+	 * @param points
+	 *            - the updated points of the user
+	 * @return the new level of the user (his current level if the points are not enough and the next level otherwise)
+	 */
+	public static int calculateLevel(int currentLevel, long points) {
+		// Calculate the threshold for next level
+		double threshold = 200 * Math.pow(currentLevel, 1.5);
 
-	@SuppressWarnings("unchecked")
-	private void achievements(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		long userID = Long.parseLong(request.getParameter("userID"));
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
-		Query query = pm.newQuery(Achievement.class);
-		List<Achievement> achvs = (List<Achievement>) query.execute();
-		query.closeAll();
-		query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + userID);
-		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
-		query.closeAll();
-		List<AchievementInfo> achvInfos = new ArrayList<AchievementInfo>();
-		for (Achievement achv : achvs) {
-			boolean earned = false;
-			for (UserAchievement userAchv : userAchvs)
-				if (userAchv.getAchievementID() == achv.getId()) {
-					earned = true;
-					break;
-				}
-			achvInfos.add(new AchievementInfo(achv, earned));
-		}
-		pm.close();
-		response.getWriter().println(new Gson().toJson(achvInfos));
+		// If the user has enough points for the next level - return the next level
+		if (points >= threshold)
+			return currentLevel + 1;
+		else
+			return currentLevel;
 	}
 }
