@@ -23,7 +23,7 @@ public class RelRankingManager extends HttpServlet {
 	private void ranking(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		long user1ID = Long.parseLong(request.getParameter("user1ID"));
 		long user2ID = Long.parseLong(request.getParameter("user2ID"));
-		
+
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		
 		User user1 = pm.getObjectById(User.class, user1ID);
@@ -34,25 +34,27 @@ public class RelRankingManager extends HttpServlet {
 			return;
 		}
 		
-		float ranking = 0;
+		double ranking = 0;
 		
 		if (user1.getOwner() == user2.getId())
 			ranking += 5;
 		else if (user2.getOwner() == user1.getId())
 			ranking += 5;
 		else
-			ranking += actionRanking(user1ID, user2ID);
+			ranking += actionRanking(user1ID, user2ID,response);
 		
-		ranking += chatRanking(user1ID, user2ID);
+
+		double tmp = chatRanking(user1ID, user2ID);
+
+		ranking += tmp;
 		
-		ranking = Math.round(ranking * 10) / 10;
+		ranking = Math.round(ranking * 10) / 10.0;
 		response.getWriter().println(ranking);
 
 	}
 	
 	@SuppressWarnings("unchecked")
-	private double actionRanking(long user1ID, long user2ID) {
-		
+	private double actionRanking(long user1ID, long user2ID, HttpServletResponse response) throws IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		
 		double actionRanking = 0;
@@ -61,27 +63,28 @@ public class RelRankingManager extends HttpServlet {
 		cal.add(Calendar.DAY_OF_MONTH, -7);
 		Date weekAgo = cal.getTime();
 		
-		Query query = pm.newQuery(Action.class);
-		query.setFilter("buyerID == " + user1ID);
-		query.setFilter("boughtID == " + user2ID);
-		query.setFilter("date > weekAgo");
-		query.declareParameters("java.util.Date weekAgo");
-		// Get all the the action in last week from user1 to user2
-		List<User> actions1 = (List<User>) query.execute(weekAgo);
-		query.closeAll();
 		
-		query = pm.newQuery(Action.class);
-		query.setFilter("buyerID == " + user2ID);
-		query.setFilter("boughtID == " + user1ID);
-		query.setFilter("date > weekAgo");
+		Query query = pm.newQuery(Action.class);
+		String f = "buyerID == " + user1ID + " && " + "boughtID =="  + user2ID + " && date > weekAgo";
+		query.setFilter(f);
 		query.declareParameters("java.util.Date weekAgo");
 		// Get all the the action in last week from user2 to user1
-		List<User> actions2 = (List<User>) query.execute(weekAgo);
+		List<Action> actions1 = (List<Action>) query.execute(weekAgo);
+		query.closeAll();
+
+
+		query = pm.newQuery(Action.class);
+		f = "buyerID == " + user2ID + " && " + "boughtID =="  + user1ID + " && date > weekAgo";
+		query.setFilter(f);
+		query.declareParameters("java.util.Date weekAgo");
+		// Get all the the action in last week from user2 to user1
+		List<Action> actions2 = (List<Action>) query.execute(weekAgo);
 		query.closeAll();
 		
-		int buys = actions1.size() + actions2.size();
 		
-		actionRanking = (float) buys /  2.0;
+		
+		int buys = actions1.size() + actions2.size();
+		actionRanking = (double) buys /  2.0;
 		if (actionRanking > 5)
 			actionRanking = 5;
 		return actionRanking;
@@ -99,26 +102,22 @@ public class RelRankingManager extends HttpServlet {
 		Date weekAgo = cal.getTime();
 		
 		Query query = pm.newQuery(ChatMessage.class);
-		query.setFilter("destination == " + user1ID);
-		query.setFilter("source == " + user2ID);
-		query.setFilter("time > weekAgo");
-		query.declareParameters("java.util.Date weekAgo");
+		String f = "destination == " + user1ID + " && " + "source == " + user2ID;
+		query.setFilter(f);
 		// Get all the the action in last week from user1 to user2
 		List<User> actions1 = (List<User>) query.execute(weekAgo);
 		query.closeAll();
 		
 		query = pm.newQuery(ChatMessage.class);
-		query.setFilter("destination == " + user1ID);
-		query.setFilter("source == " + user2ID);
-		query.setFilter("time > weekAgo");
-		query.declareParameters("java.util.Date weekAgo");
-		// Get all the the action in last week from user1 to user2
+		
+		f = "destination == " + user1ID + " && " + "source == " + user2ID;
+		query.setFilter(f);
 		List<User> actions2 = (List<User>) query.execute(weekAgo);
 		query.closeAll();
 		
 		int messages = actions1.size() + actions2.size();
 		
-		chatRanking = (float) messages /  50.0;
+		chatRanking = (double) messages /  10.0;
 		
 		if (chatRanking > 5)
 			chatRanking = 5;
