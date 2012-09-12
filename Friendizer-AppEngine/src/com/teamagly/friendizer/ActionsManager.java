@@ -26,7 +26,7 @@ public class ActionsManager extends HttpServlet {
 		else
 			actionHistory(request, response);
 	}
-	
+
 	private void buy(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long buyID = Long.parseLong(request.getParameter("buyID"));
@@ -56,13 +56,12 @@ public class ActionsManager extends HttpServlet {
 		AchievementsManager.userValueIncreased(pm.detachCopy(buyer));
 		// Check for level up
 		buyer.setLevel(UsersManager.calculateLevel(buyer.getLevel(), buyer.getPoints()));
-		if (buy.getOwner() > 0) {
+		if (buy.getOwner() > 0)
 			try {
 				User preOwner = pm.getObjectById(User.class, buy.getOwner());
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 			} catch (JDOObjectNotFoundException e) {
 			}
-		}
 		buy.setPoints(buy.getPoints() + 20);
 		AchievementsManager.userValueIncreased(pm.detachCopy(buy));
 		// Check for level up
@@ -78,7 +77,7 @@ public class ActionsManager extends HttpServlet {
 		msg.addData("userID", String.valueOf(userID));
 		SendMessage.sendMessage(buyID, msg.build());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private boolean isPurchaseLegal(User buyer, User buy) {
 		if (buy.getOwner() == buyer.getId()) {
@@ -116,9 +115,10 @@ public class ActionsManager extends HttpServlet {
 		pm.close();
 		return true;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void actionHistory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Query query = pm.newQuery(Action.class);
@@ -133,7 +133,7 @@ public class ActionsManager extends HttpServlet {
 		query.closeAll();
 		int i = 0, j = 0;
 		ArrayList<ActionInfo> actions = new ArrayList<ActionInfo>();
-		while (true) {
+		while (true)
 			if (i < result1.size()) {
 				if (j < result2.size()) {
 					if (result1.get(i).getDate().after(result2.get(j).getDate())) {
@@ -176,7 +176,6 @@ public class ActionsManager extends HttpServlet {
 				j++;
 			} else
 				break;
-		}
 		pm.close();
 		response.getWriter().println(new Gson().toJson(actions));
 	}
