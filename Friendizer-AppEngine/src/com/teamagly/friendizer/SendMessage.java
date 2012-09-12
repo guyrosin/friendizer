@@ -1,20 +1,13 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
+import java.util.logging.*;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 
+import com.google.android.gcm.server.*;
 import com.google.android.gcm.server.Constants;
-import com.google.android.gcm.server.Message;
-import com.google.android.gcm.server.MulticastResult;
-import com.google.android.gcm.server.Result;
-import com.google.android.gcm.server.Sender;
 import com.teamagly.friendizer.model.UserDevice;
 
 /**

@@ -1,33 +1,17 @@
 package com.teamagly.friendizer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.logging.Logger;
 
-import javax.jdo.JDOObjectNotFoundException;
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.google.gson.stream.JsonReader;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
+import com.restfb.*;
 import com.restfb.FacebookClient.AccessToken;
-import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.util.StringUtils;

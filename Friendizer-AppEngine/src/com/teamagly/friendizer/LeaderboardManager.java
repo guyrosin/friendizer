@@ -1,15 +1,11 @@
 package com.teamagly.friendizer;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import javax.jdo.*;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
 import com.google.gson.Gson;
 import com.teamagly.friendizer.model.User;
