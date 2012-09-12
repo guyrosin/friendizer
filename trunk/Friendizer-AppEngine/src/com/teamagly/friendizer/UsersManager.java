@@ -8,6 +8,10 @@ import javax.jdo.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.gson.Gson;
 import com.restfb.*;
 import com.restfb.exception.FacebookException;
@@ -19,6 +23,7 @@ import com.teamagly.friendizer.model.*;
 public class UsersManager extends HttpServlet {
 	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 	private static final int DAILY_BONUS_POINTS = 50;
+	private static final int WELCOME_EMAIL_DELAY = 10 * 60 * 1000; // 10 minutes
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -87,6 +92,14 @@ public class UsersManager extends HttpServlet {
 			if (accessToken == null || accessToken.length() == 0)
 				user.setFbUpdate(true); // Update the user's missing details next time
 			pm.makePersistent(user);
+
+			// Send a welcome email
+			Queue queue = QueueFactory.getQueue("welcome-email");
+			queue.add(TaskOptions.Builder
+					.withUrl("/welcome_email")
+					.countdownMillis(WELCOME_EMAIL_DELAY)
+					.param("userID", String.valueOf(user.getId()))
+					.method(Method.GET));
 		}
 
 		response.getWriter().println(new Gson().toJson(user));
@@ -110,7 +123,8 @@ public class UsersManager extends HttpServlet {
 		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 		// Get the user's data from Facebook
 		// Note: using JsonObject instead of User object for the profile picture
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", "name,gender,birthday,picture"));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
+				Parameter.with("fields", "name,gender,birthday,picture"));
 		user.updateFacebookData(jsonObject);
 	}
 
@@ -119,7 +133,8 @@ public class UsersManager extends HttpServlet {
 		// Request those fields from Facebook
 		// Note: using JsonObject instead of User object in case we want the profile picture
 		log.info("Requesting update for uid " + user.getId() + " for " + StringUtils.join(fields));
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
+				Parameter.with("fields", StringUtils.join(fields)));
 		user.updateFacebookData(jsonObject);
 	}
 
@@ -202,7 +217,7 @@ public class UsersManager extends HttpServlet {
 				log.severe("User " + friendID + " doesn't exist");
 			}
 		}
-		
+
 		query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockList = (List<UserBlock>) query.execute();

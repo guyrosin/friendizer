@@ -67,8 +67,8 @@ public class ActionsManager extends HttpServlet {
 		buy.setLevel(calculateLevel(buy.getLevel(), buy.getPoints()));
 		buy.setOwner(userID);
 		pm.makePersistent(new Action(userID, buyID, new Date()));
-		pm.close();
 		giveAchievements(pm.detachCopy(buyer), pm.detachCopy(buy));
+		pm.close();
 		response.getWriter().println("Purchase Done");
 
 		Builder msg = new Builder();
