@@ -21,6 +21,8 @@ public class RelRankingManager extends HttpServlet {
 	}
 
 	private void ranking(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
+		
 		long user1ID = Long.parseLong(request.getParameter("user1ID"));
 		long user2ID = Long.parseLong(request.getParameter("user2ID"));
 
@@ -50,6 +52,7 @@ public class RelRankingManager extends HttpServlet {
 		
 		ranking = Math.round(ranking * 10) / 10.0;
 		response.getWriter().println(ranking);
+		
 
 	}
 	

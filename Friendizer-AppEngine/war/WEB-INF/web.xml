@@ -142,6 +142,16 @@
 	    <url-pattern>/updateUsers</url-pattern>
 	    <url-pattern>/extendAccessTokens</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+	    <servlet-name>RelRankingManager</servlet-name>
+	    <servlet-class>com.teamagly.friendizer.RelRankingManager</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+	    <servlet-name>RelRankingManager</servlet-name>
+	    <url-pattern>/ranking</url-pattern>
+	</servlet-mapping>
 	
 	<servlet>
 	    <servlet-name>WelcomeServlet</servlet-name>
@@ -162,5 +172,5 @@
 	    <servlet-name>AchievementsManager</servlet-name>
 	    <url-pattern>/achievements</url-pattern>
 	</servlet-mapping>
-	
+
 </web-app>
