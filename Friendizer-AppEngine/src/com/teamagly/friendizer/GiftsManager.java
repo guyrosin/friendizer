@@ -1,9 +1,7 @@
 package com.teamagly.friendizer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.jdo.*;
@@ -17,7 +15,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class GiftsManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(GiftsManager.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -47,15 +45,7 @@ public class GiftsManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void userGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
-		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();
@@ -82,9 +72,8 @@ public class GiftsManager extends HttpServlet {
 			counters.put(userGift.getGiftID(), counters.get(userGift.getGiftID()) + 1);
 		// Create the GiftCount objects
 		ArrayList<GiftCount> giftCounts = new ArrayList<GiftCount>();
-		for (Long giftID : counters.keySet())
-			giftCounts.add(new GiftCount(getGift(gifts, giftID), counters.get(giftID)));
-
+		for (Gift gift : gifts)
+			giftCounts.add(new GiftCount(gift, counters.get(gift.getId())));
 		response.getWriter().println(new Gson().toJson(giftCounts));
 	}
 
@@ -159,26 +148,11 @@ public class GiftsManager extends HttpServlet {
 		return true;
 	}
 
-	private Gift getGift(List<Gift> gifts, long giftID) {
-		for (Gift gift : gifts)
-			if (gift.getId() == giftID)
-				return gift;
-		return null;
-	}
-
 	@SuppressWarnings("unchecked")
 	private void getGift(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long giftID = Long.parseLong(request.getParameter("giftID"));
-		// Check if that user exists
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID + " && giftID == " + giftID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();

@@ -15,20 +15,13 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class AchievementsManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(AchievementsManager.class.getName());
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(Achievement.class);
 		List<Achievement> achvs = (List<Achievement>) query.execute();
 		query.closeAll();
@@ -39,11 +32,12 @@ public class AchievementsManager extends HttpServlet {
 		List<AchievementInfo> achvInfos = new ArrayList<AchievementInfo>();
 		for (Achievement achv : achvs) {
 			boolean earned = false;
-			for (UserAchievement userAchv : userAchvs)
+			for (UserAchievement userAchv : userAchvs) {
 				if (userAchv.getAchievementID() == achv.getId()) {
 					earned = true;
 					break;
 				}
+			}
 			achvInfos.add(new AchievementInfo(achv, earned));
 		}
 		pm.close();

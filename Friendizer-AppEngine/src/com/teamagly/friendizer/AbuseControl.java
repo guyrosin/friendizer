@@ -13,7 +13,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class AbuseControl extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(AbuseControl.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -32,20 +32,6 @@ public class AbuseControl extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long blockedID = Long.parseLong(request.getParameter("blockedID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID);
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
-		try {
-			pm.getObjectById(User.class, blockedID);
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("The user you want to block doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
 		List<UserBlock> result = (List<UserBlock>) query.execute();
@@ -65,20 +51,6 @@ public class AbuseControl extends HttpServlet {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long blockedID = Long.parseLong(request.getParameter("blockedID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID);
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
-		try {
-			pm.getObjectById(User.class, blockedID);
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("The user you want to block doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
 		List<UserBlock> result = (List<UserBlock>) query.execute();
@@ -97,14 +69,6 @@ public class AbuseControl extends HttpServlet {
 	private void blockList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		// Check if the user exists
-		try {
-			pm.getObjectById(User.class, userID);
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockedID = (List<UserBlock>) query.execute();
