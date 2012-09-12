@@ -274,23 +274,47 @@ public class ActionsManager extends HttpServlet {
 		List<Action> result2 = (List<Action>) query.execute();
 		query.closeAll();
 		int i = 0, j = 0;
-		ArrayList<Action> actions = new ArrayList<Action>();
+		ArrayList<ActionInfo> actions = new ArrayList<ActionInfo>();
 		while (true) {
 			if (i < result1.size()) {
 				if (j < result2.size()) {
 					if (result1.get(i).getDate().after(result2.get(j).getDate())) {
-						actions.add(result1.get(i));
+						Action action = result1.get(i);
+						User user;
+						try {
+							user = pm.getObjectById(User.class, action.getBoughtID());
+							actions.add(new ActionInfo(user, true, action.getDate()));
+						} catch (JDOObjectNotFoundException e) {
+						}
 						i++;
 					} else {
-						actions.add(result2.get(j));
+						Action action = result2.get(j);
+						User user;
+						try {
+							user = pm.getObjectById(User.class, action.getBuyerID());
+							actions.add(new ActionInfo(user, false, action.getDate()));
+						} catch (JDOObjectNotFoundException e) {
+						}
 						j++;
 					}
 				} else {
-					actions.add(result1.get(i));
+					Action action = result1.get(i);
+					User user;
+					try {
+						user = pm.getObjectById(User.class, action.getBoughtID());
+						actions.add(new ActionInfo(user, true, action.getDate()));
+					} catch (JDOObjectNotFoundException e) {
+					}
 					i++;
 				}
 			} else if (j < result2.size()) {
-				actions.add(result2.get(j));
+				Action action = result2.get(j);
+				User user;
+				try {
+					user = pm.getObjectById(User.class, action.getBuyerID());
+					actions.add(new ActionInfo(user, false, action.getDate()));
+				} catch (JDOObjectNotFoundException e) {
+				}
 				j++;
 			} else
 				break;
