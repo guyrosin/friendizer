@@ -143,7 +143,8 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 			friendsAdapter.clear();
 			if (nearbyUsers != null)
 				friendsAdapter.addAll(nearbyUsers);
-			gridView.setEmptyView(activity.findViewById(R.id.empty));
+			if (nearbyUsers == null || nearbyUsers.isEmpty())
+				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

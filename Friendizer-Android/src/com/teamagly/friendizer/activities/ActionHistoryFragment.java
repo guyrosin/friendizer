@@ -4,13 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -22,18 +25,18 @@ import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.ActionsAdapter;
-import com.teamagly.friendizer.model.Action;
+import com.teamagly.friendizer.model.ActionInfo;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.ServerFacade;
 import com.teamagly.friendizer.utils.Utility;
 
-public class ActionHistoryFragment extends SherlockFragment {
+public class ActionHistoryFragment extends SherlockFragment implements OnItemClickListener {
 	private final String TAG = getClass().getName();
 	protected ActionHistoryTask task = new ActionHistoryTask();
 	SherlockFragmentActivity activity;
 	ActionsAdapter adapter;
-	protected GridView gridView;
-	protected List<Action> ActionsList;
+	protected ListView listView;
+	protected List<ActionInfo> ActionsList;
 	protected User user;
 	int savedPosition = -1;
 
@@ -41,7 +44,7 @@ public class ActionHistoryFragment extends SherlockFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		ActionsList = new ArrayList<Action>();
+		ActionsList = new ArrayList<ActionInfo>();
 	}
 
 	@Override
@@ -51,15 +54,16 @@ public class ActionHistoryFragment extends SherlockFragment {
 
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("No history");
-		gridView = (GridView) activity.findViewById(R.id.gridview);
+		listView = (ListView) activity.findViewById(R.id.actions_list);
 		user = Utility.getInstance().userInfo;
 
 		ActionBar actionBar = activity.getSupportActionBar();
 		actionBar.setTitle(user.getName());
-		actionBar.setSubtitle("Mutual Likes");
+		actionBar.setSubtitle("Action History");
 
 		adapter = new ActionsAdapter(activity, 0, ActionsList);
-		gridView.setAdapter(adapter);
+		listView.setAdapter(adapter);
+		listView.setOnItemClickListener(this);
 	}
 
 	/*
@@ -69,7 +73,7 @@ public class ActionHistoryFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.connections_layout, container, false);
+		return inflater.inflate(R.layout.actions_layout, container, false);
 	}
 
 	/*
@@ -80,6 +84,7 @@ public class ActionHistoryFragment extends SherlockFragment {
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
+		listView.setEmptyView(null);
 		requestHistory();
 	}
 
@@ -99,30 +104,39 @@ public class ActionHistoryFragment extends SherlockFragment {
 		task.execute(user.getId());
 	}
 
-	class ActionHistoryTask extends AsyncTask<Long, Void, List<Action>> {
+	class ActionHistoryTask extends AsyncTask<Long, Void, List<ActionInfo>> {
 
 		@Override
-		protected List<Action> doInBackground(Long... userIDs) {
+		protected List<ActionInfo> doInBackground(Long... userIDs) {
 			try {
 				return ServerFacade.actionHistory(userIDs[0]);
 			} catch (IOException e) {
 				Log.e(TAG, e.getMessage());
 			}
-			return new ArrayList<Action>();
+			return new ArrayList<ActionInfo>();
 		}
 
 		@Override
-		protected void onPostExecute(final List<Action> Actions) {
+		protected void onPostExecute(final List<ActionInfo> actions) {
 			if (isCancelled())
 				return;
 			adapter.clear();
-			if (Actions != null) {
-				adapter.addAll(Actions);
-				adapter.notifyDataSetChanged();
-			}
-			gridView.setEmptyView(activity.findViewById(R.id.empty));
+			if (actions != null)
+				adapter.addAll(actions);
+			adapter.notifyDataSetChanged();
+			if (actions == null || actions.isEmpty())
+				listView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View v, int position, long arg3) {
+		User userInfo = adapter.getItem(position).getUser();
+		// Create an intent with the friend's data
+		Intent intent = new Intent().setClass(activity, FriendProfileActivity.class);
+		intent.putExtra("user", userInfo);
+		startActivity(intent);
 	}
 
 	@Override

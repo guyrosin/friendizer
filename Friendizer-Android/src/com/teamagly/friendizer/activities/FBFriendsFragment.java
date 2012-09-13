@@ -114,7 +114,7 @@ public class FBFriendsFragment extends AbstractFriendsListFragment {
 				@Override
 				public void run() {
 					friendsAdapter.clear();
-					if (userIDs.size() == 0)
+					if (userIDs == null || userIDs.isEmpty())
 						gridView.setEmptyView(activity.findViewById(R.id.empty));
 				}
 			});

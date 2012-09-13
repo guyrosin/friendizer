@@ -67,11 +67,6 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		adapter = new PageImageAdapter(activity, 0, pagesList);
 		gridView.setAdapter(adapter);
 		gridView.setOnItemClickListener(this);
-
-		// Restore scroll position
-		// if (savedInstanceState != null)
-		// savedPosition = savedInstanceState.getInt("savedPosition");
-		// int savedListTop = savedInstanceState.getInt("savedListTop");
 	}
 
 	/*
@@ -92,8 +87,7 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
-		// if (savedPosition >= 0) // initialized to -1
-		// gridView.setSelection(savedPosition);
+		gridView.setEmptyView(null);
 		requestMutualLikes();
 	}
 
@@ -106,21 +100,6 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 		super.onPause();
 		task.cancel(true);
 		ImageLoader.getInstance().stop(); // Stop loading the images
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		// Save scroll position
-		int savedPosition = gridView.getFirstVisiblePosition();
-		View firstVisibleView = gridView.getChildAt(0);
-		int savedListTop = (firstVisibleView == null) ? 0 : firstVisibleView.getTop();
-		outState.putInt("savedListTop", savedListTop);
-		outState.putInt("savedPosition", savedPosition);
 	}
 
 	protected void requestMutualLikes() {
@@ -145,11 +124,11 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 			if (isCancelled())
 				return;
 			adapter.clear();
-			if (pages != null) {
+			if (pages != null)
 				adapter.addAll(pages);
-				adapter.notifyDataSetChanged();
-			}
-			gridView.setEmptyView(activity.findViewById(R.id.empty));
+			adapter.notifyDataSetChanged();
+			if (pages == null || pages.isEmpty())
+				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

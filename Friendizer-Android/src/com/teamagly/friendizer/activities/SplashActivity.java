@@ -1,5 +1,7 @@
 package com.teamagly.friendizer.activities;
 
+import java.io.UnsupportedEncodingException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,7 +16,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -59,54 +60,27 @@ public class SplashActivity extends SherlockActivity {
 
 		userID = SessionStore.restoreID(context);
 		Log.w(TAG, "User ID from prefs = " + userID);
-		if (userID == 0) { // Need to login to Facebook
+		if (userID == 0)
 			if (loginButton.getVisibility() == View.GONE) {
 				loginButton.setVisibility(View.VISIBLE);
 				return;
-			} else
-				// Force login
-				loginToFacebook();
-		} else
-			loginWithoutTokenTask.execute();
-
+			}
+		// Force login
+		loginToFacebook();
 	}
-
-	AsyncTask<Void, Void, Boolean> loginWithoutTokenTask = new AsyncTask<Void, Void, Boolean>() {
-
-		@Override
-		protected Boolean doInBackground(Void... v) {
-			// Use the ID from the preferences to login
-			User userInfo = ServerFacade.login(userID, regID);
-			Utility.getInstance().userInfo = userInfo;
-			return (userInfo != null);
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			String accessToken = Utility.getInstance().userInfo.getToken();
-			if (accessToken == null || accessToken.length() == 0) {
-				loginToFacebook(); // If there's no token, login to Facebook from the start
-				return;
-			}
-			Utility.getInstance().facebook.setAccessToken(accessToken);
-			Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
-
-			if (result)
-				continueToFriendizer();
-			else {
-				dialogFriendizer.dismiss(); // Dismiss the progress dialog
-				showErrorDialog("Couldn't connect to friendizer");
-			}
-		}
-	};
 
 	private void continueToFriendizer() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				dialogFriendizer.dismiss(); // Dismiss the progress dialog
+				String firstName = Utility.getInstance().userInfo.getFirstName();
+				try {
+					firstName = new String(firstName.getBytes("UTF-8"));
+				} catch (UnsupportedEncodingException e1) { // Skip the encoding
+				}
 				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
-						.show();
+				.show();
 			}
 		});
 		// Continue to the main activity
@@ -196,6 +170,7 @@ public class SplashActivity extends SherlockActivity {
 	}
 
 	protected void loginToFacebook() {
+		Log.w(TAG, "Logging in to Facebook");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -229,14 +204,14 @@ public class SplashActivity extends SherlockActivity {
 	protected void showErrorDialog(String errorMsg) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(errorMsg + ". Please restart the app")
-				.setCancelable(false)
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						finish();
-					}
-				})
-				.show();
+		.setCancelable(false)
+		.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				finish();
+			}
+		})
+		.show();
 	}
 
 	/**

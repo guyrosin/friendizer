@@ -24,7 +24,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingLeft="4dp" >
 
             <TextView
                 android:id="@+id/achievement_title"
@@ -32,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:singleLine="true"
-                android:text="" />
+                android:text="hello" />
 
             <TextView
                 android:id="@+id/achievement_description"
@@ -41,7 +42,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:singleLine="false"
-                android:text="" />
+                android:text="lolz" />
         </LinearLayout>
 
         <LinearLayout
