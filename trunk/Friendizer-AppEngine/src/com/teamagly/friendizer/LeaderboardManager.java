@@ -12,16 +12,9 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class LeaderboardManager extends HttpServlet {
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String address = request.getRequestURI();
-		String servlet = address.substring(address.lastIndexOf("/") + 1);
-		if (servlet.intern() == "getLeaderboard")
-			getLeaderboard(request, response);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void getLeaderboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		PrintWriter out = response.getWriter();
 		String type = request.getParameter("type");
@@ -36,5 +29,7 @@ public class LeaderboardManager extends HttpServlet {
 		query.closeAll();
 		if (!users.isEmpty())
 			out.println(new Gson().toJson(users));
+		
+		pm.close();
 	}
 }

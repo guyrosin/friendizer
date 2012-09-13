@@ -105,7 +105,6 @@ public class GiftsManager extends HttpServlet {
 		} catch (JDOObjectNotFoundException e) {
 			pm.close();
 			log.severe("This gift doesn't exist");
-			response.getWriter().println("This gift doesn't exist");
 			return;
 		}
 		if (!isPurchaseLegal(sender, receiver, gift)) {

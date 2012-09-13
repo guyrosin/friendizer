@@ -15,7 +15,7 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class WelcomeServlet extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(WelcomeServlet.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

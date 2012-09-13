@@ -15,7 +15,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class LocationManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(LocationManager.class.getName());
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -48,7 +48,7 @@ public class LocationManager extends HttpServlet {
 
 		// TODO: Put it in a new thread
 
-		/* Sending notification to a nearby user who bought me in the past (but didn't buy me for a week) */
+		// Sending notification to a nearby user who bought me in the past (but didn't buy me for a week)
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
@@ -70,9 +70,7 @@ public class LocationManager extends HttpServlet {
 		Date updated2 = cal2.getTime();
 		List<Action> result2;
 
-		/*
-		 * The loop goes over the users and check only the nearby users
-		 */
+		// The loop goes over the users and check only the nearby users
 		for (User nearbyUser : users) {
 			if (nearbyUser.getId() == userID)
 				continue;
@@ -146,9 +144,7 @@ public class LocationManager extends HttpServlet {
 
 		ArrayList<User> nearbyUsers = new ArrayList<User>();
 
-		/*
-		 * The loop goes over the users and adds only the nearby users to a list
-		 */
+		// The loop goes over the users and adds only the nearby users to a list
 		for (User nearbyUser : result) {
 			if (nearbyUser.getId() == userID)
 				continue;

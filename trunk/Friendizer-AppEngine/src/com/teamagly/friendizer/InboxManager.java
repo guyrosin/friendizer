@@ -1,7 +1,6 @@
 package com.teamagly.friendizer;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -16,7 +15,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class InboxManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(InboxManager.class.getName());
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

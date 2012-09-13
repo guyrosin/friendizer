@@ -10,7 +10,7 @@ import com.teamagly.friendizer.model.UserDevice;
 
 @SuppressWarnings("serial")
 public class UnregisterServlet extends HttpServlet {
-	private final Logger log = Logger.getLogger(getClass().getName());
+	private static final Logger log = Logger.getLogger(UnregisterServlet.class.getName());
 
 	@SuppressWarnings("unused")
 	@Override
