@@ -20,7 +20,7 @@ import com.teamagly.friendizer.model.*;
 
 @SuppressWarnings("serial")
 public class UsersManager extends HttpServlet {
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
+	private static final Logger log = Logger.getLogger(UsersManager.class.getName());
 	private static final int DAILY_BONUS_POINTS = 50;
 	private static final int WELCOME_EMAIL_DELAY = 10 * 60 * 1000; // 10 minutes
 
@@ -120,18 +120,16 @@ public class UsersManager extends HttpServlet {
 		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 		// Get the user's data from Facebook
 		// Note: using JsonObject instead of User object for the profile picture
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
-				Parameter.with("fields", "name,gender,birthday,picture"));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", "name,gender,birthday,picture"));
 		user.updateFacebookData(jsonObject);
 	}
 
-	void updateUserFromFacebook(User user, List<String> fields) throws FacebookException {
+	private void updateUserFromFacebook(User user, List<String> fields) throws FacebookException {
 		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 		// Request those fields from Facebook
 		// Note: using JsonObject instead of User object in case we want the profile picture
 		log.info("Requesting update for uid " + user.getId() + " for " + StringUtils.join(fields));
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
-				Parameter.with("fields", StringUtils.join(fields)));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
 		user.updateFacebookData(jsonObject);
 	}
 
@@ -154,17 +152,12 @@ public class UsersManager extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-			Query query = pm.newQuery(User.class);
-			query.setFilter("owner == " + userID);
-			List<User> result = (List<User>) query.execute();
-			result.size(); // Important: this is an App Engine bug workaround
-			query.closeAll();
-			response.getWriter().println(new Gson().toJson(result));
-		} catch (JDOObjectNotFoundException e) {
-			log.severe("User doesn't exist");
-		}
+		Query query = pm.newQuery(User.class);
+		query.setFilter("owner == " + userID);
+		List<User> result = (List<User>) query.execute();
+		result.size(); // Important: this is an App Engine bug workaround
+		query.closeAll();
+		response.getWriter().println(new Gson().toJson(result));
 		pm.close();
 	}
 
@@ -173,13 +166,6 @@ public class UsersManager extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try {
-			pm.getObjectById(User.class, userID); // Check if the user exists
-		} catch (JDOObjectNotFoundException e) {
-			pm.close();
-			log.severe("User doesn't exist");
-			return;
-		}
 		HashSet<String> names = new HashSet<String>();
 		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
@@ -279,11 +265,11 @@ public class UsersManager extends HttpServlet {
 		try {
 			user2 = pm.getObjectById(User.class, user2ID);
 		} catch (JDOObjectNotFoundException e) {
+			pm.close();
 			log.severe("User2 doesn't exist");
 			return;
-		} finally {
-			pm.close();
 		}
+		pm.close();
 
 		try {
 			// Get the access token of user1
@@ -402,12 +388,13 @@ public class UsersManager extends HttpServlet {
 		 */
 		for (Like like1 : user1LikesList) {
 			String like1ID = like1.getId();
-			for (Like like2 : user2LikesList)
+			for (Like like2 : user2LikesList) {
 				// If both users have the same like - add to the set
 				if (like1ID.equals(like2.getId())) {
 					mutualLikesIDs.add(like1ID);
 					break;
 				}
+			}
 		}
 		String mutualLikesStr = StringUtils.join(mutualLikesIDs.toArray(new String[mutualLikesIDs.size()]));
 		String query = "SELECT page_id, pic_square, name, type FROM page WHERE page_id IN (" + mutualLikesStr + ")";
@@ -430,12 +417,13 @@ public class UsersManager extends HttpServlet {
 		List<User> users = (List<User>) query.execute(yesterdayDate);
 		query.closeAll();
 
-		for (User user : users)
+		for (User user : users) {
 			try {
 				user.setMoney(user.getMoney() + DAILY_BONUS_POINTS);
 			} catch (Exception e) {
 				log.info(e.getMessage());
 			}
+		}
 
 		pm.close();
 	}

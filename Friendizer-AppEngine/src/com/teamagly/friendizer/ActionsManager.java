@@ -56,12 +56,13 @@ public class ActionsManager extends HttpServlet {
 		AchievementsManager.userValueIncreased(pm.detachCopy(buyer));
 		// Check for level up
 		buyer.setLevel(UsersManager.calculateLevel(buyer.getLevel(), buyer.getPoints()));
-		if (buy.getOwner() > 0)
+		if (buy.getOwner() > 0) {
 			try {
 				User preOwner = pm.getObjectById(User.class, buy.getOwner());
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
 			} catch (JDOObjectNotFoundException e) {
 			}
+		}
 		buy.setPoints(buy.getPoints() + 20);
 		AchievementsManager.userValueIncreased(pm.detachCopy(buy));
 		// Check for level up
@@ -143,6 +144,7 @@ public class ActionsManager extends HttpServlet {
 							user = pm.getObjectById(User.class, action.getBoughtID());
 							actions.add(new ActionInfo(user, true, action.getDate()));
 						} catch (JDOObjectNotFoundException e) {
+							log.severe("User " + action.getBoughtID() + " doesn't exist");
 						}
 						i++;
 					} else {
@@ -152,6 +154,7 @@ public class ActionsManager extends HttpServlet {
 							user = pm.getObjectById(User.class, action.getBuyerID());
 							actions.add(new ActionInfo(user, false, action.getDate()));
 						} catch (JDOObjectNotFoundException e) {
+							log.severe("User " + action.getBuyerID() + " doesn't exist");
 						}
 						j++;
 					}
@@ -162,6 +165,7 @@ public class ActionsManager extends HttpServlet {
 						user = pm.getObjectById(User.class, action.getBoughtID());
 						actions.add(new ActionInfo(user, true, action.getDate()));
 					} catch (JDOObjectNotFoundException e) {
+						log.severe("User " + action.getBoughtID() + " doesn't exist");
 					}
 					i++;
 				}
@@ -172,6 +176,7 @@ public class ActionsManager extends HttpServlet {
 					user = pm.getObjectById(User.class, action.getBuyerID());
 					actions.add(new ActionInfo(user, false, action.getDate()));
 				} catch (JDOObjectNotFoundException e) {
+					log.severe("User " + action.getBuyerID() + " doesn't exist");
 				}
 				j++;
 			} else

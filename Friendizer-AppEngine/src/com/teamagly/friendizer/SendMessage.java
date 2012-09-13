@@ -14,9 +14,8 @@ import com.teamagly.friendizer.model.UserDevice;
  * Send a message using GCM
  */
 public class SendMessage {
-	private static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
-
 	private static final Logger log = Logger.getLogger(SendMessage.class.getName());
+	private static final String SENDER_ID = "AIzaSyA52pp613NNTl8BncGIh0wDbCDPb78y5X0"; // GCM sender ID
 
 	@SuppressWarnings("unchecked")
 	public static void sendMessage(long userIDParam, Message msg) {

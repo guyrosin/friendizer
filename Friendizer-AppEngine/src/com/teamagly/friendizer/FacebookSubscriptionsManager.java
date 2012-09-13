@@ -19,12 +19,10 @@ import com.teamagly.friendizer.model.User;
 
 @SuppressWarnings("serial")
 public class FacebookSubscriptionsManager extends HttpServlet {
+	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
 	private static final String APP_ID = "273844699335189"; // Facebook app ID
 	private static final String APP_SECRET = "b2d90b5989dfdf082742e12d365053b9"; // Facebook app secret
 	private static final String BASE_URL = "http://friendizer.appspot.com/";
-
-	private static final Logger log = Logger.getLogger(FacebookSubscriptionsManager.class.getName());
-
 	private static final String VERIFY_TOKEN = "FRIENDIZER";
 
 	@Override
@@ -44,10 +42,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		else if (servlet.intern() == "extendAccessTokens")
 			extendAccessTokens();
 		else {
-
-			/*
-			 * Subscription Verification
-			 */
+			// Subscription Verification
 			String mode = request.getParameter("hub.mode"); // This is always the string "subscribe"
 			String challenge = request.getParameter("hub.challenge"); // This is a random string
 			String verifyToken = request.getParameter("hub.verify_token");
@@ -59,9 +54,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 	@SuppressWarnings("unused")
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		/*
-		 * Change Notifications
-		 */
+		// Change Notifications
 		ArrayList<String> fields = new ArrayList<String>();
 		// Read and log the whole request
 		/*
@@ -149,8 +142,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		String callbackURL = BASE_URL + "facebookSubscriptions";
 		OutputStream output = null;
 		try {
-			String query = String.format("access_token=%s&object=%s&fields=%s&callback_url=%s&verify_token=%s&method=post", URLEncoder.encode(accessToken.getAccessToken(), charset), URLEncoder.encode(object, charset), URLEncoder.encode(fields, charset), URLEncoder.encode(callbackURL, charset),
-					URLEncoder.encode(VERIFY_TOKEN, charset));
+			String query = String.format("access_token=%s&object=%s&fields=%s&callback_url=%s&verify_token=%s&method=post", URLEncoder.encode(accessToken.getAccessToken(), charset), URLEncoder.encode(object, charset), URLEncoder.encode(fields, charset), URLEncoder.encode(callbackURL, charset), URLEncoder.encode(VERIFY_TOKEN, charset));
 			url = url + "?" + query;
 
 			HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -168,11 +160,12 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if (output != null)
+			if (output != null) {
 				try {
 					output.close();
 				} catch (IOException logOrIgnore) {
 				}
+			}
 		}
 	}
 
@@ -225,12 +218,13 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		Query query = pm.newQuery(User.class);
 		List<User> users = (List<User>) query.execute();
 		query.closeAll();
-		for (User user : users)
+		for (User user : users) {
 			try {
 				requestFBData(String.valueOf(user.getId()), Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
 			} catch (Exception e) {
 				log.info(e.getMessage());
 			}
+		}
 		pm.close();
 	}
 
@@ -240,7 +234,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 		Query query = pm.newQuery(User.class);
 		List<User> users = (List<User>) query.execute();
 		query.closeAll();
-		for (User user : users)
+		for (User user : users) {
 			// Request an extended access token
 			try {
 				FacebookClient facebook = new DefaultFacebookClient(user.getToken());
@@ -249,6 +243,7 @@ public class FacebookSubscriptionsManager extends HttpServlet {
 			} catch (Exception e) {
 				log.info("Error when extending access token for " + user.getId() + ": " + e.getMessage());
 			}
+		}
 		pm.close();
 	}
 }
