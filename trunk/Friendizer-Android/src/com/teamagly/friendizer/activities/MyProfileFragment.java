@@ -20,7 +20,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -139,8 +138,8 @@ public class MyProfileFragment extends SherlockFragment {
 		activity.findViewById(R.id.btn_action_history).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
-				// ActionHistoryFragment.class.getName()));
+				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
+						ActionHistoryFragment.class.getName()));
 			}
 		});
 		// Define the status change button
@@ -179,8 +178,8 @@ public class MyProfileFragment extends SherlockFragment {
 	}
 
 	/**
-     * 
-     */
+	 * 
+	 */
 	protected void showStatusDialog() {
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
 

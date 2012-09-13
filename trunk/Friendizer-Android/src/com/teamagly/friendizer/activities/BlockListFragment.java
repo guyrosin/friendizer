@@ -39,7 +39,6 @@ public class BlockListFragment extends AbstractFriendsListFragment {
 		empty.setText("You haven't blocked anyone");
 		empty.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0); // Remove the drawable
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-		gridView.setEmptyView(null);
 	}
 
 	/*
@@ -96,7 +95,8 @@ public class BlockListFragment extends AbstractFriendsListFragment {
 			friendsAdapter.clear();
 			if (blockedUsers != null)
 				friendsAdapter.addAll(blockedUsers);
-			gridView.setEmptyView(activity.findViewById(R.id.empty));
+			if (blockedUsers == null || blockedUsers.isEmpty())
+				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

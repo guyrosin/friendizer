@@ -14,5 +14,11 @@
         android:menuCategory="secondary"
         android:title="@string/facebook_friends">
     </item>
+    <item
+        android:id="@+id/menu_filter"
+        android:icon="@drawable/ic_action_filter"
+        android:menuCategory="alternative"
+        android:showAsAction="ifRoom">
+    </item>
 
 </menu>

@@ -11,10 +11,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -25,9 +30,12 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.FriendsAdapter;
 import com.teamagly.friendizer.adapters.FriendsImageAdapter;
+import com.teamagly.friendizer.filters.UserFilter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.Utility;
+import com.teamagly.friendizer.widgets.RangeSeekBar;
+import com.teamagly.friendizer.widgets.RangeSeekBar.OnRangeSeekBarChangeListener;
 
 /**
  * Note: the child class has to call activity.setSupportProgressBarIndeterminateVisibility(false) after it's done reloading the
@@ -83,6 +91,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 	public void onResume() {
 		super.onResume();
 		activity.setSupportProgressBarIndeterminateVisibility(true);
+		gridView.setEmptyView(null); // Reset the empty view
 		gridView.setAdapter(friendsAdapter);
 		gridView.setOnItemClickListener(this);
 		if (savedPosition >= 0) // initialized to -1
@@ -136,11 +145,15 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_filter: // Show the filters dialog
+			showFiltersDialog();
+			return true;
 		case R.id.menu_refresh:
 			onResume();
 			return true;
 		case R.id.menu_facebook_friends: // Move to my Facebook friends fragment
-			startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", FBFriendsFragment.class.getName()));
+			startActivity(new Intent(activity, BaseFragmentActivity.class)
+			.putExtra("fragment", FBFriendsFragment.class.getName()));
 			return true;
 		case R.id.menu_sort:
 			final String[] options = { "Alphabeth", "Value" };
@@ -176,6 +189,72 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void showFiltersDialog() {
+		LayoutInflater inflater = activity.getLayoutInflater();
+		final View dialogLayout = inflater.inflate(R.layout.user_filter_dialog, null);
+		// Create RangeSeekBar as Integer range between 0 and 100
+		RangeSeekBar<Integer> seekBar = new RangeSeekBar<Integer>(0, 100, activity);
+		seekBar.setNotifyWhileDragging(true);
+
+		UserFilter currentFilter = friendsAdapter.getCurrentFilter();
+		TextView ageFromView = (TextView) dialogLayout.findViewById(R.id.age_from);
+		ageFromView.setText(String.valueOf(currentFilter.getMinAgeValue()));
+		seekBar.setSelectedMinValue(currentFilter.getMinAgeValue());
+		TextView ageToView = (TextView) dialogLayout.findViewById(R.id.age_to);
+		ageToView.setText(String.valueOf(currentFilter.getMaxAgeValue()));
+		seekBar.setSelectedMaxValue(currentFilter.getMaxAgeValue());
+		TextView nameView = (TextView) dialogLayout.findViewById(R.id.name_edit_text);
+		nameView.setText(currentFilter.getName());
+		RadioGroup genderRadio = (RadioGroup) dialogLayout.findViewById(R.id.gender_radio_group);
+		if (currentFilter.getGender().equals("all"))
+			genderRadio.check(R.id.gender_all);
+		else if (currentFilter.getGender().equals("male"))
+			genderRadio.check(R.id.gender_male);
+		else
+			genderRadio.check(R.id.gender_female);
+
+		seekBar.setOnRangeSeekBarChangeListener(new OnRangeSeekBarChangeListener<Integer>() {
+			@Override
+			public void onRangeSeekBarValuesChanged(RangeSeekBar<?> bar, Integer minValue, Integer maxValue) {
+				// handle changed range values
+				TextView ageFromView = (TextView) dialogLayout.findViewById(R.id.age_from);
+				TextView ageToView = (TextView) dialogLayout.findViewById(R.id.age_to);
+				ageFromView.setText(String.valueOf(minValue));
+				ageToView.setText(String.valueOf(maxValue));
+			}
+		});
+		// add RangeSeekBar to pre-defined layout
+		ViewGroup layout = (ViewGroup) dialogLayout.findViewById(R.id.age_layout);
+		layout.addView(seekBar);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setView(dialogLayout);
+		builder.setNegativeButton("Reset", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				friendsAdapter.resetFilter();
+				dialog.cancel();
+			}
+		});
+		builder.setTitle("Filters").setPositiveButton("Filter", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				TextView ageFromView = (TextView) dialogLayout.findViewById(R.id.age_from);
+				String ageFrom = ageFromView.getText().toString();
+				TextView ageToView = (TextView) dialogLayout.findViewById(R.id.age_to);
+				String ageTo = ageToView.getText().toString();
+				TextView nameView = (TextView) dialogLayout.findViewById(R.id.name_edit_text);
+				String name = nameView.getText().toString();
+				RadioGroup genderRadio = (RadioGroup) dialogLayout.findViewById(R.id.gender_radio_group);
+				RadioButton selectedButton = (RadioButton) dialogLayout.findViewById(genderRadio.getCheckedRadioButtonId());
+				String gender = selectedButton.getText().toString();
+				UserFilter filter = new UserFilter(name, gender, Integer.valueOf(ageFrom), Integer.valueOf(ageTo));
+				friendsAdapter.filter(filter);
+			}
+		});
+		builder.show();
 	}
 
 	/*

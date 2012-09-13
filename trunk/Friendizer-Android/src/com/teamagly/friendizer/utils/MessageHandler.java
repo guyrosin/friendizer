@@ -1,6 +1,7 @@
 package com.teamagly.friendizer.utils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 
 import android.app.Activity;
@@ -82,9 +83,18 @@ public class MessageHandler {
 		final long when = System.currentTimeMillis();
 		builder = new Builder(context);
 		builder.setContentTitle(title);
-		builder.setContentText(message);
+		try {
+			builder.setContentText(new String(message.getBytes("UTF-8")));
+		} catch (UnsupportedEncodingException e1) {
+			builder.setContentText(message); // Skip the encoding
+		}
 		builder.setSmallIcon(APP_ICON_RES_ID);
-		builder.setTicker(tickerText);
+		try {
+			builder.setTicker(new String(tickerText.getBytes("UTF-8")));
+		} catch (UnsupportedEncodingException e) {
+			builder.setTicker(tickerText); // Skip the encoding
+			Log.e(TAG, e.getMessage());
+		}
 		int requestCode = 0;
 		if (type == NotificationType.CHAT) {
 			requestCode = Long.valueOf(userID).hashCode(); // Create a unique code for chat notifications

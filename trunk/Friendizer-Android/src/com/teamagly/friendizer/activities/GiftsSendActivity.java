@@ -71,6 +71,7 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 	protected void onResume() {
 		super.onResume();
 		setSupportProgressBarIndeterminateVisibility(true);
+		gridView.setEmptyView(null);
 		new AsyncTask<Void, Void, List<Gift>>() {
 			@Override
 			protected List<Gift> doInBackground(Void... params) {
@@ -85,11 +86,11 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 			@Override
 			protected void onPostExecute(List<Gift> gifts) {
 				giftsList.clear();
-				if (gifts != null) {
+				if (gifts != null)
 					giftsList.addAll(gifts);
-					adapter.notifyDataSetChanged();
-				}
-				gridView.setEmptyView(activity.findViewById(R.id.empty));
+				adapter.notifyDataSetChanged();
+				if (gifts == null || gifts.isEmpty())
+					gridView.setEmptyView(activity.findViewById(R.id.empty));
 				setSupportProgressBarIndeterminateVisibility(false);
 			}
 		}.execute();
@@ -104,19 +105,19 @@ public class GiftsSendActivity extends SherlockActivity implements OnItemClickLi
 		final Gift gift = giftsList.get(position);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("Send " + gift.getName() + " to " + destUser.getName() + " for " + gift.getValue() + " coins?")
-				.setCancelable(false)
-				.setPositiveButton("Send", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						new SendGiftTask().execute(gift);
-					}
-				})
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				});
+		.setCancelable(false)
+		.setPositiveButton("Send", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				new SendGiftTask().execute(gift);
+			}
+		})
+		.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
 		builder.show();
 	}
 

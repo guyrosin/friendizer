@@ -14,6 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.teamagly.friendizer.filters.UserFilter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.Comparators;
 import com.teamagly.friendizer.utils.Utility;
@@ -21,24 +24,38 @@ import com.teamagly.friendizer.utils.Utility;
 public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filterable {
 
 	public static String SORT_BY = "sort";
+	public static String LAST_FILTER = "last_user_filter";
 	protected LayoutInflater inflater;
 	private List<User> allUsersList;
 	private List<User> filteredUsersList;
-	private UserFilter filter;
+	private AdapterFilter adapterFilter;
+	private UserFilter userFilter;
 	private int sortBy;
 
 	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects) {
 		super(context, textViewResourceId, objects);
 
-		SharedPreferences settings = Utility.getSharedPreferences();
-		sortBy = settings.getInt(SORT_BY, -1);
+		SharedPreferences prefs = Utility.getSharedPreferences();
+		sortBy = prefs.getInt(SORT_BY, -1);
 
 		allUsersList = new ArrayList<User>();
 		allUsersList.addAll(objects);
 		filteredUsersList = new ArrayList<User>();
 		filteredUsersList.addAll(allUsersList);
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		getFilter();
+		// Retrieve the last used filter from the preferences
+		String lastFilterStr = prefs.getString(LAST_FILTER, "");
+		if (lastFilterStr.length() > 0)
+			try {
+				userFilter = new Gson().fromJson(lastFilterStr, UserFilter.class);
+			} catch (JsonSyntaxException e) {
+				userFilter = new UserFilter();
+			}
+		else
+			userFilter = new UserFilter();
+		filter(userFilter);
 	}
 
 	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, boolean sort) {
@@ -54,9 +71,9 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 
 	@Override
 	public Filter getFilter() {
-		if (filter == null)
-			filter = new UserFilter();
-		return filter;
+		if (adapterFilter == null)
+			adapterFilter = new AdapterFilter();
+		return adapterFilter;
 	}
 
 	@Override
@@ -89,16 +106,20 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 	@Override
 	public void add(User object) {
 		allUsersList.add(object);
-		filteredUsersList.add(object);
+		filter(userFilter);
 		notifyDataSetChanged();
 	}
 
 	@Override
 	public void addAll(Collection<? extends User> collection) {
-		for (User u : collection)
-			allUsersList.add(u);
-		filteredUsersList.addAll(collection);
+		allUsersList.addAll(collection);
+		filter(userFilter);
 		notifyDataSetChanged();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return filteredUsersList.isEmpty();
 	}
 
 	@Override
@@ -118,27 +139,49 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		super.notifyDataSetChanged();
 	}
 
-	private class UserFilter extends Filter {
+	public void filter(UserFilter filter) {
+		userFilter = filter;
+		getFilter().filter(new Gson().toJson(filter).toString());
+		// Save the new filter
+		SharedPreferences.Editor editor = Utility.getSharedPreferences().edit();
+		editor.putString(LAST_FILTER, new Gson().toJson(filter));
+		editor.commit();
+	}
+
+	public void resetFilter() {
+		userFilter = new UserFilter();
+		getFilter().filter("RESET");
+		// Save the new filter
+		SharedPreferences.Editor editor = Utility.getSharedPreferences().edit();
+		editor.putString(LAST_FILTER, "");
+		editor.commit();
+	}
+
+	public UserFilter getCurrentFilter() {
+		return userFilter;
+	}
+
+	private class AdapterFilter extends Filter {
 
 		@Override
-		protected FilterResults performFiltering(CharSequence constraint) {
-			constraint = constraint.toString().toLowerCase();
+		protected FilterResults performFiltering(CharSequence jsonConstraint) {
 			FilterResults result = new FilterResults();
-			if (constraint != null && constraint.toString().length() > 0) {
-				ArrayList<User> filteredItems = new ArrayList<User>();
-
-				for (int i = 0, l = allUsersList.size(); i < l; i++) {
-					User m = allUsersList.get(i);
-					if (m.getName().toLowerCase().contains(constraint))
-						filteredItems.add(m);
-				}
-				result.count = filteredItems.size();
-				result.values = filteredItems;
-			} else
+			if (jsonConstraint.equals("RESET")) {
 				synchronized (this) {
 					result.values = allUsersList;
 					result.count = allUsersList.size();
 				}
+				return result;
+			}
+			ArrayList<User> filteredItems = new ArrayList<User>();
+			UserFilter filter = new Gson().fromJson(jsonConstraint.toString(), UserFilter.class);
+			for (User user : allUsersList)
+				if (filter.satistfies(user))
+					filteredItems.add(user);
+			synchronized (this) {
+				result.count = filteredItems.size();
+				result.values = filteredItems;
+			}
 			return result;
 		}
 
