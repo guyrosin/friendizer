@@ -5,7 +5,7 @@ import javax.jdo.annotations.*;
 @PersistenceCapable
 public class Gift {
 	@PrimaryKey
-	@Persistent
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	Long id;
 
 	@Persistent
@@ -17,8 +17,7 @@ public class Gift {
 	@Persistent
 	int value;
 
-	public Gift(long id, String name, String iconRes, int value) {
-		this.id = id;
+	public Gift(String name, String iconRes, int value) {
 		this.name = name;
 		this.iconRes = iconRes;
 		this.value = value;
@@ -26,10 +25,6 @@ public class Gift {
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {

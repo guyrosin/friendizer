@@ -26,12 +26,24 @@ public class UserGift {
 	public long getGiftID() {
 		return giftID;
 	}
+	
+	public void setGiftID(long giftID) {
+		this.giftID = giftID;
+	}
 
 	public long getSenderID() {
 		return senderID;
 	}
+	
+	public void setSenderID(long senderID) {
+		this.senderID = senderID;
+	}
 
 	public long getReceiverID() {
 		return receiverID;
+	}
+	
+	public void setReceiverID(long receiverID) {
+		this.receiverID = receiverID;
 	}
 }

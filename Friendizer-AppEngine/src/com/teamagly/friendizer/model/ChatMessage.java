@@ -4,9 +4,6 @@ import java.util.Date;
 
 import javax.jdo.annotations.*;
 
-import com.google.appengine.labs.repackaged.org.json.*;
-import com.teamagly.friendizer.Notifications;
-
 @PersistenceCapable
 public class ChatMessage {
 	@PrimaryKey
@@ -28,33 +25,12 @@ public class ChatMessage {
 	@Persistent
 	private boolean unread;
 
-	public ChatMessage() {
-
-	}
-
-	public ChatMessage(long source, long destination, String text) {
-		super();
+	public ChatMessage(long source, long destination, String text, Date time) {
 		this.source = source;
 		this.destination = destination;
 		this.text = text;
 		this.unread = true;
-		this.time = new Date();
-	}
-
-	public String toC2DMMessage() throws JSONException {
-		JSONObject c2dm = new JSONObject();
-		c2dm.put("userID", source);
-		c2dm.put("text", text);
-		c2dm.put("type", Notifications.NotificationType.CHAT);
-		return c2dm.toString();
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long key) {
-		this.id = key;
+		this.time = time;
 	}
 
 	public long getSource() {

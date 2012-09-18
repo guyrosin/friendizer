@@ -14,12 +14,13 @@ public class Mission {
 	@Persistent
 	private int type;
 
-	public Long getId() {
-		return id;
+	public Mission(long userID, int type) {
+		this.userID = userID;
+		this.type = type;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public Long getId() {
+		return id;
 	}
 
 	public long getUserID() {
