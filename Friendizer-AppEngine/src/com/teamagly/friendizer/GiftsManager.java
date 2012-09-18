@@ -31,6 +31,14 @@ public class GiftsManager extends HttpServlet {
 			getGift(request, response);
 	}
 
+	/**
+	 * Get all the gifts.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void allGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -42,10 +50,19 @@ public class GiftsManager extends HttpServlet {
 		response.getWriter().println(new Gson().toJson(result));
 	}
 
+	/**
+	 * Get the gifts of a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void userGifts(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the gifts IDs of the gifts that the user got
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();
@@ -54,16 +71,19 @@ public class GiftsManager extends HttpServlet {
 			pm.close();
 			return;
 		}
+		// Create the query of the user gifts
 		StringBuilder giftsFilter = new StringBuilder();
 		for (UserGift userGift : userGifts)
 			giftsFilter.append("id == " + userGift.getGiftID() + " || ");
 		giftsFilter.delete(giftsFilter.length() - 4, giftsFilter.length()); // Delete the last "or" sign
+		// Get the gifts of the user
 		query = pm.newQuery(Gift.class);
 		query.setFilter(giftsFilter.toString());
 		List<Gift> gifts = (List<Gift>) query.execute();
 		gifts.size(); // App Engine bug workaround
 		query.closeAll();
 		pm.close();
+		// Initialize the counters
 		HashMap<Long, Integer> counters = new HashMap<Long, Integer>();
 		for (Gift gift : gifts)
 			counters.put(gift.getId(), 0);
@@ -77,11 +97,20 @@ public class GiftsManager extends HttpServlet {
 		response.getWriter().println(new Gson().toJson(giftCounts));
 	}
 
+	/**
+	 * Send a gift from one user to another.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private void sendGift(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long senderID = Long.parseLong(request.getParameter("senderID"));
 		long receiverID = Long.parseLong(request.getParameter("receiverID"));
 		long giftID = Long.parseLong(request.getParameter("giftID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the sender
 		User sender;
 		try {
 			sender = pm.getObjectById(User.class, senderID);
@@ -90,6 +119,7 @@ public class GiftsManager extends HttpServlet {
 			log.severe("The sender doesn't exist");
 			return;
 		}
+		// Get the receiver
 		User receiver;
 		try {
 			receiver = pm.getObjectById(User.class, senderID);
@@ -98,7 +128,7 @@ public class GiftsManager extends HttpServlet {
 			log.severe("The receiver doesn't exist");
 			return;
 		}
-
+		// Get the gift
 		Gift gift;
 		try {
 			gift = pm.getObjectById(Gift.class, giftID);
@@ -107,33 +137,48 @@ public class GiftsManager extends HttpServlet {
 			log.severe("This gift doesn't exist");
 			return;
 		}
+		// Check if the sender can send a gift to the receiver
 		if (!isPurchaseLegal(sender, receiver, gift)) {
 			pm.close();
 			return;
 		}
+		// Decrease the sender money
 		sender.setMoney(sender.getMoney() - gift.getValue());
-
-		UserGift userGift = new UserGift(receiverID, senderID, giftID);
-		pm.makePersistent(userGift);
+		// Add the gift send from the sender to the receiver
+		pm.makePersistent(new UserGift(receiverID, senderID, giftID));
+		// Give the achievement
 		AchievementsManager.userSentGift(pm.detachCopy(sender));
 		pm.close();
 		response.getWriter().println("The gift has been sent");
-
+		// Send notification to the receiver device
 		Builder msg = new Builder();
 		msg.addData("type", NotificationType.GFT.toString());
 		msg.addData("userID", String.valueOf(senderID));
-		msg.addData("giftID", String.valueOf(userGift.getGiftID()));
+		msg.addData("giftID", String.valueOf(giftID));
 		msg.addData("giftName", String.valueOf(gift.getName()));
 		SendMessage.sendMessage(receiverID, msg.build());
 	}
-	
+
+	/**
+	 * Check if the sender can send a gift to the receiver.
+	 * 
+	 * @param sender
+	 *            The sender
+	 * @param receiver
+	 *            The receiver
+	 * @param gift
+	 *            The gift
+	 * @return true if it is legal, false otherwise.
+	 */
 	@SuppressWarnings("unchecked")
 	private boolean isPurchaseLegal(User sender, User receiver, Gift gift) {
+		// Check if the sender has enough money
 		if (sender.getMoney() < gift.getValue()) {
 			log.severe("The sender doesn't have enough money to send this gift");
 			return false;
 		}
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Check if the receiver hasn't blocked the sender
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + receiver.getId() + " && blockedID == " + sender.getId());
 		List<UserBlock> result = (List<UserBlock>) query.execute();
@@ -144,14 +189,24 @@ public class GiftsManager extends HttpServlet {
 			return false;
 		}
 		pm.close();
+		// Passed all the tests
 		return true;
 	}
 
+	/**
+	 * Get a gift of a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void getGift(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		long giftID = Long.parseLong(request.getParameter("giftID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the user gift
 		Query query = pm.newQuery(UserGift.class);
 		query.setFilter("receiverID == " + userID + " && giftID == " + giftID);
 		List<UserGift> userGifts = (List<UserGift>) query.execute();
@@ -160,16 +215,17 @@ public class GiftsManager extends HttpServlet {
 			pm.close();
 			return;
 		}
+		// Get the gift with the number of times the user got it
+		Gift gift;
 		try {
-			Gift gift = pm.getObjectById(Gift.class, giftID);
-			GiftCount giftCount = new GiftCount(gift, userGifts.size());
-			response.getWriter().println(new Gson().toJson(giftCount));
+			gift = pm.getObjectById(Gift.class, giftID);
 		} catch (JDOObjectNotFoundException e) {
+			pm.close();
 			log.severe("Gift doesn't exist");
 			return;
-		} finally {
-			pm.close();
 		}
+		GiftCount giftCount = new GiftCount(gift, userGifts.size());
+		response.getWriter().println(new Gson().toJson(giftCount));
+		pm.close();
 	}
-
 }

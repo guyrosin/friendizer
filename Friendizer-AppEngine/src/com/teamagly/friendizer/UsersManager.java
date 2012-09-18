@@ -92,11 +92,7 @@ public class UsersManager extends HttpServlet {
 
 			// Send a welcome email
 			Queue queue = QueueFactory.getQueue("welcome-email");
-			queue.add(TaskOptions.Builder
-					.withUrl("/welcome_email")
-					.countdownMillis(WELCOME_EMAIL_DELAY)
-					.param("userID", String.valueOf(user.getId()))
-					.method(Method.GET));
+			queue.add(TaskOptions.Builder.withUrl("/welcome_email").countdownMillis(WELCOME_EMAIL_DELAY).param("userID", String.valueOf(user.getId())).method(Method.GET));
 		}
 
 		response.getWriter().println(new Gson().toJson(user));
@@ -133,10 +129,19 @@ public class UsersManager extends HttpServlet {
 		user.updateFacebookData(jsonObject);
 	}
 
+	/**
+	 * Get the user details from the DB.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private void userDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the user
 		try {
 			User user = pm.getObjectById(User.class, userID);
 			response.getWriter().println(new Gson().toJson(user));
@@ -147,60 +152,78 @@ public class UsersManager extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Get the users that their owner is the given user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void ownList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the own list
 		Query query = pm.newQuery(User.class);
 		query.setFilter("owner == " + userID);
 		List<User> result = (List<User>) query.execute();
 		result.size(); // Important: this is an App Engine bug workaround
 		query.closeAll();
-		response.getWriter().println(new Gson().toJson(result));
 		pm.close();
+		response.getWriter().println(new Gson().toJson(result));
 	}
 
+	/**
+	 * Get the user friends.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void getFriends(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setCharacterEncoding("UTF-8");
 		long userID = Long.parseLong(request.getParameter("userID"));
+		HashSet<Long> friendsIDs = new HashSet<Long>();
+		ArrayList<User> friends = new ArrayList<User>();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		HashSet<String> names = new HashSet<String>();
+		// Get actions in which the user is the buyer
 		Query query = pm.newQuery(Action.class);
 		query.setFilter("buyerID == " + userID);
 		List<Action> result = (List<Action>) query.execute();
 		query.closeAll();
-		List<User> friends = new ArrayList<User>();
 		for (Action action : result) {
-			long friendID = action.getBoughtID() != userID ? action.getBoughtID() : action.getBuyerID();
 			try {
-				User friend = pm.getObjectById(User.class, friendID);
-				if (!names.contains(friend.getName())) {
+				// Add the friend if he wasn't added yet
+				User friend = pm.getObjectById(User.class, action.getBoughtID());
+				if (!friendsIDs.contains(friend.getId())) {
+					friendsIDs.add(friend.getId());
 					friends.add(friend);
-					names.add(friend.getName());
 				}
 			} catch (JDOObjectNotFoundException e) {
-				log.severe("User " + friendID + " doesn't exist");
+				log.severe("User " + action.getBoughtID() + " doesn't exist");
 			}
 		}
+		// Get actions in which the user is being bought
 		query = pm.newQuery(Action.class);
 		query.setFilter("boughtID == " + userID);
 		result = (List<Action>) query.execute();
 		query.closeAll();
 		for (Action action : result) {
-			long friendID = action.getBoughtID() != userID ? action.getBoughtID() : action.getBuyerID();
 			try {
-				User friend = pm.getObjectById(User.class, friendID);
-				if (!names.contains(friend.getName())) {
+				// Add the friend if he wasn't added yet
+				User friend = pm.getObjectById(User.class, action.getBuyerID());
+				if (!friendsIDs.contains(friend.getId())) {
+					friendsIDs.add(friend.getId());
 					friends.add(friend);
-					names.add(friend.getName());
 				}
 			} catch (JDOObjectNotFoundException e) {
-				log.severe("User " + friendID + " doesn't exist");
+				log.severe("User " + action.getBuyerID() + " doesn't exist");
 			}
 		}
-
+		// Remove the blocked users from the list
 		query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockList = (List<UserBlock>) query.execute();
@@ -215,19 +238,25 @@ public class UsersManager extends HttpServlet {
 			if (i < friends.size())
 				friends.remove(i);
 		}
-
-		response.getWriter().println(new Gson().toJson(friends));
 		pm.close();
+		response.getWriter().println(new Gson().toJson(friends));
 	}
 
+	/**
+	 * Update the user status.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setCharacterEncoding("UTF-8");
-
 		long userID = Long.parseLong(request.getParameter("userID"));
 		String status = request.getParameter("status");
-
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
+			// Update the status
 			User user = pm.getObjectById(User.class, userID);
 			user.setStatus(status);
 		} catch (JDOObjectNotFoundException e) {
