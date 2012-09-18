@@ -27,29 +27,36 @@ public class LocationManager extends HttpServlet {
 			nearbyUsers(request, response);
 	}
 
+	/**
+	 * Change the location of a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void changeLocation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		double latitude = Double.parseDouble(request.getParameter("latitude"));
 		double longitude = Double.parseDouble(request.getParameter("longitude"));
-		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the user
+		User user;
 		try {
 			user = pm.getObjectById(User.class, userID);
 		} catch (JDOObjectNotFoundException e) {
 			log.severe("User doesn't exist");
 			return;
 		}
+		// Set the new location and update date
 		user.setLatitude(latitude);
 		user.setLongitude(longitude);
 		user.setSince(new Date());
-
 		pm.close();
 
 		// TODO: Put it in a new thread
-
 		// Sending notification to a nearby user who bought me in the past (but didn't buy me for a week)
-
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		cal.add(Calendar.MINUTE, -30);
@@ -116,11 +123,20 @@ public class LocationManager extends HttpServlet {
 		response.getWriter().println("The user location was changed");
 	}
 
+	/**
+	 * Get the nearby users.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
-		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the user
+		User user;
 		try {
 			user = pm.getObjectById(User.class, userID);
 		} catch (JDOObjectNotFoundException e) {
@@ -130,6 +146,7 @@ public class LocationManager extends HttpServlet {
 		}
 		// Update the current date
 		user.setSince(new Date());
+		// Get all the online users from the database
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(new Date());
 		cal.add(Calendar.MINUTE, -30);
@@ -138,12 +155,9 @@ public class LocationManager extends HttpServlet {
 		query.setFilter("since > updatedDate");
 		query.setOrdering("since asc");
 		query.declareParameters("java.util.Date updatedDate");
-		// Get all the online users from the database
 		List<User> result = (List<User>) query.execute(updated);
 		query.closeAll();
-
 		ArrayList<User> nearbyUsers = new ArrayList<User>();
-
 		// The loop goes over the users and adds only the nearby users to a list
 		for (User nearbyUser : result) {
 			if (nearbyUser.getId() == userID)
@@ -153,7 +167,6 @@ public class LocationManager extends HttpServlet {
 			if (latitudeDiff * latitudeDiff + longitudeDiff * longitudeDiff <= 1)
 				nearbyUsers.add(nearbyUser);
 		}
-
 		pm.close();
 		response.getWriter().println(new Gson().toJson(nearbyUsers));
 	}

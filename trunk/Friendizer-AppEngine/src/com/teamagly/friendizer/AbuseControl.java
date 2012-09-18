@@ -27,6 +27,14 @@ public class AbuseControl extends HttpServlet {
 			blockList(request, response);
 	}
 
+	/**
+	 * Block a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void block(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
@@ -36,16 +44,26 @@ public class AbuseControl extends HttpServlet {
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
 		List<UserBlock> result = (List<UserBlock>) query.execute();
 		query.closeAll();
+		// Check if already blocked this user
 		if (!result.isEmpty()) {
 			pm.close();
 			log.severe("You've already blocked this user");
 			return;
 		}
+		// Block the user
 		pm.makePersistent(new UserBlock(userID, blockedID));
 		pm.close();
 		response.getWriter().println("You've successfully blocked the user");
 	}
-	
+
+	/**
+	 * Unblock a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void unblock(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
@@ -55,20 +73,31 @@ public class AbuseControl extends HttpServlet {
 		query.setFilter("userID == " + userID + " && blockedID == " + blockedID);
 		List<UserBlock> result = (List<UserBlock>) query.execute();
 		query.closeAll();
+		// Check if blocked this user in the past
 		if (result.isEmpty()) {
 			pm.close();
 			log.severe("You didn't block this user");
 			return;
 		}
+		// Unblock the user
 		pm.deletePersistent(result.get(0));
 		pm.close();
 		response.getWriter().println("You've successfully unblocked the user");
 	}
 
+	/**
+	 * Get the blocked list of a user.
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	private void blockList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		// Get the blocked users IDs
 		Query query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
 		List<UserBlock> blockedID = (List<UserBlock>) query.execute();
@@ -77,10 +106,12 @@ public class AbuseControl extends HttpServlet {
 			pm.close();
 			return;
 		}
+		// Create the query of the blocked users
 		StringBuilder blockedFilter = new StringBuilder();
 		for (UserBlock userBlock : blockedID)
 			blockedFilter.append("id == " + userBlock.getBlockedID() + " || ");
 		blockedFilter.delete(blockedFilter.length() - 4, blockedFilter.length());
+		// Get the blocked users
 		query = pm.newQuery(User.class);
 		query.setFilter(blockedFilter.toString());
 		List<User> blocked = (List<User>) query.execute();
