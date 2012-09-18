@@ -7,6 +7,7 @@ import com.teamagly.friendizer.utils.Utility;
 
 public class Message implements Serializable {
 
+	@SuppressWarnings("unused")
 	private Long id;
 
 	private long source;
@@ -21,12 +22,12 @@ public class Message implements Serializable {
 
 	private static final long serialVersionUID = 9125316871449587189L;
 
-	public Message(long source, long destination, String text) {
+	public Message(long source, long destination, String text, Date time) {
 		this.source = source;
 		this.destination = destination;
 		this.text = text;
 		this.unread = true;
-		this.time = new Date();
+		this.time = time;
 	}
 
 	/**
@@ -36,20 +37,12 @@ public class Message implements Serializable {
 	 * @param text
 	 *            content of the message
 	 */
-	public Message(long destination, String text) {
+	public Message(long destination, String text, Date time) {
 		this.source = Utility.getInstance().userInfo.getId();
 		this.destination = destination;
 		this.text = text;
 		this.unread = true;
-		this.time = new Date();
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long key) {
-		this.id = key;
+		this.time = time;
 	}
 
 	public long getSource() {
