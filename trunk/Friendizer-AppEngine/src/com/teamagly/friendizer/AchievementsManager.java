@@ -69,21 +69,23 @@ public class AchievementsManager extends HttpServlet {
 		if (user.getPoints() < 1000)
 			return;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + user.getId() + " && achievementID == 29001");
+		// Get the achievement
+		Query query = pm.newQuery(Achievement.class);
+		query.setFilter("title == 'Value I'");
+		List<Achievement> achvList = (List<Achievement>) query.execute();
+		query.closeAll();
+		if (achvList.isEmpty()) {
+			pm.close();
+			log.severe("This achievement doesn't exist");
+			return;
+		}
+		Achievement achv = achvList.get(0);
+		query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + user.getId() + " && achievementID == " + achv.getId());
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		// Check if the user doesn't have this achievement yet
 		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 29001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
 			// Reward the user with money
 			user.setMoney(user.getMoney() + achv.getReward());
 			// Reward the user with points
@@ -110,21 +112,23 @@ public class AchievementsManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	public static void purchaseMade(User buyer, User buy) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + buyer.getId() + " && achievementID == 28001");
+		// Get the achievement
+		Query query = pm.newQuery(Achievement.class);
+		query.setFilter("title == 'Buy I'");
+		List<Achievement> achvList = (List<Achievement>) query.execute();
+		query.closeAll();
+		if (achvList.isEmpty()) {
+			pm.close();
+			log.severe("This achievement doesn't exist");
+			return;
+		}
+		Achievement achv = achvList.get(0);
+		query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + buyer.getId() + " && achievementID == " + achv.getId());
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		// Check if the buyer doesn't have this achievement yet
 		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 28001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
 			// Reward the buyer with money
 			buyer.setMoney(buyer.getMoney() + achv.getReward());
 			// Reward the buyer with points
@@ -140,21 +144,23 @@ public class AchievementsManager extends HttpServlet {
 			notificate(buyer, achv);
 		}
 
+		// Get the achievement
+		query = pm.newQuery(Achievement.class);
+		query.setFilter("title == 'Buy II'");
+		achvList = (List<Achievement>) query.execute();
+		query.closeAll();
+		if (achvList.isEmpty()) {
+			pm.close();
+			log.severe("This achievement doesn't exist");
+			return;
+		}
+		achv = achvList.get(0);
 		query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + buy.getId() + " && achievementID == 30001");
+		query.setFilter("userID == " + buy.getId() + " && achievementID == " + achv.getId());
 		result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		// Check if the user bought doesn't have this achievement yet
 		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 30001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
 			// Reward the user bought with money
 			buy.setMoney(buy.getMoney() + achv.getReward());
 			// Reward the user bought with points
@@ -181,21 +187,23 @@ public class AchievementsManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	public static void userSentGift(User user) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(UserAchievement.class);
-		query.setFilter("userID == " + user.getId() + " && achievementID == 66001");
+		// Get the achievement
+		Query query = pm.newQuery(Achievement.class);
+		query.setFilter("title == 'Gift I'");
+		List<Achievement> achvList = (List<Achievement>) query.execute();
+		query.closeAll();
+		if (achvList.isEmpty()) {
+			pm.close();
+			log.severe("This achievement doesn't exist");
+			return;
+		}
+		Achievement achv = achvList.get(0);
+		query = pm.newQuery(UserAchievement.class);
+		query.setFilter("userID == " + user.getId() + " && achievementID == " + achv.getId());
 		List<UserAchievement> result = (List<UserAchievement>) query.execute();
 		query.closeAll();
 		// Check if the user doesn't have this achievement yet
 		if (result.isEmpty()) {
-			// Get the achievement from the database
-			Achievement achv;
-			try {
-				achv = pm.getObjectById(Achievement.class, 66001);
-			} catch (JDOObjectNotFoundException e) {
-				pm.close();
-				log.severe("This achievement doesn't exist");
-				return;
-			}
 			// Reward the user with money
 			user.setMoney(user.getMoney() + achv.getReward());
 			// Reward the user with points

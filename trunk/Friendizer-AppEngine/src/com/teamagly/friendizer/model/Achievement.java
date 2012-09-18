@@ -5,7 +5,7 @@ import javax.jdo.annotations.*;
 @PersistenceCapable
 public class Achievement {
 	@PrimaryKey
-	@Persistent
+	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Long id;
 	
 	@Persistent
@@ -23,8 +23,7 @@ public class Achievement {
 	@Persistent
 	private long points;
 
-	public Achievement(long id, String title, String description, String iconRes, int reward, long points) {
-		this.id = id;
+	public Achievement(String title, String description, String iconRes, int reward, long points) {
 		this.title = title;
 		this.description = description;
 		this.iconRes = iconRes;
@@ -34,10 +33,6 @@ public class Achievement {
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getTitle() {

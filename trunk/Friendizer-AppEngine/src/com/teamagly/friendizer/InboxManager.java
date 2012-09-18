@@ -1,7 +1,7 @@
 package com.teamagly.friendizer;
 
 import java.io.*;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import javax.jdo.*;
@@ -44,7 +44,7 @@ public class InboxManager extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		ChatMessage message = new ChatMessage(source, destination, text);
+		ChatMessage message = new ChatMessage(source, destination, text, new Date());
 
 		pm.makePersistent(message);
 		pm.close();
