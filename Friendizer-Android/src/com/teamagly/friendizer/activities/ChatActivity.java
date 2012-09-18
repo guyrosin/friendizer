@@ -4,6 +4,7 @@
 package com.teamagly.friendizer.activities;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -145,7 +146,7 @@ public class ChatActivity extends SherlockActivity {
 			Log.d(TAG, "Got a new chat message from " + userID);
 			if (userID == destUser.getId()) {
 				String msg = intent.getStringExtra("text");
-				Message newMsg = new Message(userID, Utility.getInstance().userInfo.getId(), msg);
+				Message newMsg = new Message(userID, Utility.getInstance().userInfo.getId(), msg, new Date());
 				messages.add(newMsg);
 				// messagesAdapter.notifyDataSetChanged(); not working, so recreate the adapter instead
 				messagesAdapter = new MessagesAdapter(context, R.id.message, messages);
@@ -170,7 +171,7 @@ public class ChatActivity extends SherlockActivity {
 	private void sendMessage(String text) {
 		// Check that there's actually something to send
 		if (text.length() > 0) {
-			Message newMsg = new Message(destUser.getId(), text);
+			Message newMsg = new Message(destUser.getId(), text, new Date());
 			new SendTask().execute(newMsg);
 		}
 	}

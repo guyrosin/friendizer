@@ -7,8 +7,7 @@ public class Gift {
 	private String iconRes;
 	private int value;
 
-	public Gift(long id, String name, String iconRes, int value) {
-		this.id = id;
+	public Gift(String name, String iconRes, int value) {
 		this.name = name;
 		this.iconRes = iconRes;
 		this.value = value;
@@ -16,10 +15,6 @@ public class Gift {
 
 	public long getId() {
 		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
 	}
 
 	public String getName() {
