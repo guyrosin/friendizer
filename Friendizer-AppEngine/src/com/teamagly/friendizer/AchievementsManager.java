@@ -39,7 +39,6 @@ public class AchievementsManager extends HttpServlet {
 		query.setFilter("userID == " + userID);
 		List<UserAchievement> userAchvs = (List<UserAchievement>) query.execute();
 		query.closeAll();
-		pm.close();
 		// Create a list of AchievementInfo
 		List<AchievementInfo> achvInfos = new ArrayList<AchievementInfo>();
 		for (Achievement achv : achvs) {
@@ -54,6 +53,7 @@ public class AchievementsManager extends HttpServlet {
 			// Add the AchievementInfo
 			achvInfos.add(new AchievementInfo(achv, earned));
 		}
+		pm.close();
 		response.getWriter().println(new Gson().toJson(achvInfos));
 	}
 
