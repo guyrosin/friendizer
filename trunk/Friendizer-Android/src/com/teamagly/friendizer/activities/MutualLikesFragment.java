@@ -124,8 +124,10 @@ public class MutualLikesFragment extends SherlockFragment implements OnItemClick
 			if (isCancelled())
 				return;
 			adapter.clear();
-			if (pages != null)
-				adapter.addAll(pages);
+			if (pages != null) {
+				for (Page page : pages)
+					adapter.add(page);
+			}
 			adapter.notifyDataSetChanged();
 			if (pages == null || pages.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
