@@ -121,8 +121,10 @@ public class ActionHistoryFragment extends SherlockFragment implements OnItemCli
 			if (isCancelled())
 				return;
 			adapter.clear();
-			if (actions != null)
-				adapter.addAll(actions);
+			if (actions != null) {
+				for (ActionInfo action : actions)
+					adapter.add(action);
+			}
 			adapter.notifyDataSetChanged();
 			if (actions == null || actions.isEmpty())
 				listView.setEmptyView(activity.findViewById(R.id.empty));

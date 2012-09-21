@@ -84,8 +84,10 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 			if (isCancelled())
 				return;
 			friendsAdapter.clear();
-			if (friends != null)
-				friendsAdapter.addAll(friends);
+			if (friends != null) {
+				for (User friend : friends)
+					friendsAdapter.add(friend);
+			}
 			if (friends == null || friends.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);

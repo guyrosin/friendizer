@@ -134,7 +134,8 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 			if (isCancelled())
 				return;
 			adapter.clear();
-			adapter.addAll(users);
+			for (User user : users)
+				adapter.add(user);
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

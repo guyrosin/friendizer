@@ -109,9 +109,13 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtMatching.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (userInfo.getMatching() > 0)
-					startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
-							MutualLikesFragment.class.getName()).putExtra("user", userInfo));
+				if (userInfo.getMatching() <= 0) {
+					if (txtMatching.getText().length() == 0)
+						return;
+					userInfo.setMatching(Integer.parseInt(txtMatching.getText().toString().substring(0, txtMatching.getText().length() - 1)));
+				}
+				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
+						MutualLikesFragment.class.getName()).putExtra("user", userInfo));
 			}
 		});
 	}
@@ -517,7 +521,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		@Override
 		protected void onPostExecute(Integer matching) {
 			if (matching > 0) {
-				userInfo.setMatching(matching);
+				if (userInfo != null)
+					userInfo.setMatching(matching);
 				// Update the view
 				txtMatching.setText(String.valueOf(matching) + "%");
 			} else

@@ -196,7 +196,10 @@ public class SplashActivity extends SherlockActivity {
 	public void onDestroy() {
 		// if (friendizerLoginTask != null)
 		// friendizerLoginTask.cancel(true);
-		unregisterReceiver(mHandleMessageReceiver);
+		try {
+			unregisterReceiver(mHandleMessageReceiver);
+		} catch (IllegalArgumentException e) {
+		}
 		GCMRegistrar.onDestroy(this);
 		super.onDestroy();
 	}
