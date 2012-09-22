@@ -68,12 +68,16 @@ public class ActionsManager extends HttpServlet {
 		buyer.setPoints(buyer.getPoints() + 10);
 		// Check for level up
 		buyer.setLevel(UsersManager.calculateLevel(buyer.getLevel(), buyer.getPoints()));
+		// Increase the number of users the buyer owns
+		buyer.setOwnsNum(buyer.getOwnsNum() + 1);
 		// Check if user bought has an owner
 		if (buy.getOwner() > 0) {
 			try {
-				// Increase the owner money
 				User preOwner = pm.getObjectById(User.class, buy.getOwner());
+				// Increase the previous owner money
 				preOwner.setMoney(preOwner.getMoney() + buy.getPoints());
+				// Decrease the previous owner owns number
+				preOwner.setOwnsNum(preOwner.getOwnsNum() - 1);
 			} catch (JDOObjectNotFoundException e) {
 				log.severe("User " + buy.getOwner() + " doesn't exist");
 			}

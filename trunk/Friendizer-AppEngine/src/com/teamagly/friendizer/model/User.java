@@ -64,6 +64,9 @@ public class User {
 
 	@Persistent
 	private boolean fbUpdate;
+	
+	@Persistent
+	private Integer ownsNum;
 
 	/**
 	 * Constructor for a new user
@@ -80,6 +83,7 @@ public class User {
 		this.token = token;
 		status = "";
 		fbUpdate = false;
+		ownsNum = 0;
 	}
 
 	public long getId() {
@@ -258,5 +262,13 @@ public class User {
 			gender = jsonObject.getString("gender");
 		if (jsonObject.has("birthday"))
 			birthday = jsonObject.getString("birthday");
+	}
+	
+	public Integer getOwnsNum() {
+		return ownsNum;
+	}
+	
+	public void setOwnsNum(Integer ownsNum) {
+		this.ownsNum = ownsNum;
 	}
 }
