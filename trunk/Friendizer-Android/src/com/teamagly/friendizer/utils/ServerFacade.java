@@ -176,7 +176,6 @@ public final class ServerFacade {
 		in.close();
 		if (user == null)
 			return null;
-		user.setOwnsList(ownList(userID));
 		return user;
 	}
 

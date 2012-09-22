@@ -167,8 +167,7 @@ public class MyProfileFragment extends SherlockFragment {
 			txtStatus.setVisibility(View.VISIBLE);
 		} else
 			txtStatus.setVisibility(View.GONE);
-		if (userInfo.getOwnsList() != null)
-			owns.setText(String.valueOf(userInfo.getOwnsList().size()));
+		owns.setText(String.valueOf(userInfo.getOwnsNum()));
 
 		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
 			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
