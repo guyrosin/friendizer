@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.teamagly.friendizer"
     android:installLocation="auto"
-    android:versionCode="19"
-    android:versionName="1.1.2" >
+    android:versionCode="20"
+    android:versionName="1.1.3" >
 
     <!-- GCM requires Android SDK version 2.2 (API level 8) or above -->
     <uses-sdk
