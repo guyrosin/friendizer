@@ -277,8 +277,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		xpBar.setText(earnedPointsThisLevel + " / " + currentLevelPoints);
 
 		txtValue.setText(String.valueOf(userInfo.getPoints()));
-		if (userInfo.getOwnsList() != null)
-			txtOwns.setText(String.valueOf(userInfo.getOwnsList().size()));
+		txtOwns.setText(String.valueOf(userInfo.getOwnsNum()));
 		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0) {
 			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
 			txtStatus.setVisibility(View.VISIBLE);
