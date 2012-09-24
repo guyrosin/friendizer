@@ -134,6 +134,18 @@ public class LocationManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
+
+		// Note: doesn't work (when trying to put in a list of objects)
+		// try { // Cache hit
+		// List<User> nearbyUsers = NearbyUsersCache.get(userID);
+		// if (nearbyUsers != null) {
+		// log.info("Nearby users cache hit for  " + userID);
+		// response.getWriter().println(new Gson().toJson(nearbyUsers));
+		// return;
+		// }
+		// } catch (NullPointerException e) { // Cache miss
+		// }
+
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		// Get the user
 		User user;
@@ -168,6 +180,10 @@ public class LocationManager extends HttpServlet {
 				nearbyUsers.add(nearbyUser);
 		}
 		pm.close();
+
+		// Save the nearby users in the cache
+		// NearbyUsersCache.put(userID, nearbyUsers);
+
 		response.getWriter().println(new Gson().toJson(nearbyUsers));
 	}
 }
