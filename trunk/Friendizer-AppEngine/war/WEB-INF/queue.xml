@@ -20,9 +20,9 @@
   </queue>
   <queue>
     <name>welcome-email</name>
-    <rate>2/m</rate>
+    <rate>1/m</rate>
     <retry-parameters>
-      <task-retry-limit>2</task-retry-limit>
+      <task-retry-limit>1</task-retry-limit>
     </retry-parameters>
   </queue>
 </queue-entries>

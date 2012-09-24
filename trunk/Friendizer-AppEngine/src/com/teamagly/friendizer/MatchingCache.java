@@ -7,15 +7,15 @@ import net.sf.jsr107cache.*;
 import com.google.appengine.api.memcache.jsr107cache.GCacheFactory;
 
 public final class MatchingCache {
-	private static final int ONE_DAY = 3600 * 24;
+	private static final int EXPIRES_TIME = 3600 * 24; // One day in seconds
 	private static Cache cache;
-	
+
 	private MatchingCache() {
 	}
-	
+
 	static {
 		HashMap<String, Integer> props = new HashMap<String, Integer>();
-		props.put(GCacheFactory.EXPIRATION_DELTA, ONE_DAY);
+		props.put(GCacheFactory.EXPIRATION_DELTA, EXPIRES_TIME);
 		try {
 			CacheFactory cacheFactory = CacheManager.getInstance().getCacheFactory();
 			cache = cacheFactory.createCache(props);

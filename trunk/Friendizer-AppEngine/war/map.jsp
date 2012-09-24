@@ -11,8 +11,16 @@
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
   <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
   <script type="text/javascript" src="gmaps.js"></script>
-  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css" />
-  <link rel="stylesheet" type="text/css" href="examples.css" />
+  <style type="text/css">
+        html, body {
+                height: 100%;
+                margin: 0;
+        }
+
+        #map {
+                min-height: 100%; 
+        }
+    </style>
 		<script type="text/javascript">
 	var map;
 	$(document).ready(function(){
@@ -37,6 +45,7 @@
 		List<User> users = (List<User>) query.execute();
 		query.closeAll();
 		for (User user : users){
+			if (user.getLatitude() != -1 && user.getLongitude() != -1) {
 %>
 
 	  map.addMarker({
@@ -44,6 +53,7 @@
 		lng: <%=user.getLongitude()%>
 	  });
 	  <%
+	  }
 		}
 		pm.close();
 		%>
