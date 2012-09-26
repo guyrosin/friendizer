@@ -29,6 +29,7 @@
 		<servlet-name>UsersManager</servlet-name>
 		<url-pattern>/login</url-pattern>
 		<url-pattern>/userDetails</url-pattern>
+		<url-pattern>/sendAccessToken</url-pattern>
 		<url-pattern>/ownList</url-pattern>
 		<url-pattern>/getFriends</url-pattern>
 		<url-pattern>/updateStatus</url-pattern>
