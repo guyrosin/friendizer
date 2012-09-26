@@ -19,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -48,6 +49,8 @@ public class MyProfileFragment extends SherlockFragment {
 	private TextView money;
 	private TextView owns;
 	private ImageView ownerPic;
+	private LinearLayout btnOwnsLayout;
+	private LinearLayout btnOwnerLayout;
 	private TextView txtLevel;
 	private TextProgressBar xpBar;
 
@@ -78,12 +81,14 @@ public class MyProfileFragment extends SherlockFragment {
 		txtStatus = (TextView) activity.findViewById(R.id.status);
 		age = (TextView) activity.findViewById(R.id.age);
 		gender = (TextView) activity.findViewById(R.id.gender);
-		value = (TextView) activity.findViewById(R.id.value);
+		value = (TextView) activity.findViewById(R.id.points);
 		money = (TextView) activity.findViewById(R.id.money);
 		owns = (TextView) activity.findViewById(R.id.owns);
 		ownerPic = (ImageView) activity.findViewById(R.id.owner_pic);
 		txtLevel = (TextView) activity.findViewById(R.id.level);
 		xpBar = (TextProgressBar) activity.findViewById(R.id.xp_bar);
+		btnOwnsLayout = (LinearLayout) activity.findViewById(R.id.btn_owns_layout);
+		btnOwnerLayout = (LinearLayout) activity.findViewById(R.id.btn_owner_layout);
 
 		txtStatus.setOnClickListener(new OnClickListener() {
 			@Override
@@ -92,7 +97,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		});
 
-		owns.setOnClickListener(new OnClickListener() {
+		btnOwnsLayout.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", OwnsFragment.class.getName()));
@@ -255,7 +260,7 @@ public class MyProfileFragment extends SherlockFragment {
 					@Override
 					public void run() {
 						ImageLoader.getInstance().displayImage(picURL, ownerPic);
-						ownerPic.setOnClickListener(new OnClickListener() {
+						btnOwnerLayout.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								// Move to the owner's profile

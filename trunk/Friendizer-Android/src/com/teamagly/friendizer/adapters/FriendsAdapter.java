@@ -14,8 +14,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.filters.UserFilter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.Comparators;
@@ -31,12 +33,14 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 	private AdapterFilter adapterFilter;
 	private UserFilter userFilter;
 	private int sortBy;
+	private MenuItem filterMenuItem;
 
-	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects) {
+	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, MenuItem filterMenuItem) {
 		super(context, textViewResourceId, objects);
 
 		SharedPreferences prefs = Utility.getSharedPreferences();
 		sortBy = prefs.getInt(SORT_BY, -1);
+		this.filterMenuItem = filterMenuItem;
 
 		allUsersList = new ArrayList<User>();
 		allUsersList.addAll(objects);
@@ -58,8 +62,8 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		filter(userFilter);
 	}
 
-	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, boolean sort) {
-		this(context, textViewResourceId, objects);
+	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, MenuItem filterMenuItem, boolean sort) {
+		this(context, textViewResourceId, objects, filterMenuItem);
 		if (!sort)
 			sortBy = -1;
 	}
@@ -146,6 +150,8 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		SharedPreferences.Editor editor = Utility.getSharedPreferences().edit();
 		editor.putString(LAST_FILTER, new Gson().toJson(filter));
 		editor.commit();
+		if (filterMenuItem != null) // Update the menu item
+			filterMenuItem.setIcon(isFiltered() ? R.drawable.ic_action_filter_on : R.drawable.ic_action_filter);
 	}
 
 	public void resetFilter() {
@@ -155,6 +161,8 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		SharedPreferences.Editor editor = Utility.getSharedPreferences().edit();
 		editor.putString(LAST_FILTER, "");
 		editor.commit();
+		if (filterMenuItem != null) // Update the menu item
+			filterMenuItem.setIcon(R.drawable.ic_action_filter);
 	}
 
 	public UserFilter getCurrentFilter() {
@@ -191,5 +199,12 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 			filteredUsersList = (ArrayList<User>) results.values;
 			notifyDataSetChanged();
 		}
+	}
+
+	/**
+	 * @return true iff the adapter is filtered
+	 */
+	public boolean isFiltered() {
+		return !userFilter.isBlank();
 	}
 }

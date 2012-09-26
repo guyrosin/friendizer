@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
@@ -18,8 +19,8 @@ public class FriendsImageAdapter extends FriendsAdapter {
 	@SuppressWarnings("unused")
 	private final String TAG = getClass().getName();
 
-	public FriendsImageAdapter(Context context, int textViewResourceId, List<User> objects) {
-		super(context, textViewResourceId, objects);
+	public FriendsImageAdapter(Context context, int textViewResourceId, List<User> objects, MenuItem filterMenuItem) {
+		super(context, textViewResourceId, objects, filterMenuItem);
 	}
 
 	/*

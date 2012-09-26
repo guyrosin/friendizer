@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <!-- Note the category is "alternative" (highest priority) -->
     <item
-        android:id="@+id/menu_map"
-        android:icon="@drawable/ic_action_map"
+        android:id="@+id/menu_facebook_friends"
+        android:icon="@drawable/ic_action_facebook"
         android:menuCategory="alternative"
-        android:orderInCategory="1"
         android:showAsAction="ifRoom"
-        android:title="Map">
+        android:title="@string/facebook_friends">
     </item>
 
 </menu>

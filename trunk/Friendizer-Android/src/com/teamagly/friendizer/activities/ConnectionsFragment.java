@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -77,4 +81,28 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.teamagly.friendizer.activities.AbstractFriendsListFragment#onCreateOptionsMenu(com.actionbarsherlock.view.Menu,
+	 * com.actionbarsherlock.view.MenuInflater)
+	 */
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		inflater.inflate(R.menu.friends_menu, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_facebook_friends: // Move to my Facebook friends fragment
+			startActivity(new Intent(activity, BaseFragmentActivity.class)
+			.putExtra("fragment", FBFriendsFragment.class.getName()));
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
 }

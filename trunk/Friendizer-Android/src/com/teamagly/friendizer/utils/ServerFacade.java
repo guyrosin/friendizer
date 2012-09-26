@@ -38,6 +38,7 @@ public final class ServerFacade {
 	private static final String REG_ID = "regID";
 	private static final String USER_ID = "userID";
 	private static final String ACCESS_TOKEN = "accessToken";
+	private static final String ACCESS_TOKEN_EXPIRES = "accessTokenExpires";
 
 	private ServerFacade() {
 	}
@@ -94,11 +95,12 @@ public final class ServerFacade {
 		return response;
 	}
 
-	public static User login(long userID, String accessToken, String regID) {
+	public static User login(long userID, String accessToken, long accessTokenExpires, String regID) {
 		String serverUrl = fullServerAddress + "login";
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair(REG_ID, regID));
 		params.add(new BasicNameValuePair(ACCESS_TOKEN, accessToken));
+		params.add(new BasicNameValuePair(ACCESS_TOKEN_EXPIRES, String.valueOf(accessTokenExpires)));
 		params.add(new BasicNameValuePair(USER_ID, String.valueOf(userID)));
 		String res = "";
 		long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
@@ -167,6 +169,13 @@ public final class ServerFacade {
 			}
 		}
 		return null;
+	}
+
+	public static void sendAccessToken(long userID, String accessToken, long accessTokenExpires) throws IOException {
+		URL url = new URL(fullServerAddress + "sendAccessToken?userID=" + userID + "&accessToken=" + accessToken
+				+ "&accessTokenExpires=" + accessTokenExpires);
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+		in.close();
 	}
 
 	public static User userDetails(long userID) throws IOException {
@@ -377,5 +386,4 @@ public final class ServerFacade {
 		in.close();
 		return users;
 	}
-
 }

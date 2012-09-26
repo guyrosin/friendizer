@@ -17,8 +17,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -44,7 +44,7 @@ public class ChatActivity extends SherlockActivity {
 	// Layout Views
 	private ListView messagesView;
 	private EditText newMsgText;
-	private Button sendButton;
+	private ImageView sendButton;
 
 	private MessagesAdapter messagesAdapter;
 	private List<Message> messages;
@@ -82,7 +82,7 @@ public class ChatActivity extends SherlockActivity {
 		// mOutEditText.setOnEditorActionListener(mWriteListener);
 
 		// Initialize the send button with a listener that for click events
-		sendButton = (Button) findViewById(R.id.button_send);
+		sendButton = (ImageView) findViewById(R.id.btn_send);
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

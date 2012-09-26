@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
@@ -20,8 +21,9 @@ public class LeaderboardListAdapter extends FriendsAdapter {
 	private final String TAG = getClass().getName();
 	private String leaderboardType;
 
-	public LeaderboardListAdapter(Context context, int textViewResourceId, List<User> objects, String leaderboardType) {
-		super(context, textViewResourceId, objects, false);
+	public LeaderboardListAdapter(Context context, int textViewResourceId, List<User> objects, MenuItem filterMenuItem,
+			String leaderboardType) {
+		super(context, textViewResourceId, objects, filterMenuItem, false);
 		this.leaderboardType = leaderboardType;
 	}
 

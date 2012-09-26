@@ -54,4 +54,9 @@ public class UserFilter {
 	public int getMaxAgeValue() {
 		return maxAgeValue;
 	}
+
+	public boolean isBlank() {
+		UserFilter blankFilter = new UserFilter();
+		return (name.equals(blankFilter.name) && gender.equals(blankFilter.gender) && minAgeValue == blankFilter.minAgeValue && maxAgeValue == blankFilter.maxAgeValue);
+	}
 }

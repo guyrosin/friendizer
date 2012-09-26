@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.friendizer" parent="@style/Theme.Sherlock.Light.DarkActionBar">
+    <style name="Theme.friendizer" parent="@style/Theme.Sherlock.Light.DarkActionBar.ForceOverflow">
 
         <!-- <item name="android:windowBackground">@drawable/app_background</item> -->
         <!--

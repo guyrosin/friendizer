@@ -27,7 +27,11 @@ public class User implements Serializable {
 
 	private String picture;
 
+	private String email;
+
 	private String token; // Facebook access token
+
+	private long tokenExpires; // Facebook access token expiration
 
 	/*
 	 * Friendizer data
@@ -122,6 +126,14 @@ public class User implements Serializable {
 		this.token = token;
 	}
 
+	public long getTokenExpires() {
+		return tokenExpires;
+	}
+
+	public void setTokenExpires(long tokenExpires) {
+		this.tokenExpires = tokenExpires;
+	}
+
 	/**
 	 * @return the owner
 	 */
@@ -202,6 +214,14 @@ public class User implements Serializable {
 	 */
 	public void setPicURL(String picURL) {
 		picture = picURL;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	/**
