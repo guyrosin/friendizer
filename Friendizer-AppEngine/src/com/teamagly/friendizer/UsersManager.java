@@ -30,6 +30,8 @@ public class UsersManager extends HttpServlet {
 		String servlet = address.substring(address.lastIndexOf("/") + 1);
 		if (servlet.intern() == "userDetails")
 			userDetails(request, response);
+		else if (servlet.intern() == "sendAccessToken")
+			sendAccessToken(request, response);
 		else if (servlet.intern() == "ownList")
 			ownList(request, response);
 		else if (servlet.intern() == "getFriends")
@@ -57,22 +59,31 @@ public class UsersManager extends HttpServlet {
 		String regID = request.getParameter("regID");
 		long userID = Long.parseLong(request.getParameter("userID"));
 		String accessToken = request.getParameter("accessToken");
+		String accessTokenExpiresStr = request.getParameter("accessTokenExpires");
+		long accessTokenExpires = 0;
+		if (accessTokenExpiresStr != null)
+			accessTokenExpires = Long.parseLong(accessTokenExpiresStr);
 		User user;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
 			user = pm.getObjectById(User.class, userID);
 			log.info("User " + userID + " exists");
-			if (accessToken != null && accessToken.length() > 0) {
-				log.info("Got a new access token");
-				// Update the new access token of the user
-				user.setToken(accessToken);
-			}
 			// Update the current date
 			user.setSince(new Date());
 
+			if (accessToken != null && accessToken.length() > 0 && accessTokenExpires > 0) {
+				log.info("Got a new access token: " + accessToken + ", expires: " + accessTokenExpires);
+				// Update the new access token of the user
+				user.setToken(accessToken);
+				user.setTokenExpires(accessTokenExpires);
+			} // Note: the client side is responsible for providing a valid access token
+			// else
+			// Extend the access token
+			// Utility.extendAccessToken(user);
+
 			if (user.isFbUpdate())
 				try {
-					updateUserFromFacebook(user, Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
+					updateUserFromFacebook(user);
 					user.setFbUpdate(false);
 				} catch (Exception e) {
 					log.severe(e.getMessage());
@@ -84,7 +95,7 @@ public class UsersManager extends HttpServlet {
 		} catch (JDOObjectNotFoundException e) {
 			log.info("Registering " + userID);
 			// Create a new user with the given ID and access token
-			user = new User(userID, accessToken);
+			user = new User(userID, accessToken, accessTokenExpires);
 			updateUserFromFacebook(user);
 			if (accessToken == null || accessToken.length() == 0)
 				user.setFbUpdate(true); // Update the user's missing details next time
@@ -92,7 +103,11 @@ public class UsersManager extends HttpServlet {
 
 			// Send a welcome email
 			Queue queue = QueueFactory.getQueue("welcome-email");
-			queue.add(TaskOptions.Builder.withUrl("/welcome_email").countdownMillis(WELCOME_EMAIL_DELAY).param("userID", String.valueOf(user.getId())).method(Method.GET));
+			queue.add(TaskOptions.Builder
+					.withUrl("/welcome_email")
+					.countdownMillis(WELCOME_EMAIL_DELAY)
+					.param("userID", String.valueOf(user.getId()))
+					.method(Method.GET));
 		}
 
 		response.getWriter().println(new Gson().toJson(user));
@@ -112,20 +127,53 @@ public class UsersManager extends HttpServlet {
 		pm.close();
 	}
 
+	/**
+	 * Updates the user's given access token
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void sendAccessToken(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long userID = Long.parseLong(request.getParameter("userID"));
+		String accessToken = request.getParameter("accessToken");
+		String accessTokenExpiresStr = request.getParameter("accessTokenExpires");
+		long accessTokenExpires = 0;
+		if (accessTokenExpiresStr != null)
+			accessTokenExpires = Long.parseLong(accessTokenExpiresStr);
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			// Get the user
+			User user = pm.getObjectById(User.class, userID);
+			if (accessToken != null && accessToken.length() > 0 && accessTokenExpires > 0) {
+				log.info("Got a new access token: " + accessToken + ", expires: " + accessTokenExpires);
+				user.setToken(accessToken);
+				user.setTokenExpires(accessTokenExpires);
+
+				if (user.isFbUpdate())
+					try {
+						updateUserFromFacebook(user);
+						user.setFbUpdate(false);
+					} catch (Exception e) {
+						log.severe(e.getMessage());
+					}
+
+			} else
+				log.info("Got an invalid access token");
+		} catch (JDOObjectNotFoundException e) {
+			log.severe("User doesn't exist");
+		} finally {
+			pm.close();
+		}
+	}
+
 	private void updateUserFromFacebook(User user) {
 		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
 		// Get the user's data from Facebook
 		// Note: using JsonObject instead of User object for the profile picture
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", "name,gender,birthday,picture"));
-		user.updateFacebookData(jsonObject);
-	}
-
-	private void updateUserFromFacebook(User user, List<String> fields) throws FacebookException {
-		FacebookClient facebook = new DefaultFacebookClient(user.getToken());
-		// Request those fields from Facebook
-		// Note: using JsonObject instead of User object in case we want the profile picture
-		log.info("Requesting update for uid " + user.getId() + " for " + StringUtils.join(fields));
-		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class, Parameter.with("fields", StringUtils.join(fields)));
+		JsonObject jsonObject = facebook.fetchObject(String.valueOf(user.getId()), JsonObject.class,
+				Parameter.with("fields", "name,gender,birthday,picture,email"));
 		user.updateFacebookData(jsonObject);
 	}
 
@@ -194,7 +242,7 @@ public class UsersManager extends HttpServlet {
 		query.setFilter("buyerID == " + userID);
 		List<Action> result = (List<Action>) query.execute();
 		query.closeAll();
-		for (Action action : result) {
+		for (Action action : result)
 			try {
 				// Add the friend if he wasn't added yet
 				User friend = pm.getObjectById(User.class, action.getBoughtID());
@@ -205,13 +253,12 @@ public class UsersManager extends HttpServlet {
 			} catch (JDOObjectNotFoundException e) {
 				log.severe("User " + action.getBoughtID() + " doesn't exist");
 			}
-		}
 		// Get actions in which the user is being bought
 		query = pm.newQuery(Action.class);
 		query.setFilter("boughtID == " + userID);
 		result = (List<Action>) query.execute();
 		query.closeAll();
-		for (Action action : result) {
+		for (Action action : result)
 			try {
 				// Add the friend if he wasn't added yet
 				User friend = pm.getObjectById(User.class, action.getBuyerID());
@@ -222,7 +269,6 @@ public class UsersManager extends HttpServlet {
 			} catch (JDOObjectNotFoundException e) {
 				log.severe("User " + action.getBuyerID() + " doesn't exist");
 			}
-		}
 		// Remove the blocked users from the list
 		query = pm.newQuery(UserBlock.class);
 		query.setFilter("userID == " + userID);
@@ -417,13 +463,12 @@ public class UsersManager extends HttpServlet {
 		 */
 		for (Like like1 : user1LikesList) {
 			String like1ID = like1.getId();
-			for (Like like2 : user2LikesList) {
+			for (Like like2 : user2LikesList)
 				// If both users have the same like - add to the set
 				if (like1ID.equals(like2.getId())) {
 					mutualLikesIDs.add(like1ID);
 					break;
 				}
-			}
 		}
 		String mutualLikesStr = StringUtils.join(mutualLikesIDs.toArray(new String[mutualLikesIDs.size()]));
 		String query = "SELECT page_id, pic_square, name, type FROM page WHERE page_id IN (" + mutualLikesStr + ")";
@@ -446,13 +491,12 @@ public class UsersManager extends HttpServlet {
 		List<User> users = (List<User>) query.execute(yesterdayDate);
 		query.closeAll();
 
-		for (User user : users) {
+		for (User user : users)
 			try {
 				user.setMoney(user.getMoney() + DAILY_BONUS_POINTS);
 			} catch (Exception e) {
 				log.info(e.getMessage());
 			}
-		}
 
 		pm.close();
 	}

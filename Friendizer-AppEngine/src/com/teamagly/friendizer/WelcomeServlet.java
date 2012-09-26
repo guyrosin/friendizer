@@ -31,7 +31,9 @@ public class WelcomeServlet extends HttpServlet {
 		String accessToken = user.getToken();
 		String userName = user.getName();
 		String firstName = userName.substring(0, userName.indexOf(" "));
-		String email = getEmailFromFacebook(userID, accessToken);
+		String email = user.getEmail();
+		if (email == null)
+			getEmailFromFacebook(userID, accessToken);
 		log.info("access token: " + accessToken);
 		log.info("email: " + email);
 		if (email != null && email.length() > 0) {
@@ -40,13 +42,13 @@ public class WelcomeServlet extends HttpServlet {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("Hi ")
-					.append(firstName)
-					.append(",<br>I am one of the developers of Friendizer and I noticed that you downloaded our app today.<br>")
-					.append("I wanted to thank you for trying it out. The app is still under heavy development and we hope that you find it useful. You are one of the first to check it out!<br>")
-					.append("I'd love to hear how your initial experience was. Any feedback, ideas on how we can improve or any problems that you run into and we will fix them as soon as possible.<br><br>")
-					.append("Thanks again,<br>")
-					.append("Guy<br>")
-					.append("friendizer.team@gmail.com");
+			.append(firstName)
+			.append(",<br>I am one of the developers of Friendizer and I noticed that you downloaded our app today.<br>")
+			.append("I wanted to thank you for trying it out. The app is still under heavy development and we hope that you find it useful. You are one of the first to check it out!<br>")
+			.append("I'd love to hear how your initial experience was. Any feedback, ideas on how we can improve or any problems that you run into and we will fix them as soon as possible.<br><br>")
+			.append("Thanks again,<br>")
+			.append("Guy<br>")
+			.append("friendizer.team@gmail.com");
 
 			try {
 				Message msg = new MimeMessage(session);

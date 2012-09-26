@@ -32,7 +32,13 @@ public class User {
 	private String picture;
 
 	@Persistent
+	private String email;
+
+	@Persistent
 	private String token; // Facebook access token
+
+	@Persistent
+	private Long tokenExpires; // Facebook access token expiration
 
 	/*
 	 * Friendizer data
@@ -64,14 +70,16 @@ public class User {
 
 	@Persistent
 	private boolean fbUpdate;
-	
+
 	@Persistent
 	private Integer ownsNum;
 
 	/**
 	 * Constructor for a new user
+	 * 
+	 * @param accessTokenExpires
 	 */
-	public User(long id, String token) {
+	public User(long id, String token, long tokenExpires) {
 		this.id = id;
 		owner = 0;
 		points = 100;
@@ -80,7 +88,9 @@ public class User {
 		latitude = -1;
 		longitude = -1;
 		since = new Date();
+		email = "";
 		this.token = token;
+		this.tokenExpires = tokenExpires;
 		status = "";
 		fbUpdate = false;
 		ownsNum = 0;
@@ -226,6 +236,26 @@ public class User {
 		this.token = token;
 	}
 
+	public long getTokenExpires() {
+		return tokenExpires;
+	}
+
+	public void setTokenExpires(long tokenExpires) {
+		this.tokenExpires = tokenExpires;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public void setTokenExpires(Long tokenExpires) {
+		this.tokenExpires = tokenExpires;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -262,12 +292,14 @@ public class User {
 			gender = jsonObject.getString("gender");
 		if (jsonObject.has("birthday"))
 			birthday = jsonObject.getString("birthday");
+		if (jsonObject.has("email"))
+			email = jsonObject.getString("email");
 	}
-	
+
 	public Integer getOwnsNum() {
 		return ownsNum;
 	}
-	
+
 	public void setOwnsNum(Integer ownsNum) {
 		this.ownsNum = ownsNum;
 	}
