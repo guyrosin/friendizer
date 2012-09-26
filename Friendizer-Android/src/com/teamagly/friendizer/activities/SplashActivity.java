@@ -1,5 +1,6 @@
 package com.teamagly.friendizer.activities;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.json.JSONException;
@@ -16,6 +17,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -60,13 +62,78 @@ public class SplashActivity extends SherlockActivity {
 
 		userID = SessionStore.restoreID(context);
 		Log.w(TAG, "User ID from prefs = " + userID);
-		if (userID == 0)
+		if (userID == 0) { // Need to login to Facebook
 			if (loginButton.getVisibility() == View.GONE) {
 				loginButton.setVisibility(View.VISIBLE);
 				return;
+			} else
+				// Force login to Facebook
+				loginToFacebook();
+		} else
+			loginWithoutTokenTask.execute();
+
+	}
+
+	AsyncTask<Void, Void, Boolean> loginWithoutTokenTask = new AsyncTask<Void, Void, Boolean>() {
+
+		@Override
+		protected Boolean doInBackground(Void... v) {
+			// Use the ID from the preferences to login
+			User userInfo = ServerFacade.login(userID, regID);
+			Utility.getInstance().userInfo = userInfo;
+			return (userInfo != null);
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (!result) {
+				dialogFriendizer.dismiss(); // Dismiss the progress dialog
+				showErrorDialog("Couldn't connect to friendizer");
+				return;
 			}
-		// Force login
-		loginToFacebook();
+			String accessToken = Utility.getInstance().userInfo.getToken();
+			long accessTokenExpires = Utility.getInstance().userInfo.getTokenExpires();
+			Log.w(TAG, "session valid? " + Utility.getInstance().facebook.isSessionValid());
+			Log.w(TAG, "token: " + accessToken);
+			Log.w(TAG, "token expires: " + accessTokenExpires);
+			if (!Utility.getInstance().facebook.isSessionValid()) {
+				loginToFacebook(); // If there's no token, login to Facebook from the start
+				return;
+			}
+			Utility.getInstance().facebook.setAccessToken(accessToken);
+			Utility.getInstance().facebook.setAccessExpires(accessTokenExpires);
+
+			// Try to extend the access token
+			Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
+			String newToken = Utility.getInstance().facebook.getAccessToken();
+			long newTokenExpires = Utility.getInstance().facebook.getAccessExpires();
+			if (!newToken.equals(accessToken)) {
+				new SendAccessTokenTask().execute(); // Send the extended access token to the server
+				Log.w(TAG, "extended token: session valid? " + Utility.getInstance().facebook.isSessionValid());
+				Log.w(TAG, ", new token: " + newToken);
+				Log.w(TAG, ", token expires: " + newTokenExpires);
+				Utility.getInstance().userInfo.setToken(newToken);
+				Utility.getInstance().userInfo.setTokenExpires(newTokenExpires);
+			}
+
+			continueToFriendizer();
+		}
+	};
+
+	/**
+	 * Send the current access token to the server
+	 */
+	private class SendAccessTokenTask extends AsyncTask<Void, Void, Boolean> {
+		@Override
+		protected Boolean doInBackground(Void... v) {
+			try {
+				ServerFacade.sendAccessToken(userID, Utility.getInstance().facebook.getAccessToken(),
+						Utility.getInstance().facebook.getAccessExpires());
+			} catch (IOException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			return null;
+		}
 	}
 
 	private void continueToFriendizer() {
@@ -79,8 +146,7 @@ public class SplashActivity extends SherlockActivity {
 					firstName = new String(firstName.getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e1) { // Skip the encoding
 				}
-				Toast.makeText(context, "Welcome " + Utility.getInstance().userInfo.getFirstName() + "!", Toast.LENGTH_LONG)
-				.show();
+				Toast.makeText(context, "Welcome " + firstName + "!", Toast.LENGTH_LONG).show();
 			}
 		});
 		// Continue to the main activity
@@ -269,14 +335,14 @@ public class SplashActivity extends SherlockActivity {
 				userID = Long.parseLong(jsonObject.getString("id"));
 				Log.w(TAG, "User ID = " + userID);
 				SessionStore.saveID(userID, SplashActivity.this);
-				Utility.getInstance().facebook.extendAccessTokenIfNeeded(context, null);
 			} catch (JSONException e) {
 				Log.e(TAG, "Error when requesting FB ID: " + response);
 				Log.e(TAG, e.getMessage());
 				return;
 			}
 			// Login to friendizer (with the access token)
-			User userInfo = ServerFacade.login(userID, Utility.getInstance().facebook.getAccessToken(), regID);
+			User userInfo = ServerFacade.login(userID, Utility.getInstance().facebook.getAccessToken(),
+					Utility.getInstance().facebook.getAccessExpires(), regID);
 			if (userInfo != null) {
 				Utility.getInstance().userInfo = userInfo;
 				continueToFriendizer();

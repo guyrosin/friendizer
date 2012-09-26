@@ -32,6 +32,7 @@ import com.teamagly.friendizer.utils.ServerFacade;
 
 public class LeaderboardFragment extends SherlockFragment implements OnNavigationListener, OnItemClickListener {
 	private final String TAG = getClass().getName();
+	private Menu menu;
 	protected LeaderboardTask task;
 	private String[] types;
 	private String selectedType;
@@ -60,13 +61,14 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 		actionBar.setDisplayShowTitleEnabled(false);
 
 		Context context = actionBar.getThemedContext();
-		ArrayAdapter<CharSequence> navListAdapter = ArrayAdapter.createFromResource(context, R.array.leaderboard_types_titles, com.actionbarsherlock.R.layout.sherlock_spinner_item);
-		navListAdapter.setDropDownViewResource(com.actionbarsherlock.R.layout.sherlock_spinner_dropdown_item);
+		ArrayAdapter<CharSequence> navListAdapter = ArrayAdapter.createFromResource(context, R.array.leaderboard_types_titles,
+				R.layout.sherlock_spinner_item);
+		navListAdapter.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		actionBar.setListNavigationCallbacks(navListAdapter, this);
 
-		adapter = new LeaderboardListAdapter(activity, 0, usersList, types[0]);
+		adapter = new LeaderboardListAdapter(activity, 0, usersList, menu.findItem(R.id.menu_filter), types[0]);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(this);
 	}
@@ -152,6 +154,7 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
+		this.menu = menu;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +57,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	private TextView txtMatching;
 	private TextView txtOwns;
 	private ImageView imgOwnerPic;
+	private LinearLayout btnMatchingLayout;
+	private LinearLayout btnOwnerLayout;
 	private TextView txtMutualFriends;
 	private TableLayout buttonsTable;
 	private TextView txtLevel;
@@ -81,7 +84,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		txtStatus = (TextView) findViewById(R.id.status);
 		txtAge = (TextView) findViewById(R.id.age);
 		txtGender = (TextView) findViewById(R.id.gender);
-		txtValue = (TextView) findViewById(R.id.value);
+		txtValue = (TextView) findViewById(R.id.points);
 		txtMatching = (TextView) findViewById(R.id.matching);
 		txtOwns = (TextView) findViewById(R.id.owns);
 		imgOwnerPic = (ImageView) findViewById(R.id.owner_pic);
@@ -89,6 +92,8 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
 		txtLevel = (TextView) findViewById(R.id.level);
 		xpBar = (TextProgressBar) findViewById(R.id.xp_bar);
+		btnMatchingLayout = (LinearLayout) activity.findViewById(R.id.btn_matching_layout);
+		btnOwnerLayout = (LinearLayout) activity.findViewById(R.id.btn_owner_layout);
 
 		blocked = intent.getBooleanExtra("blocked", false);
 		Object userObject = intent.getSerializableExtra("user");
@@ -106,13 +111,16 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			updateButtons();
 		}
 
-		txtMatching.setOnClickListener(new OnClickListener() {
+		btnMatchingLayout.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (userInfo.getMatching() <= 0) {
 					if (txtMatching.getText().length() == 0)
 						return;
-					userInfo.setMatching(Integer.parseInt(txtMatching.getText().toString().substring(0, txtMatching.getText().length() - 1)));
+					userInfo.setMatching(Integer.parseInt(txtMatching
+							.getText()
+							.toString()
+							.substring(0, txtMatching.getText().length() - 1)));
 				}
 				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
 						MutualLikesFragment.class.getName()).putExtra("user", userInfo));
@@ -199,22 +207,22 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			builder.setIcon(android.R.drawable.ic_dialog_alert);
 			if (blocked)
 				builder.setTitle("Unblock " + userInfo.getName() + "?")
-						.setMessage("You'll be able to get connected again")
-						.setPositiveButton("Unlock", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								new UnblockTask().execute();
-							}
-						});
+				.setMessage("You'll be able to get connected again")
+				.setPositiveButton("Unlock", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						new UnblockTask().execute();
+					}
+				});
 			else
 				builder.setTitle("Block " + userInfo.getName() + "?")
-						.setMessage("You won't hear anything from " + userInfo.getFirstName())
-						.setPositiveButton("Block", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int id) {
-								new BlockTask().execute();
-							}
-						});
+				.setMessage("You won't hear anything from " + userInfo.getFirstName())
+				.setPositiveButton("Block", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int id) {
+						new BlockTask().execute();
+					}
+				});
 			builder.show();
 			return true;
 		default:
@@ -448,7 +456,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 					public void run() {
 						ImageLoader.getInstance().displayImage(picURL, imgOwnerPic);
 						// Add a listener for the owner's pic
-						imgOwnerPic.setOnClickListener(new OnClickListener() {
+						btnOwnerLayout.setOnClickListener(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								Intent intent = null;

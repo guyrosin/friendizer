@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.google.android.maps.OverlayItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.readystatesoftware.mapviewballoons.BalloonOverlayView;
-import com.readystatesoftware.mapviewballoons.R;
+import com.teamagly.friendizer.R;
 
 public class CustomBalloonOverlayView<Item extends OverlayItem> extends BalloonOverlayView<CustomOverlayItem> {
 

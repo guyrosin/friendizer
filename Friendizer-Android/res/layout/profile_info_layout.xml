@@ -87,89 +87,37 @@
                 android:progressDrawable="@drawable/xp_bar_states" />
         </RelativeLayout>
 
-        <TableLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
             android:orientation="horizontal"
-            android:padding="8dp" >
+            android:paddingBottom="8dp"
+            android:paddingTop="10dp" >
 
-            <TableRow>
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                layout="@layout/btn_points_layout" />
 
-                <TextView
-                    android:id="@+id/value"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.25"
-                    android:gravity="center"
-                    android:text=""
-                    android:textSize="20sp" />
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                layout="@layout/btn_money_layout" />
 
-                <TextView
-                    android:id="@+id/money"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.25"
-                    android:gravity="center"
-                    android:text=""
-                    android:textSize="20sp" />
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                layout="@layout/btn_owns_layout" />
 
-                <TextView
-                    android:id="@+id/owns"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight="0.25"
-                    android:gravity="center"
-                    android:text=""
-                    android:textSize="20sp" />
-
-                <ImageView
-                    android:id="@+id/owner_pic"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="0.25"
-                    android:gravity="center" />
-            </TableRow>
-
-            <TableRow android:paddingTop="1dp" >
-
-                <TextView
-                    android:id="@+id/value_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="@string/points"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/money_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="@string/coins"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/owns_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="@string/owned"
-                    android:textColor="@color/soft_grey" />
-
-                <TextView
-                    android:id="@+id/owner_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.25"
-                    android:gravity="center_horizontal"
-                    android:text="@string/owner"
-                    android:textColor="@color/soft_grey" />
-            </TableRow>
-        </TableLayout>
+            <include
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                layout="@layout/btn_owner_layout" />
+        </LinearLayout>
 
         <TableLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

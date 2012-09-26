@@ -45,6 +45,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 	protected static String SORT_BY = FriendsAdapter.SORT_BY;
 	@SuppressWarnings("unused")
 	private final String TAG = "AbstractFriendsListFragment";
+	private Menu menu;
 	protected GridView gridView;
 	protected FriendsAdapter friendsAdapter;
 	protected ArrayList<User> usersList = new ArrayList<User>();
@@ -75,7 +76,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		SharedPreferences settings = Utility.getSharedPreferences();
 		sortBy = settings.getInt(SORT_BY, 0);
 
-		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList);
+		friendsAdapter = new FriendsImageAdapter(activity, 0, usersList, menu.findItem(R.id.menu_filter));
 
 		// Restore scroll position
 		if (savedInstanceState != null)
@@ -136,6 +137,7 @@ public abstract class AbstractFriendsListFragment extends SherlockFragment imple
 		menu.clear();
 		inflater.inflate(R.menu.list_menu, menu);
 		inflater.inflate(R.menu.main_menu, menu);
+		this.menu = menu;
 	}
 
 	/*
