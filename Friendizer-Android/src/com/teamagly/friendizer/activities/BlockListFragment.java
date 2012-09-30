@@ -93,10 +93,8 @@ public class BlockListFragment extends AbstractFriendsListFragment {
 			if (isCancelled())
 				return;
 			friendsAdapter.clear();
-			if (blockedUsers != null) {
-				for (User blocked : blockedUsers)
-					friendsAdapter.add(blocked);
-			}
+			if (blockedUsers != null)
+				friendsAdapter.addAll(blockedUsers);
 			if (blockedUsers == null || blockedUsers.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);

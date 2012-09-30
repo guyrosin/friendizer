@@ -141,10 +141,8 @@ public class PeopleRadarFragment extends AbstractFriendsListFragment implements 
 		@Override
 		protected void onPostExecute(final List<User> nearbyUsers) {
 			friendsAdapter.clear();
-			if (nearbyUsers != null) {
-				for (User user : nearbyUsers)
-					friendsAdapter.add(user);
-			}
+			if (nearbyUsers != null)
+				friendsAdapter.addAll(nearbyUsers);
 			if (nearbyUsers == null || nearbyUsers.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);

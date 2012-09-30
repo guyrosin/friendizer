@@ -65,7 +65,7 @@ public class AchievementsAdapter extends ArrayAdapter<Achievement> {
 		if (achievement.isEarned())
 			titleWithEarned = "<b><font color='#00CC00'>&#10003;<font></b> " + achievement.getTitle();
 		else
-			titleWithEarned = "<b><font color='#5C0000'>&#10007;<font></b> " + achievement.getTitle();
+			titleWithEarned = "<b><font color='#5C0000'>&#10006;<font></b> " + achievement.getTitle();
 		holder.title.setText(Html.fromHtml(titleWithEarned));
 
 		holder.description.setText(achievement.getDescription());

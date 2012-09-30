@@ -18,9 +18,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +27,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
@@ -41,6 +39,7 @@ import com.teamagly.friendizer.widgets.TextProgressBar;
 public class FriendProfileActivity extends SherlockFragmentActivity {
 
 	private final String TAG = getClass().getName();
+	private AQuery aq;
 	SherlockFragmentActivity activity = this;
 	ActionBar actionBar;
 	User userInfo;
@@ -48,20 +47,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	private boolean blocked = false;
 
 	private Menu menu;
-	private ImageView userPic;
-	private TextView txtName;
-	private TextView txtStatus;
-	private TextView txtAge;
-	private TextView txtGender;
-	private TextView txtValue;
 	private TextView txtMatching;
-	private TextView txtOwns;
-	private ImageView imgOwnerPic;
-	private LinearLayout btnMatchingLayout;
-	private LinearLayout btnOwnerLayout;
-	private TextView txtMutualFriends;
-	private TableLayout buttonsTable;
-	private TextView txtLevel;
 	private TextProgressBar xpBar;
 	final Handler handler = new Handler();
 
@@ -75,25 +61,13 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		Intent intent = getIntent();
 		setContentView(R.layout.friend_profile_layout);
+		aq = new AQuery(this);
 		actionBar = getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setDisplayShowTitleEnabled(false);
 
-		userPic = (ImageView) findViewById(R.id.user_pic);
-		txtName = (TextView) findViewById(R.id.name);
-		txtStatus = (TextView) findViewById(R.id.status);
-		txtAge = (TextView) findViewById(R.id.age);
-		txtGender = (TextView) findViewById(R.id.gender);
-		txtValue = (TextView) findViewById(R.id.points);
-		txtMatching = (TextView) findViewById(R.id.matching);
-		txtOwns = (TextView) findViewById(R.id.owns);
-		imgOwnerPic = (ImageView) findViewById(R.id.owner_pic);
-		txtMutualFriends = (TextView) findViewById(R.id.mutual_friends);
-		buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
-		txtLevel = (TextView) findViewById(R.id.level);
+		txtMatching = aq.find(R.id.matching).getTextView();
 		xpBar = (TextProgressBar) findViewById(R.id.xp_bar);
-		btnMatchingLayout = (LinearLayout) activity.findViewById(R.id.btn_matching_layout);
-		btnOwnerLayout = (LinearLayout) activity.findViewById(R.id.btn_owner_layout);
 
 		blocked = intent.getBooleanExtra("blocked", false);
 		Object userObject = intent.getSerializableExtra("user");
@@ -111,7 +85,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			updateButtons();
 		}
 
-		btnMatchingLayout.setOnClickListener(new OnClickListener() {
+		aq.find(R.id.btn_matching_layout).clicked(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (userInfo.getMatching() <= 0) {
@@ -277,31 +251,26 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	}
 
 	protected void updateViews() {
-		txtLevel.setText("Level " + userInfo.getLevel());
+		aq.find(R.id.level).text("Level " + userInfo.getLevel());
 		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
 		int currentLevelPoints = userInfo.getLevelPoints();
 		xpBar.setMax(currentLevelPoints);
 		xpBar.setProgress(earnedPointsThisLevel);
 		xpBar.setText(earnedPointsThisLevel + " / " + currentLevelPoints);
 
-		txtValue.setText(String.valueOf(userInfo.getPoints()));
-		txtOwns.setText(String.valueOf(userInfo.getOwnsNum()));
-		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0) {
-			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
-			txtStatus.setVisibility(View.VISIBLE);
-		} else
-			txtStatus.setVisibility(View.GONE);
+		aq.find(R.id.points).text(String.valueOf(userInfo.getPoints()));
+		aq.find(R.id.owns).text(String.valueOf(userInfo.getOwnsNum()));
+		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0)
+			aq.find(R.id.status).text("\"" + userInfo.getStatus() + "\"").visible();
+		else
+			aq.find(R.id.status).gone();
 
 		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
-			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
-		txtName.setText(userInfo.getName());
-		txtAge.setText(userInfo.getAge());
-		if (userInfo.getGender() != null && userInfo.getGender().length() > 0) {
-			String genderStr = userInfo.getGender();
-			// Capitalize the first letter
-			// txtGender.setText(Character.toUpperCase(genderStr.charAt(0)) + genderStr.substring(1));
-			txtGender.setText(genderStr);
-		}
+			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), aq.find(R.id.user_pic).getImageView());
+		aq.find(R.id.name).text(userInfo.getName());
+		aq.find(R.id.age).text(userInfo.getAge());
+		if (userInfo.getGender() != null && userInfo.getGender().length() > 0)
+			aq.find(R.id.gender).text(userInfo.getGender());
 		if (menu != null) {
 			MenuItem blockItem = menu.findItem(R.id.menu_block);
 			if (blockItem != null)
@@ -310,11 +279,10 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 	}
 
 	protected void updateButtons() {
-		// Check if I bought this user (TODO: temporary! currently the only diff is the buy button)
+		// Check if I bought this user
 		if ((userInfo.getOwnerID() == Utility.getInstance().userInfo.getId())) {
 			// Show the relevant buttons layout
-			buttonsTable = (TableLayout) findViewById(R.id.buttons_friend);
-			buttonsTable.setVisibility(View.VISIBLE);
+			aq.find(R.id.buttons_friend).visible();
 			findViewById(R.id.buttons_stranger).setVisibility(View.GONE);
 			// Define the chat button
 			findViewById(R.id.btn_friend_chat).setOnClickListener(new View.OnClickListener() {
@@ -354,8 +322,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 			});
 		} else {
 			// Show the relevant buttons layout
-			buttonsTable = (TableLayout) findViewById(R.id.buttons_stranger);
-			buttonsTable.setVisibility(View.VISIBLE);
+			aq.find(R.id.buttons_stranger).visible();
 			findViewById(R.id.buttons_friend).setVisibility(View.GONE);
 			// Define the buy button
 			findViewById(R.id.btn_stranger_buy).setOnClickListener(new View.OnClickListener() {
@@ -430,7 +397,7 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						txtMutualFriends.setText(String.valueOf(friends.length()));
+						aq.find(R.id.mutual_friends).text(String.valueOf(friends.length()));
 						setSupportProgressBarIndeterminateVisibility(false); // Done loading the data (roughly...)
 					}
 				});
@@ -454,9 +421,9 @@ public class FriendProfileActivity extends SherlockFragmentActivity {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						ImageLoader.getInstance().displayImage(picURL, imgOwnerPic);
+						ImageLoader.getInstance().displayImage(picURL, aq.find(R.id.owner_pic).getImageView());
 						// Add a listener for the owner's pic
-						btnOwnerLayout.setOnClickListener(new OnClickListener() {
+						aq.find(R.id.btn_owner_layout).clicked(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								Intent intent = null;

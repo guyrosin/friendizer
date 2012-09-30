@@ -18,15 +18,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.model.User;
@@ -39,19 +37,8 @@ import com.teamagly.friendizer.widgets.TextProgressBar;
 public class MyProfileFragment extends SherlockFragment {
 
 	private final String TAG = getClass().getName();
+	private AQuery aq;
 	protected SherlockFragmentActivity activity;
-	private ImageView userPic;
-	private TextView name;
-	private TextView txtStatus;
-	private TextView age;
-	private TextView gender;
-	private TextView value;
-	private TextView money;
-	private TextView owns;
-	private ImageView ownerPic;
-	private LinearLayout btnOwnsLayout;
-	private LinearLayout btnOwnerLayout;
-	private TextView txtLevel;
 	private TextProgressBar xpBar;
 
 	/*
@@ -72,32 +59,21 @@ public class MyProfileFragment extends SherlockFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
+		aq = new AQuery(activity);
 		activity.setContentView(R.layout.profile_info_layout);
 		ActionBar actionBar = getSherlockActivity().getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 
-		userPic = (ImageView) activity.findViewById(R.id.user_pic);
-		name = (TextView) activity.findViewById(R.id.name);
-		txtStatus = (TextView) activity.findViewById(R.id.status);
-		age = (TextView) activity.findViewById(R.id.age);
-		gender = (TextView) activity.findViewById(R.id.gender);
-		value = (TextView) activity.findViewById(R.id.points);
-		money = (TextView) activity.findViewById(R.id.money);
-		owns = (TextView) activity.findViewById(R.id.owns);
-		ownerPic = (ImageView) activity.findViewById(R.id.owner_pic);
-		txtLevel = (TextView) activity.findViewById(R.id.level);
 		xpBar = (TextProgressBar) activity.findViewById(R.id.xp_bar);
-		btnOwnsLayout = (LinearLayout) activity.findViewById(R.id.btn_owns_layout);
-		btnOwnerLayout = (LinearLayout) activity.findViewById(R.id.btn_owner_layout);
 
-		txtStatus.setOnClickListener(new OnClickListener() {
+		aq.find(R.id.status).clicked(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showStatusDialog();
 			}
 		});
 
-		btnOwnsLayout.setOnClickListener(new OnClickListener() {
+		aq.find(R.id.btn_owns_layout).clicked(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment", OwnsFragment.class.getName()));
@@ -122,7 +98,7 @@ public class MyProfileFragment extends SherlockFragment {
 
 	protected void initButtons() {
 		// Define the achievements button
-		activity.findViewById(R.id.btn_achievements).setOnClickListener(new View.OnClickListener() {
+		aq.find(R.id.btn_achievements).clicked(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(activity, AchievementsActivity.class);
@@ -131,7 +107,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		});
 		// Define the gifts button
-		activity.findViewById(R.id.btn_gifts).setOnClickListener(new View.OnClickListener() {
+		aq.find(R.id.btn_gifts).clicked(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent intent = new Intent(activity, GiftsUserActivity.class);
@@ -140,7 +116,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		});
 		// Define the action history button
-		activity.findViewById(R.id.btn_action_history).setOnClickListener(new View.OnClickListener() {
+		aq.find(R.id.btn_action_history).clicked(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(activity, BaseFragmentActivity.class).putExtra("fragment",
@@ -148,7 +124,7 @@ public class MyProfileFragment extends SherlockFragment {
 			}
 		});
 		// Define the status change button
-		activity.findViewById(R.id.btn_change_status).setOnClickListener(new View.OnClickListener() {
+		aq.find(R.id.btn_change_status).clicked(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showStatusDialog();
@@ -158,27 +134,26 @@ public class MyProfileFragment extends SherlockFragment {
 
 	protected void updateViews() {
 		User userInfo = Utility.getInstance().userInfo;
-		txtLevel.setText("Level " + userInfo.getLevel());
+		aq.find(R.id.level).text("Level " + userInfo.getLevel());
 		int earnedPointsThisLevel = userInfo.getEarnedPointsThisLevel();
 		int currentLevelPoints = userInfo.getLevelPoints();
 		xpBar.setMax(currentLevelPoints);
 		xpBar.setProgress(earnedPointsThisLevel);
 		xpBar.setText(earnedPointsThisLevel + " / " + currentLevelPoints);
 
-		value.setText(String.valueOf(userInfo.getPoints()));
-		money.setText(String.valueOf(userInfo.getMoney()));
-		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0) {
-			txtStatus.setText("\"" + userInfo.getStatus() + "\"");
-			txtStatus.setVisibility(View.VISIBLE);
-		} else
-			txtStatus.setVisibility(View.GONE);
-		owns.setText(String.valueOf(userInfo.getOwnsNum()));
+		aq.find(R.id.points).text(String.valueOf(userInfo.getPoints()));
+		aq.find(R.id.money).text(String.valueOf(userInfo.getMoney()));
+		if (userInfo.getStatus() != null && userInfo.getStatus().length() > 0)
+			aq.find(R.id.status).text("\"" + userInfo.getStatus() + "\"").visible();
+		else
+			aq.find(R.id.status).gone();
+		aq.find(R.id.owns).text(String.valueOf(userInfo.getOwnsNum()));
 
 		if (userInfo.getPicURL() != null && userInfo.getPicURL().length() > 0)
-			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), userPic);
-		name.setText(userInfo.getName());
-		age.setText(userInfo.getAge());
-		gender.setText(userInfo.getGender());
+			ImageLoader.getInstance().displayImage(userInfo.getPicURL(), aq.id(R.id.user_pic).getImageView());
+		aq.find(R.id.name).text(userInfo.getName());
+		aq.find(R.id.age).text(userInfo.getAge());
+		aq.find(R.id.gender).text(userInfo.getGender());
 	}
 
 	/**
@@ -237,10 +212,10 @@ public class MyProfileFragment extends SherlockFragment {
 		protected void onPostExecute(Void v) {
 			// Update the view
 			if (status.length() > 0) {
-				txtStatus.setText("\"" + status + "\"");
-				txtStatus.setVisibility(View.VISIBLE);
+				aq.find(R.id.status).text("\"" + status + "\"");
+				aq.find(R.id.status).visible();
 			} else
-				txtStatus.setVisibility(View.GONE);
+				aq.find(R.id.status).gone();
 		}
 	}
 
@@ -259,8 +234,8 @@ public class MyProfileFragment extends SherlockFragment {
 				activity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						ImageLoader.getInstance().displayImage(picURL, ownerPic);
-						btnOwnerLayout.setOnClickListener(new OnClickListener() {
+						ImageLoader.getInstance().displayImage(picURL, aq.find(R.id.owner_pic).getImageView());
+						aq.find(R.id.btn_owner_layout).clicked(new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								// Move to the owner's profile

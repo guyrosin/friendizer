@@ -7,9 +7,6 @@ import java.util.List;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -30,22 +27,13 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		activity.setContentView(R.layout.connections_layout);
 		ActionBar actionBar = activity.getSupportActionBar();
 		actionBar.setTitle("Own List");
 
 		TextView empty = (TextView) activity.findViewById(R.id.empty);
 		empty.setText("Forever Alone! (you don't own anyone. Go buy someone!)");
 		gridView = (GridView) activity.findViewById(R.id.gridview);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
-	 */
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
-		return inflater.inflate(R.layout.connections_layout, container, false);
 	}
 
 	/*
@@ -84,10 +72,8 @@ public class OwnsFragment extends AbstractFriendsListFragment {
 			if (isCancelled())
 				return;
 			friendsAdapter.clear();
-			if (friends != null) {
-				for (User friend : friends)
-					friendsAdapter.add(friend);
-			}
+			if (friends != null)
+				friendsAdapter.addAll(friends);
 			if (friends == null || friends.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);

@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +29,8 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 	public static String SORT_BY = "sort";
 	public static String LAST_FILTER = "last_user_filter";
 	protected LayoutInflater inflater;
-	private List<User> allUsersList;
-	private List<User> filteredUsersList;
+	protected List<User> allUsersList;
+	protected List<User> filteredUsersList;
 	private AdapterFilter adapterFilter;
 	private UserFilter userFilter;
 	private int sortBy;
@@ -64,6 +65,12 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 
 	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, MenuItem filterMenuItem, boolean sort) {
 		this(context, textViewResourceId, objects, filterMenuItem);
+		if (!sort)
+			sortBy = -1;
+	}
+
+	public FriendsAdapter(Context context, int textViewResourceId, List<User> objects, boolean sort) {
+		this(context, textViewResourceId, objects, null);
 		if (!sort)
 			sortBy = -1;
 	}
@@ -169,6 +176,12 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		return userFilter;
 	}
 
+	public void setFilterMenuItem(MenuItem filterMenuItem) {
+		this.filterMenuItem = filterMenuItem;
+		if (filterMenuItem != null) // Update the menu item
+			filterMenuItem.setIcon(isFiltered() ? R.drawable.ic_action_filter_on : R.drawable.ic_action_filter);
+	}
+
 	private class AdapterFilter extends Filter {
 
 		@Override
@@ -196,7 +209,7 @@ public abstract class FriendsAdapter extends ArrayAdapter<User> implements Filte
 		@SuppressWarnings("unchecked")
 		@Override
 		protected void publishResults(CharSequence constraint, FilterResults results) {
-			filteredUsersList = (ArrayList<User>) results.values;
+			filteredUsersList = (List<User>) results.values;
 			notifyDataSetChanged();
 		}
 	}
