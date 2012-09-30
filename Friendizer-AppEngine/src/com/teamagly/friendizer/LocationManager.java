@@ -134,6 +134,7 @@ public class LocationManager extends HttpServlet {
 	@SuppressWarnings("unchecked")
 	private void nearbyUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long userID = Long.parseLong(request.getParameter("userID"));
+		boolean offlineUsersToo = Boolean.parseBoolean(request.getParameter("offlineToo"));
 
 		// Note: doesn't work (when trying to put in a list of objects)
 		// try { // Cache hit
@@ -160,14 +161,18 @@ public class LocationManager extends HttpServlet {
 		user.setSince(new Date());
 		// Get all the online users from the database
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(new Date());
-		cal.add(Calendar.MINUTE, -30);
-		Date updated = cal.getTime();
 		Query query = pm.newQuery(User.class);
-		query.setFilter("since > updatedDate");
 		query.setOrdering("since asc");
-		query.declareParameters("java.util.Date updatedDate");
-		List<User> result = (List<User>) query.execute(updated);
+		List<User> result;
+		if (!offlineUsersToo) {
+			cal.setTime(new Date());
+			cal.add(Calendar.MINUTE, -30);
+			Date updated = cal.getTime();
+			query.setFilter("since > updatedDate");
+			query.declareParameters("java.util.Date updatedDate");
+			result = (List<User>) query.execute(updated);
+		}else 
+			result = (List<User>) query.execute();
 		query.closeAll();
 		ArrayList<User> nearbyUsers = new ArrayList<User>();
 		// The loop goes over the users and adds only the nearby users to a list
