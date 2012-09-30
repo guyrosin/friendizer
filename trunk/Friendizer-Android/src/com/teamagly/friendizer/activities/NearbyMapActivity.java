@@ -29,6 +29,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.androidquery.service.MarketService;
 import com.google.android.maps.Overlay;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.readystatesoftware.maps.OnSingleTapListener;
@@ -36,6 +37,7 @@ import com.readystatesoftware.maps.TapControlledMapView;
 import com.squareup.seismic.ShakeDetector;
 import com.teamagly.friendizer.FriendizerApp;
 import com.teamagly.friendizer.R;
+import com.teamagly.friendizer.adapters.MapAdapter;
 import com.teamagly.friendizer.model.User;
 import com.teamagly.friendizer.utils.BaseDialogListener;
 import com.teamagly.friendizer.utils.ServerFacade;
@@ -49,6 +51,7 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	public static final String ACTION_UPDATE_LOCATION = "com.teamagly.friendizer.UPDATE_LOCATION";
 
 	ActionBar actionBar;
+	protected Menu menu;
 	ArrayList<Integer> tabs = new ArrayList<Integer>();
 	private ShakeDetector shakeDetector;
 	protected TapControlledMapView mapView;
@@ -58,6 +61,8 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	protected CustomItemizedOverlay nearbyUsersItemizedOverlay;
 	LinearLayout markerLayout;
 	protected NearbyUsersTask task = new NearbyUsersTask();
+	protected MapAdapter usersAdapter;
+	protected ArrayList<User> usersList = new ArrayList<User>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,13 +75,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		setTabs();
 
 		stub = getResources().getDrawable(R.drawable.stub);
-		ImageView meButton = (ImageView) findViewById(R.id.meButton);
-		meButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				zoomMyLocation();
-			}
-		});
 
 		// extract MapView from layout
 		mapView = (TapControlledMapView) findViewById(R.id.mapview);
@@ -111,7 +109,24 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		mapOverlays.add(nearbyUsersItemizedOverlay);
 		mapOverlays.add(myItemizedOverlay);
 
+		usersAdapter = new MapAdapter(this, 0, usersList, null, mapView, nearbyUsersItemizedOverlay, markerLayout);
+
+		ImageView meButton = (ImageView) findViewById(R.id.meButton);
+		meButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				zoomMyLocation();
+			}
+		});
+
 		shakeDetector = new ShakeDetector(this);
+
+		// Check for a new version
+		if (getIntent().getBooleanExtra("launch", false)) {
+			MarketService ms = new MarketService(this);
+			ms.level(MarketService.REVISION).checkVersion();
+		}
+
 	}
 
 	protected void zoomMyLocation() {
@@ -135,8 +150,6 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		nearbyUsersItemizedOverlay.hideAllBalloons();
 		myItemizedOverlay.clear();
 		nearbyUsersItemizedOverlay.clear();
-
-		mapView.invalidate();
 
 		if (Utility.getInstance().getLocation() != null) {
 			CustomOverlayItem myOverlayItem = new CustomOverlayItem(Utility.getInstance().userInfo, markerLayout);
@@ -215,29 +228,12 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		}
 
 		@Override
-		protected void onPostExecute(final List<User> nearbyUsers) {
-			if (nearbyUsers.size() > 0) {
-				for (User user : nearbyUsers) {
-					CustomOverlayItem overlayItem = new CustomOverlayItem(user, markerLayout);
-					nearbyUsersItemizedOverlay.addOverlay(overlayItem);
-				}
-				mapView.invalidate();
-			}
+		protected void onPostExecute(List<User> nearbyUsers) {
+			usersAdapter.clear();
+			usersAdapter.addAll(nearbyUsers);
 			setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}
-
-	/**
-	 * Shows an alert dialog in case the GPS is disabled
-	 */
-	/*
-	 * private void buildAlertMessageNoGPS() { final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	 * builder.setMessage("Your GPS seems to be disabled, do you want to enable it?").setCancelable(false)
-	 * .setPositiveButton("Yes", new DialogInterface.OnClickListener() { public void onClick(final DialogInterface dialog, final
-	 * int id) { startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); } }).setNegativeButton("Skip", new
-	 * DialogInterface.OnClickListener() { public void onClick(final DialogInterface dialog, final int id) { dialog.cancel(); }
-	 * }); final AlertDialog alert = builder.create(); alert.show(); }
-	 */
 
 	/*
 	 * (non-Javadoc)
@@ -249,6 +245,8 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		inflater.inflate(R.menu.nearby_map_menu, menu);
+		this.menu = menu;
+		usersAdapter.setFilterMenuItem(menu.findItem(R.id.menu_filter));
 		return true;
 	}
 
@@ -259,6 +257,9 @@ public class NearbyMapActivity extends SherlockMapActivity implements ActionBar.
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_filter: // Show the filters dialog
+			Utility.showFiltersDialog(this, usersAdapter);
+			return true;
 		case R.id.menu_list:
 			// Update the selection in the preferences
 			SharedPreferences settings = Utility.getSharedPreferences();

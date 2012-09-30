@@ -17,8 +17,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -27,6 +25,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
+import com.androidquery.AQuery;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.MessagesAdapter;
 import com.teamagly.friendizer.model.Message;
@@ -38,13 +37,12 @@ import com.teamagly.friendizer.utils.Utility;
 public class ChatActivity extends SherlockActivity {
 
 	private final String TAG = getClass().getName();
+	private AQuery aq;
 	public static final String ACTION_UPDATE_CHAT = "com.teamagly.friendizer.ChatActivity.UPDATE";
 	ActionBar actionBar;
 
 	// Layout Views
 	private ListView messagesView;
-	private EditText newMsgText;
-	private ImageView sendButton;
 
 	private MessagesAdapter messagesAdapter;
 	private List<Message> messages;
@@ -71,6 +69,7 @@ public class ChatActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.messages_layout);
+		aq = new AQuery(this);
 
 		destUser = (User) getIntent().getSerializableExtra("user");
 		actionBar = getSupportActionBar();
@@ -78,15 +77,13 @@ public class ChatActivity extends SherlockActivity {
 		actionBar.setTitle(destUser.getName());
 
 		// Initialize the compose field with a listener for the return key
-		newMsgText = (EditText) findViewById(R.id.new_msg_text);
 		// mOutEditText.setOnEditorActionListener(mWriteListener);
 
 		// Initialize the send button with a listener that for click events
-		sendButton = (ImageView) findViewById(R.id.btn_send);
-		sendButton.setOnClickListener(new OnClickListener() {
+		aq.find(R.id.btn_send).clicked(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				sendMessage(newMsgText.getText().toString());
+				sendMessage(aq.find(R.id.new_msg_text).getText().toString());
 			}
 		});
 	}
@@ -192,7 +189,7 @@ public class ChatActivity extends SherlockActivity {
 
 		@Override
 		protected void onPostExecute(Void v) {
-			newMsgText.setText(""); // Clear the edit text field
+			aq.find(R.id.new_msg_text).clear(); // Clear the edit text field
 			messages.add(msg);
 			// messagesAdapter.notifyDataSetChanged(); not working, so recreate the adapter instead
 			messagesAdapter = new MessagesAdapter(getBaseContext(), R.id.message, messages);

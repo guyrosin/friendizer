@@ -149,6 +149,7 @@ public class SplashActivity extends SherlockActivity {
 				Toast.makeText(context, "Welcome " + firstName + "!", Toast.LENGTH_LONG).show();
 			}
 		});
+
 		// Continue to the main activity
 		Intent intent = new Intent();
 		SharedPreferences settings = Utility.getSharedPreferences();
@@ -157,6 +158,7 @@ public class SplashActivity extends SherlockActivity {
 		else
 			intent.setClass(SplashActivity.this, FriendizerActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra("launch", true);
 		startActivity(intent);
 		finish();
 	}

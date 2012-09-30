@@ -10,5 +10,11 @@
         android:title="Map"
         android:visible="true">
     </item>
+    <item
+        android:id="@+id/menu_filter"
+        android:icon="@drawable/ic_action_filter"
+        android:menuCategory="alternative"
+        android:showAsAction="ifRoom">
+    </item>
 
 </menu>

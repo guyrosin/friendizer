@@ -24,6 +24,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.androidquery.AQuery;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.teamagly.friendizer.R;
 import com.teamagly.friendizer.adapters.LeaderboardListAdapter;
@@ -32,6 +33,7 @@ import com.teamagly.friendizer.utils.ServerFacade;
 
 public class LeaderboardFragment extends SherlockFragment implements OnNavigationListener, OnItemClickListener {
 	private final String TAG = getClass().getName();
+	private AQuery aq;
 	private Menu menu;
 	protected LeaderboardTask task;
 	private String[] types;
@@ -54,8 +56,9 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		activity = getSherlockActivity();
+		aq = new AQuery(activity);
 
-		listView = (ListView) activity.findViewById(R.id.leaderboard_list);
+		listView = aq.find(R.id.leaderboard_list).getListView();
 
 		ActionBar actionBar = activity.getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
@@ -136,8 +139,7 @@ public class LeaderboardFragment extends SherlockFragment implements OnNavigatio
 			if (isCancelled())
 				return;
 			adapter.clear();
-			for (User user : users)
-				adapter.add(user);
+			adapter.addAll(users);
 			activity.setSupportProgressBarIndeterminateVisibility(false);
 		}
 	}

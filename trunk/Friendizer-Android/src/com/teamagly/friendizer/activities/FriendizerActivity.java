@@ -49,10 +49,6 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 		setIntent(intent);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onResume()
-	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -71,26 +67,8 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 				}
 			getIntent().removeExtra("tab"); // Clear the intent
 		}
-		// TODO use in the background (and not here)
-		// if (!Utility.getInstance().facebook.isSessionValid()) {
-		// Util.showAlert(this, "Warning", "You must first log in.");
-		// }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.app.Activity#onNewIntent(android.content.Intent)
-	 */
-	// @Override
-	// protected void onNewIntent(Intent intent) {
-	// super.onNewIntent(intent);
-	// setIntent(intent);
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
-	 */
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -100,10 +78,6 @@ public class FriendizerActivity extends SherlockFragmentActivity implements Acti
 			outState.putInt("tab", tabs.get(selectedIndex));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onBackPressed()
-	 */
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();

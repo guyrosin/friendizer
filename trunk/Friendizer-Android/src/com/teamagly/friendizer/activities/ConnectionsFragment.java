@@ -72,10 +72,8 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 			if (isCancelled())
 				return;
 			friendsAdapter.clear();
-			if (friends != null) {
-				for (User friend : friends)
-					friendsAdapter.add(friend);
-			}
+			if (friends != null)
+				friendsAdapter.addAll(friends);
 			if (friends == null || friends.isEmpty())
 				gridView.setEmptyView(activity.findViewById(R.id.empty));
 			activity.setSupportProgressBarIndeterminateVisibility(false);
@@ -91,6 +89,7 @@ public class ConnectionsFragment extends AbstractFriendsListFragment {
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.friends_menu, menu);
+		this.menu = menu;
 	}
 
 	@Override

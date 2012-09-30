@@ -111,10 +111,10 @@ public class AchievementsActivity extends SherlockActivity implements OnItemClic
 		String earned = "";
 		if (user.getId() == Utility.getInstance().userInfo.getId())
 			earned = achv.isEarned() ? "<b><font color='#00CC00'>&#10003;<font></b> You've earned it!"
-					: "<b><font color='#5C0000'>&#10007;<font></b> You've not earned it yet.";
+					: "<b><font color='#5C0000'>&#10006;<font></b> You've not earned it yet.";
 		else
 			earned = achv.isEarned() ? "<b><font color='#00CC00'>&#10003;<font></b> " + user.getFirstName() + " has earned it!"
-					: "<b><font color='#5C0000'>&#10007;<font></b> " + user.getFirstName() + " hasn't earned it yet.";
+					: "<b><font color='#5C0000'>&#10006;<font></b> " + user.getFirstName() + " hasn't earned it yet.";
 		txtEarned.setText(Html.fromHtml(earned));
 		ImageView image = (ImageView) dialog.findViewById(R.id.achv_icon);
 

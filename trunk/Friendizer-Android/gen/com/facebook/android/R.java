@@ -1169,8 +1169,6 @@ containing a value of this type.
         public static final int loading=0x7f0a0023;
         public static final int logout_title=0x7f0a0013;
         public static final int made_by=0x7f0a0026;
-        /**  <string name="mapAPIKey">0R54sIbhKTeZ9hTY5ntHtWV1qgbbPY1g_UI3K8A</string> Debug Key 
-         */
         public static final int mapAPIKey=0x7f0a002d;
         public static final int matching=0x7f0a001e;
         public static final int more_title=0x7f0a0018;
