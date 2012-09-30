@@ -61,7 +61,8 @@ public class Utility {
 		query.closeAll();
 		for (User user : users)
 			try {
-				requestFBData(String.valueOf(user.getId()), Arrays.asList("name,gender,birthday,picture".split("\\s*,\\s*")));
+				requestFBData(String.valueOf(user.getId()),
+						Arrays.asList("name,gender,birthday,picture,email".split("\\s*,\\s*")));
 			} catch (Exception e) {
 				log.info(e.getMessage());
 			}
